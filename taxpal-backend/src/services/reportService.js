@@ -1,9 +1,10 @@
 const PDFDocument = require('pdfkit');
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
+const { Op } = require('sequelize');
+const { Transaction } = require('../models');
 const { getTaxEstimate } = require('./taxService');
 const { getDashboardSummary, getDashboardAnalytics } = require('./dashboardService');
 const { buildDateRange, roundToTwo, sum } = require('../utils/finance');
+const { serializeDocuments } = require('../utils/serialize');
 
 const escapeCsv = (value) => {
   const text = String(value ?? '');
@@ -56,24 +57,31 @@ const createPdfBuffer = (title, sections = []) => {
 };
 
 const fetchTransactions = async (userId, query = {}) => {
-  const filter = {
-    user: new mongoose.Types.ObjectId(userId)
+  const where = {
+    userId
   };
 
   if (query.type) {
-    filter.type = query.type;
+    where.type = query.type;
   }
 
   if (query.category) {
-    filter.category = String(query.category).trim();
+    where.category = String(query.category).trim();
   }
 
   const range = buildDateRange(query.from, query.to);
   if (range) {
-    filter.date = range;
+    where.date = {};
+    if (range.$gte) where.date[Op.gte] = range.$gte;
+    if (range.$lte) where.date[Op.lte] = range.$lte;
   }
 
-  return Transaction.find(filter).sort({ date: -1, createdAt: -1 }).lean();
+  const rawTransactions = await Transaction.findAll({
+    where,
+    order: [['date', 'DESC'], ['createdAt', 'DESC']]
+  });
+
+  return serializeDocuments(rawTransactions);
 };
 
 const buildTransactionsReport = async (userId, query = {}) => {

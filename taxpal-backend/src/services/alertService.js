@@ -1,15 +1,10 @@
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
+const { Op } = require('sequelize');
+const { Alert, Transaction } = require('../models');
 const AppError = require('../utils/AppError');
-const { getCollection } = require('./mongoService');
 const { getBudgetOverview, listBudgets } = require('./budgetService');
 const { getTaxEstimate } = require('./taxService');
 const { roundToTwo, sum } = require('../utils/finance');
 const { serializeDocument, serializeDocuments } = require('../utils/serialize');
-
-const collectionName = 'alerts';
-
-const getAlertCollection = () => getCollection(collectionName);
 
 const normalizeAlertInput = (payload) => {
   const title = String(payload.title || '').trim();
@@ -37,66 +32,62 @@ const normalizeAlertInput = (payload) => {
     sourceKey: payload.sourceKey ? String(payload.sourceKey).trim() : null,
     read: payload.read !== undefined ? Boolean(payload.read) : false,
     resolved: payload.resolved !== undefined ? Boolean(payload.resolved) : false,
-    metadata: payload.metadata || {}
+    metadata: payload.metadata || null
   };
 };
 
 const createAlert = async (userId, payload) => {
-  const alert = normalizeAlertInput(payload);
-  const collection = getAlertCollection();
-  const now = new Date();
+  const alertData = normalizeAlertInput(payload);
 
-  if (alert.sourceKey) {
-    const existing = await collection.findOne({ userId, sourceKey: alert.sourceKey });
+  if (alertData.sourceKey) {
+    const existing = await Alert.findOne({
+      where: { userId, sourceKey: alertData.sourceKey }
+    });
+
     if (existing) {
-      const result = await collection.findOneAndUpdate(
-        { _id: existing._id },
-        { $set: { ...alert, updatedAt: now } },
-        { returnDocument: 'after' }
-      );
-
-      return serializeDocument(result.value);
+      await existing.update(alertData);
+      return serializeDocument(existing);
     }
   }
 
-  const document = {
+  const alert = await Alert.create({
     userId,
-    ...alert,
-    createdAt: now,
-    updatedAt: now
-  };
+    ...alertData
+  });
 
-  const result = await collection.insertOne(document);
-  return serializeDocument({ ...document, _id: result.insertedId });
+  return serializeDocument(alert);
 };
 
 const listAlerts = async (userId, query = {}) => {
-  const collection = getAlertCollection();
-  const filter = { userId };
+  const where = { userId };
 
   if (query.read !== undefined) {
-    filter.read = query.read === 'true';
+    where.read = query.read === 'true';
   }
 
   if (query.resolved !== undefined) {
-    filter.resolved = query.resolved === 'true';
+    where.resolved = query.resolved === 'true';
   }
 
   if (query.severity) {
-    filter.severity = String(query.severity).trim().toLowerCase();
+    where.severity = String(query.severity).trim().toLowerCase();
   }
 
-  const alerts = await collection.find(filter).sort({ createdAt: -1 }).toArray();
+  const alerts = await Alert.findAll({
+    where,
+    order: [['createdAt', 'DESC']]
+  });
+
   return serializeDocuments(alerts);
 };
 
 const getAlertById = async (userId, alertId) => {
-  if (!mongoose.Types.ObjectId.isValid(alertId)) {
-    throw new AppError('Invalid alert ID', 400);
-  }
-
-  const collection = getAlertCollection();
-  const alert = await collection.findOne({ _id: new mongoose.Types.ObjectId(alertId), userId });
+  const alert = await Alert.findOne({
+    where: {
+      id: alertId,
+      userId
+    }
+  });
 
   if (!alert) {
     throw new AppError('Alert not found', 404);
@@ -106,11 +97,17 @@ const getAlertById = async (userId, alertId) => {
 };
 
 const updateAlert = async (userId, alertId, payload) => {
-  if (!mongoose.Types.ObjectId.isValid(alertId)) {
-    throw new AppError('Invalid alert ID', 400);
+  const alert = await Alert.findOne({
+    where: {
+      id: alertId,
+      userId
+    }
+  });
+
+  if (!alert) {
+    throw new AppError('Alert not found', 404);
   }
 
-  const collection = getAlertCollection();
   const update = {};
 
   if (payload.title !== undefined) {
@@ -141,35 +138,25 @@ const updateAlert = async (userId, alertId, payload) => {
     update.metadata = payload.metadata;
   }
 
-  const result = await collection.findOneAndUpdate(
-    { _id: new mongoose.Types.ObjectId(alertId), userId },
-    { $set: { ...update, updatedAt: new Date() } },
-    { returnDocument: 'after' }
-  );
-
-  if (!result.value) {
-    throw new AppError('Alert not found', 404);
-  }
-
-  return serializeDocument(result.value);
+  await alert.update(update);
+  return serializeDocument(alert);
 };
 
 const deleteAlert = async (userId, alertId) => {
-  if (!mongoose.Types.ObjectId.isValid(alertId)) {
-    throw new AppError('Invalid alert ID', 400);
-  }
-
-  const collection = getAlertCollection();
-  const result = await collection.findOneAndDelete({
-    _id: new mongoose.Types.ObjectId(alertId),
-    userId
+  const alert = await Alert.findOne({
+    where: {
+      id: alertId,
+      userId
+    }
   });
 
-  if (!result.value) {
+  if (!alert) {
     throw new AppError('Alert not found', 404);
   }
 
-  return serializeDocument(result.value);
+  const serialized = serializeDocument(alert);
+  await alert.destroy();
+  return serialized;
 };
 
 const markAlertRead = async (userId, alertId, read = true) => {
@@ -181,16 +168,21 @@ const resolveAlert = async (userId, alertId, resolved = true) => {
 };
 
 const refreshAlerts = async (userId) => {
-  const [budgets, budgetOverview, taxEstimate, expenses] = await Promise.all([
+  const [budgets, budgetOverview, taxEstimate, rawExpenses] = await Promise.all([
     listBudgets(userId),
     getBudgetOverview(userId),
     getTaxEstimate(userId, {}, { skipPersistence: true }),
-    Transaction.find({
-      user: new mongoose.Types.ObjectId(userId),
-      type: 'expense'
-    }).sort({ date: -1 }).limit(50).lean()
+    Transaction.findAll({
+      where: {
+        userId,
+        type: 'expense'
+      },
+      order: [['date', 'DESC']],
+      limit: 50
+    })
   ]);
 
+  const expenses = serializeDocuments(rawExpenses);
   const alerts = [];
 
   if (budgetOverview.activeBudgets === 0) {
@@ -205,7 +197,7 @@ const refreshAlerts = async (userId) => {
   }
 
   budgets
-    .filter((budget) => budget.active && budget.usage)
+    .filter((budget) => budget.usage)
     .forEach((budget) => {
       if (budget.usage.status === 'over') {
         alerts.push({
@@ -255,7 +247,6 @@ const refreshAlerts = async (userId) => {
   }
 
   const persisted = [];
-
   for (const alert of alerts) {
     persisted.push(await createAlert(userId, alert));
   }

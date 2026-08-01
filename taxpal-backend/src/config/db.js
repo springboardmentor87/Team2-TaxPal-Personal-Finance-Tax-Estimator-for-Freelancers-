@@ -1,14 +1,53 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
+const mysql = require('mysql2/promise');
 
-const connectDB = async () => {
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'taxpal',
+  process.env.DB_USER || 'root',
+  process.env.DB_PASSWORD || '',
+  {
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 3306,
+    dialect: 'mysql',
+    logging: false
+  }
+);
+
+const ensureDatabaseExists = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const connection = await mysql.createConnection({
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: process.env.DB_PORT || 3306,
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || ''
+    });
 
-    console.log('MongoDB connected successfully');
+    const dbName = process.env.DB_NAME || 'taxpal';
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
+    await connection.end();
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+    // If creation check fails, proceed and let Sequelize report connection status
   }
 };
 
-module.exports = connectDB;
+const connectDB = async () => {
+  try {
+    await ensureDatabaseExists();
+    await sequelize.authenticate();
+    console.log('✅ MySQL connected successfully via Sequelize');
+
+    // Ensure models are registered before sync
+    require('../models');
+
+    // Synchronize models with database schema
+    await sequelize.sync();
+    console.log('✅ MySQL models & tables synchronized successfully');
+  } catch (error) {
+    console.error('❌ MySQL connection failed:', error.message);
+  }
+};
+
+module.exports = {
+  sequelize,
+  connectDB
+};

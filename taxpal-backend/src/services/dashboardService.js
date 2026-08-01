@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
-const User = require('../models/User');
-const { getCollection } = require('./mongoService');
+const { Op } = require('sequelize');
+const { Transaction, User, Alert } = require('../models');
 const { buildMonthWindow, monthKey, percent, roundToTwo, sum } = require('../utils/finance');
+const { serializeDocument, serializeDocuments } = require('../utils/serialize');
 const { getBudgetOverview } = require('./budgetService');
 const { getTaxEstimate } = require('./taxService');
 
@@ -11,21 +10,32 @@ const getDashboardSummary = async (userId) => {
   const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-  const [currentMonthTransactions, recentTransactions, yearToDateTransactions, user] = await Promise.all([
-    Transaction.find({
-      user: new mongoose.Types.ObjectId(userId),
-      date: { $gte: startOfCurrentMonth, $lte: now }
-    }).sort({ date: -1 }).lean(),
-    Transaction.find({ user: new mongoose.Types.ObjectId(userId) })
-      .sort({ date: -1, createdAt: -1 })
-      .limit(5)
-      .lean(),
-    Transaction.find({
-      user: new mongoose.Types.ObjectId(userId),
-      date: { $gte: startOfYear, $lte: now }
-    }).lean(),
-    User.findById(userId).select('name email country').lean()
+  const [rawCurrentMonth, rawRecent, rawYtd, userObj] = await Promise.all([
+    Transaction.findAll({
+      where: {
+        userId,
+        date: { [Op.gte]: startOfCurrentMonth, [Op.lte]: now }
+      },
+      order: [['date', 'DESC']]
+    }),
+    Transaction.findAll({
+      where: { userId },
+      order: [['date', 'DESC'], ['createdAt', 'DESC']],
+      limit: 5
+    }),
+    Transaction.findAll({
+      where: {
+        userId,
+        date: { [Op.gte]: startOfYear, [Op.lte]: now }
+      }
+    }),
+    User.findByPk(userId, { attributes: ['id', 'name', 'email', 'country'] })
   ]);
+
+  const currentMonthTransactions = serializeDocuments(rawCurrentMonth);
+  const recentTransactions = serializeDocuments(rawRecent);
+  const yearToDateTransactions = serializeDocuments(rawYtd);
+  const user = serializeDocument(userObj);
 
   const monthlyIncome = roundToTwo(sum(currentMonthTransactions.filter((transaction) => transaction.type === 'income').map((transaction) => transaction.amount)));
   const monthlyExpenses = roundToTwo(sum(currentMonthTransactions.filter((transaction) => transaction.type === 'expense').map((transaction) => transaction.amount)));
@@ -63,12 +73,11 @@ const getDashboardSummary = async (userId) => {
     return accumulator;
   }, {});
 
-  const alertsCollection = getCollection('alerts');
   const [budgetOverview, taxEstimate, alertCount, unreadAlerts] = await Promise.all([
     getBudgetOverview(userId),
     getTaxEstimate(userId, { year: now.getFullYear() }, { skipPersistence: true }),
-    alertsCollection.countDocuments({ userId, resolved: false }),
-    alertsCollection.countDocuments({ userId, read: false })
+    Alert.count({ where: { userId, resolved: false } }),
+    Alert.count({ where: { userId, read: false } })
   ]);
 
   return {
@@ -107,10 +116,13 @@ const getDashboardAnalytics = async (userId) => {
   const now = new Date();
   const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-  const transactions = await Transaction.find({
-    user: new mongoose.Types.ObjectId(userId),
-    date: { $gte: startOfYear, $lte: now }
-  }).lean();
+  const rawTransactions = await Transaction.findAll({
+    where: {
+      userId,
+      date: { [Op.gte]: startOfYear, [Op.lte]: now }
+    }
+  });
+  const transactions = serializeDocuments(rawTransactions);
 
   const monthlyGroups = buildMonthWindow(12);
   const monthlyAnalytics = monthlyGroups.map((window) => {

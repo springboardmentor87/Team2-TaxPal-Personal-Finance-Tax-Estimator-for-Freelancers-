@@ -3,7 +3,7 @@ const serializeDocument = (document) => {
     return null;
   }
 
-  const plain = JSON.parse(JSON.stringify(document));
+  const plain = typeof document.get === 'function' ? document.get({ plain: true }) : JSON.parse(JSON.stringify(document));
 
   if (plain._id) {
     plain.id = plain._id;
