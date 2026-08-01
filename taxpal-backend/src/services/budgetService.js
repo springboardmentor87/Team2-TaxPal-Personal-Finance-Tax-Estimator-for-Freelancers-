@@ -1,11 +1,8 @@
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
+const { Op } = require('sequelize');
+const { Budget, Transaction } = require('../models');
 const AppError = require('../utils/AppError');
-const { getCollection } = require('./mongoService');
 const { endOfMonth, endOfYear, roundToTwo, startOfMonth, startOfYear, sum } = require('../utils/finance');
 const { serializeDocument, serializeDocuments } = require('../utils/serialize');
-
-const collectionName = 'budgets';
 
 const normalizePeriod = (period) => {
   const value = String(period || 'monthly').toLowerCase();
@@ -75,42 +72,44 @@ const normalizeBudgetInput = (payload) => {
     category,
     amount: roundToTwo(amount),
     period,
-    active: payload.active !== undefined ? Boolean(payload.active) : true,
-    threshold: payload.threshold !== undefined ? Number(payload.threshold) : 80,
-    notes: payload.notes ? String(payload.notes).trim() : ''
+    alertThreshold: payload.threshold !== undefined ? Number(payload.threshold) / 100 : 0.8
   };
 };
 
-const getBudgetCollection = () => getCollection(collectionName);
-
-const getBudgetWithUsage = async (userId, budget) => {
-  if (!budget) {
+const getBudgetWithUsage = async (userId, budgetObj) => {
+  if (!budgetObj) {
     return null;
   }
 
+  const budget = serializeDocument(budgetObj);
   const range = getPeriodRange(budget.period, new Date());
 
-  const spentTransactions = await Transaction.find({
-    user: new mongoose.Types.ObjectId(userId),
-    type: 'expense',
-    category: budget.category,
-    date: {
-      $gte: range.start,
-      $lte: range.end
+  const spentTransactions = await Transaction.findAll({
+    where: {
+      userId,
+      type: 'expense',
+      category: budget.category,
+      date: {
+        [Op.gte]: range.start,
+        [Op.lte]: range.end
+      }
     }
-  }).lean();
+  });
 
-  const spent = roundToTwo(sum(spentTransactions.map((transaction) => transaction.amount)));
+  const transactions = serializeDocuments(spentTransactions);
+  const spent = roundToTwo(sum(transactions.map((transaction) => transaction.amount)));
   const remaining = roundToTwo(Number(budget.amount || 0) - spent);
   const utilization = budget.amount ? roundToTwo((spent / Number(budget.amount)) * 100) : 0;
+  const thresholdPercent = (budget.alertThreshold || 0.8) * 100;
 
   return {
-    ...serializeDocument(budget),
+    ...budget,
+    threshold: thresholdPercent,
     usage: {
       spent,
       remaining,
       utilization,
-      status: utilization >= 100 ? 'over' : utilization >= (Number(budget.threshold) || 80) ? 'warning' : 'healthy',
+      status: utilization >= 100 ? 'over' : utilization >= thresholdPercent ? 'warning' : 'healthy',
       periodStart: range.start,
       periodEnd: range.end
     }
@@ -118,36 +117,32 @@ const getBudgetWithUsage = async (userId, budget) => {
 };
 
 const createBudget = async (userId, payload) => {
-  const budget = normalizeBudgetInput(payload);
-  const collection = getBudgetCollection();
-  const now = new Date();
-
-  const document = {
+  const budgetData = normalizeBudgetInput(payload);
+  const budget = await Budget.create({
     userId,
-    ...budget,
-    createdAt: now,
-    updatedAt: now
-  };
+    ...budgetData
+  });
 
-  const result = await collection.insertOne(document);
-  return serializeDocument({ ...document, _id: result.insertedId });
+  return getBudgetWithUsage(userId, budget);
 };
 
 const listBudgets = async (userId) => {
-  const collection = getBudgetCollection();
-  const budgets = await collection.find({ userId }).sort({ createdAt: -1 }).toArray();
-  const enriched = await Promise.all(budgets.map(async (budget) => getBudgetWithUsage(userId, budget)));
+  const budgets = await Budget.findAll({
+    where: { userId },
+    order: [['createdAt', 'DESC']]
+  });
 
-  return serializeDocuments(enriched);
+  const enriched = await Promise.all(budgets.map(async (budget) => getBudgetWithUsage(userId, budget)));
+  return enriched;
 };
 
 const getBudgetById = async (userId, budgetId) => {
-  if (!mongoose.Types.ObjectId.isValid(budgetId)) {
-    throw new AppError('Invalid budget ID', 400);
-  }
-
-  const collection = getBudgetCollection();
-  const budget = await collection.findOne({ _id: new mongoose.Types.ObjectId(budgetId), userId });
+  const budget = await Budget.findOne({
+    where: {
+      id: budgetId,
+      userId
+    }
+  });
 
   if (!budget) {
     throw new AppError('Budget not found', 404);
@@ -157,14 +152,14 @@ const getBudgetById = async (userId, budgetId) => {
 };
 
 const updateBudget = async (userId, budgetId, payload) => {
-  if (!mongoose.Types.ObjectId.isValid(budgetId)) {
-    throw new AppError('Invalid budget ID', 400);
-  }
+  const budget = await Budget.findOne({
+    where: {
+      id: budgetId,
+      userId
+    }
+  });
 
-  const collection = getBudgetCollection();
-  const existingBudget = await collection.findOne({ _id: new mongoose.Types.ObjectId(budgetId), userId });
-
-  if (!existingBudget) {
+  if (!budget) {
     throw new AppError('Budget not found', 404);
   }
 
@@ -198,55 +193,40 @@ const updateBudget = async (userId, budgetId, payload) => {
     update.period = normalizePeriod(payload.period);
   }
 
-  if (payload.active !== undefined) {
-    update.active = Boolean(payload.active);
-  }
-
   if (payload.threshold !== undefined) {
-    update.threshold = Number(payload.threshold);
+    update.alertThreshold = Number(payload.threshold) / 100;
   }
 
-  if (payload.notes !== undefined) {
-    update.notes = String(payload.notes).trim();
-  }
-
-  const result = await collection.findOneAndUpdate(
-    { _id: new mongoose.Types.ObjectId(budgetId), userId },
-    { $set: { ...update, updatedAt: new Date() } },
-    { returnDocument: 'after' }
-  );
-
-  return getBudgetWithUsage(userId, result.value);
+  await budget.update(update);
+  return getBudgetWithUsage(userId, budget);
 };
 
 const deleteBudget = async (userId, budgetId) => {
-  if (!mongoose.Types.ObjectId.isValid(budgetId)) {
-    throw new AppError('Invalid budget ID', 400);
-  }
-
-  const collection = getBudgetCollection();
-  const result = await collection.findOneAndDelete({
-    _id: new mongoose.Types.ObjectId(budgetId),
-    userId
+  const budget = await Budget.findOne({
+    where: {
+      id: budgetId,
+      userId
+    }
   });
 
-  if (!result.value) {
+  if (!budget) {
     throw new AppError('Budget not found', 404);
   }
 
-  return serializeDocument(result.value);
+  const serialized = serializeDocument(budget);
+  await budget.destroy();
+  return serialized;
 };
 
 const getBudgetOverview = async (userId) => {
   const budgets = await listBudgets(userId);
-  const activeBudgets = budgets.filter((budget) => budget.active);
 
   return {
     totalBudgets: budgets.length,
-    activeBudgets: activeBudgets.length,
-    totalAllocated: roundToTwo(sum(activeBudgets.map((budget) => budget.amount))),
-    totalSpent: roundToTwo(sum(activeBudgets.map((budget) => budget.usage?.spent || 0))),
-    totalRemaining: roundToTwo(sum(activeBudgets.map((budget) => budget.usage?.remaining || 0))),
+    activeBudgets: budgets.length,
+    totalAllocated: roundToTwo(sum(budgets.map((budget) => budget.amount))),
+    totalSpent: roundToTwo(sum(budgets.map((budget) => budget.usage?.spent || 0))),
+    totalRemaining: roundToTwo(sum(budgets.map((budget) => budget.usage?.remaining || 0))),
     budgets
   };
 };

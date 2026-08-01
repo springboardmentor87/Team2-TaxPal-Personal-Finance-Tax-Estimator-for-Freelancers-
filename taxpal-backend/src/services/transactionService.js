@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
+const { Op } = require('sequelize');
+const { Transaction } = require('../models');
 const AppError = require('../utils/AppError');
 const { buildDateRange, buildMonthWindow, monthKey, percent, roundToTwo, sum } = require('../utils/finance');
+const { serializeDocument, serializeDocuments } = require('../utils/serialize');
 
 const parsePagination = (query) => {
   const page = Math.max(1, Number.parseInt(query.page, 10) || 1);
@@ -15,31 +16,34 @@ const parsePagination = (query) => {
 };
 
 const buildTransactionFilter = (userId, query = {}) => {
-  const filter = {
-    user: new mongoose.Types.ObjectId(userId)
+  const where = {
+    userId
   };
 
   if (query.type) {
-    filter.type = query.type;
+    where.type = query.type;
   }
 
   if (query.category) {
-    filter.category = query.category.trim();
+    where.category = query.category.trim();
   }
 
   const dateRange = buildDateRange(query.from, query.to);
   if (dateRange) {
-    filter.date = dateRange;
+    where.date = {};
+    if (dateRange.$gte) where.date[Op.gte] = dateRange.$gte;
+    if (dateRange.$lte) where.date[Op.lte] = dateRange.$lte;
   }
 
   if (query.search) {
-    filter.$or = [
-      { description: { $regex: query.search.trim(), $options: 'i' } },
-      { category: { $regex: query.search.trim(), $options: 'i' } }
+    const searchTerm = `%${query.search.trim()}%`;
+    where[Op.or] = [
+      { description: { [Op.like]: searchTerm } },
+      { category: { [Op.like]: searchTerm } }
     ];
   }
 
-  return filter;
+  return where;
 };
 
 const normalizeTransactionInput = (payload) => {
@@ -78,57 +82,60 @@ const createTransaction = async (userId, payload) => {
   const transactionData = normalizeTransactionInput(payload);
 
   const transaction = await Transaction.create({
-    user: new mongoose.Types.ObjectId(userId),
+    userId,
     ...transactionData
   });
 
-  return transaction.toObject();
+  return serializeDocument(transaction);
 };
 
 const listTransactions = async (userId, query = {}) => {
   const pagination = parsePagination(query);
-  const filter = buildTransactionFilter(userId, query);
+  const where = buildTransactionFilter(userId, query);
 
-  const [transactions, totalCount] = await Promise.all([
-    Transaction.find(filter)
-      .sort({ date: -1, createdAt: -1 })
-      .skip(pagination.skip)
-      .limit(pagination.limit)
-      .lean(),
-    Transaction.countDocuments(filter)
-  ]);
+  const { rows, count } = await Transaction.findAndCountAll({
+    where,
+    order: [['date', 'DESC'], ['createdAt', 'DESC']],
+    offset: pagination.skip,
+    limit: pagination.limit
+  });
 
   return {
-    transactions,
+    transactions: serializeDocuments(rows),
     pagination: {
       page: pagination.page,
       limit: pagination.limit,
-      totalCount,
-      totalPages: Math.max(1, Math.ceil(totalCount / pagination.limit))
+      totalCount: count,
+      totalPages: Math.max(1, Math.ceil(count / pagination.limit))
     }
   };
 };
 
 const getTransactionById = async (userId, transactionId) => {
-  if (!mongoose.Types.ObjectId.isValid(transactionId)) {
-    throw new AppError('Invalid transaction ID', 400);
-  }
-
   const transaction = await Transaction.findOne({
-    _id: transactionId,
-    user: new mongoose.Types.ObjectId(userId)
-  }).lean();
+    where: {
+      id: transactionId,
+      userId
+    }
+  });
 
   if (!transaction) {
     throw new AppError('Transaction not found', 404);
   }
 
-  return transaction;
+  return serializeDocument(transaction);
 };
 
 const updateTransaction = async (userId, transactionId, payload) => {
-  if (!mongoose.Types.ObjectId.isValid(transactionId)) {
-    throw new AppError('Invalid transaction ID', 400);
+  const transaction = await Transaction.findOne({
+    where: {
+      id: transactionId,
+      userId
+    }
+  });
+
+  if (!transaction) {
+    throw new AppError('Transaction not found', 404);
   }
 
   const update = {};
@@ -169,47 +176,34 @@ const updateTransaction = async (userId, transactionId, payload) => {
     update.date = date;
   }
 
-  const transaction = await Transaction.findOneAndUpdate(
-    {
-      _id: transactionId,
-      user: new mongoose.Types.ObjectId(userId)
-    },
-    {
-      $set: update
-    },
-    {
-      new: true,
-      runValidators: true
-    }
-  ).lean();
-
-  if (!transaction) {
-    throw new AppError('Transaction not found', 404);
-  }
-
-  return transaction;
+  await transaction.update(update);
+  return serializeDocument(transaction);
 };
 
 const deleteTransaction = async (userId, transactionId) => {
-  if (!mongoose.Types.ObjectId.isValid(transactionId)) {
-    throw new AppError('Invalid transaction ID', 400);
-  }
-
-  const transaction = await Transaction.findOneAndDelete({
-    _id: transactionId,
-    user: new mongoose.Types.ObjectId(userId)
-  }).lean();
+  const transaction = await Transaction.findOne({
+    where: {
+      id: transactionId,
+      userId
+    }
+  });
 
   if (!transaction) {
     throw new AppError('Transaction not found', 404);
   }
 
-  return transaction;
+  const serialized = serializeDocument(transaction);
+  await transaction.destroy();
+  return serialized;
 };
 
 const getTransactionAnalytics = async (userId, query = {}) => {
-  const filter = buildTransactionFilter(userId, query);
-  const transactions = await Transaction.find(filter).sort({ date: -1 }).lean();
+  const where = buildTransactionFilter(userId, query);
+  const rawTransactions = await Transaction.findAll({
+    where,
+    order: [['date', 'DESC']]
+  });
+  const transactions = serializeDocuments(rawTransactions);
 
   const incomeTransactions = transactions.filter((transaction) => transaction.type === 'income');
   const expenseTransactions = transactions.filter((transaction) => transaction.type === 'expense');
