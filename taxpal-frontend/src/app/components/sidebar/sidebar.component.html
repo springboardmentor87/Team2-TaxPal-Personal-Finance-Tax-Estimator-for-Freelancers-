@@ -1,0 +1,59 @@
+<!-- Mobile overlay -->
+<div
+  *ngIf="open"
+  class="fixed inset-0 z-40 bg-foreground/30 backdrop-blur-sm lg:hidden"
+  (click)="onClose()"
+  aria-hidden="true"
+></div>
+
+<aside
+  [class]="
+    'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-sidebar-border bg-sidebar p-5 transition-transform duration-300 ease-out lg:static lg:z-auto lg:translate-x-0 ' +
+    (open ? 'translate-x-0' : '-translate-x-full')
+  "
+>
+  <div class="mb-8 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/30">
+        <lucide-icon name="Wallet" class="h-5 w-5"></lucide-icon>
+      </div>
+
+      <div>
+        <p class="text-lg font-bold leading-none tracking-tight text-sidebar-foreground">
+          TaxPal
+        </p>
+        <p class="mt-1 text-xs text-muted-foreground">Finance Suite</p>
+      </div>
+    </div>
+
+    <button
+      (click)="onClose()"
+      class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent lg:hidden"
+    >
+      <lucide-icon name="X" class="h-5 w-5"></lucide-icon>
+    </button>
+  </div>
+
+  <nav class="flex flex-1 flex-col gap-2">
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="item.href"
+      routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground"
+      (click)="onClose()"
+      class="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-sidebar-foreground transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+    >
+      <lucide-icon
+        [name]="item.icon"
+        class="h-5 w-5 text-muted-foreground group-hover:text-sidebar-accent-foreground transition-transform duration-200 group-hover:scale-110"
+      ></lucide-icon>
+      {{ item.label }}
+    </a>
+  </nav>
+
+  <div class="mt-auto rounded-2xl bg-accent/60 p-4">
+    <p class="text-sm font-semibold text-accent-foreground">Tax Season Ready</p>
+    <p class="mt-1 text-xs text-muted-foreground">
+      Your records are up to date. Export reports anytime.
+    </p>
+  </div>
+</aside>

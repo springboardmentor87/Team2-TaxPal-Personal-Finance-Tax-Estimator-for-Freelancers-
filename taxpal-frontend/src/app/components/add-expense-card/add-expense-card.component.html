@@ -1,0 +1,77 @@
+<div class="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
+  <div class="mb-5">
+    <h2 class="text-lg font-semibold tracking-tight text-foreground">Add Expense</h2>
+    <p class="text-sm text-muted-foreground">
+      Enter the expense details below to keep track of your spending.
+    </p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="flex flex-col gap-4">
+    <div>
+      <label for="amount" class="mb-1.5 block text-sm font-medium text-foreground">Amount</label>
+      <div class="relative">
+        <lucide-icon name="DollarSign" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></lucide-icon>
+        <input
+          id="amount"
+          type="number"
+          inputmode="decimal"
+          step="0.01"
+          min="0"
+          placeholder="Enter amount (₹)"
+          formControlName="amount"
+          class="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground outline-none transition-shadow placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40 pl-9"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label for="category" class="mb-1.5 block text-sm font-medium text-foreground">Expense Category</label>
+      <div class="relative">
+        <select
+          id="category"
+          formControlName="category"
+          class="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground outline-none transition-shadow focus:ring-2 focus:ring-ring/40 cursor-pointer appearance-none pr-9"
+        >
+          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+        </select>
+        <lucide-icon name="ChevronDown" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></lucide-icon>
+      </div>
+    </div>
+
+    <div>
+      <label for="date" class="mb-1.5 block text-sm font-medium text-foreground">Expense Date</label>
+      <div class="relative">
+        <lucide-icon name="CalendarDays" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></lucide-icon>
+        <input
+          id="date"
+          type="date"
+          formControlName="date"
+          class="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground outline-none transition-shadow placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40 pl-9"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label for="description" class="mb-1.5 block text-sm font-medium text-foreground">Expense Description</label>
+      <textarea
+        id="description"
+        rows="2"
+        placeholder="Enter expense description"
+        formControlName="description"
+        class="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground outline-none transition-shadow placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40 h-auto resize-none py-2.5"
+      ></textarea>
+    </div>
+
+    <p *ngIf="error" class="text-sm font-medium text-destructive" role="alert">
+      {{ error }}
+    </p>
+
+    <button
+      type="submit"
+      class="flex w-full h-11 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/25 transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+    >
+      <lucide-icon name="Plus" class="h-4 w-4"></lucide-icon>
+      Add Expense
+    </button>
+  </form>
+</div>

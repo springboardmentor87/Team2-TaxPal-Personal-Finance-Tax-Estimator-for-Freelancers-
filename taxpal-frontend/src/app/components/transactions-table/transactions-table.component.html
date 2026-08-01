@@ -1,0 +1,85 @@
+<div class="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+  <div class="flex items-center justify-between border-b border-border px-5 py-4 md:px-6">
+    <div>
+      <h2 class="text-lg font-semibold tracking-tight text-foreground">Recent Transactions</h2>
+      <p class="text-sm text-muted-foreground">Your latest income and income activity.</p>
+    </div>
+    <button class="hidden rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary sm:block">
+      View all
+    </button>
+  </div>
+
+  <!-- Desktop table -->
+  <div class="hidden overflow-x-auto md:block">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
+          <th class="px-4 py-3 font-medium">Date</th>
+          <th class="px-4 py-3 font-medium">Category</th>
+          <th class="px-4 py-3 font-medium">Description</th>
+          <th class="px-4 py-3 text-right font-medium">Amount</th>
+          <th class="px-4 py-3 font-medium">Status</th>
+          <th class="px-4 py-3 text-center font-medium">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let t of transactions"
+          class="border-b border-border/60 transition-colors last:border-0 hover:bg-secondary/50"
+        >
+          <td class="whitespace-nowrap px-4 py-4 text-muted-foreground">{{ formatDate(t.date) }}</td>
+          <td class="px-4 py-4">
+            <span class="rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+              {{ t.category }}
+            </span>
+          </td>
+          <td class="max-w-[220px] truncate px-4 py-4 font-medium text-foreground">{{ t.description }}</td>
+          <td [class]="amountClass(t.type)">
+            {{ t.type === 'income' ? '+' : '-' }}{{ formatCurrency(t.amount) }}
+          </td>
+          <td class="px-4 py-4">
+            <span [class]="statusClass(t.status)">
+              <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+              {{ t.status }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-center">
+              <button
+                class="rounded-lg bg-red-100 px-3 py-1 text-sm text-red-700 hover:bg-red-200"
+                (click)="onDelete(t.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <ul class="divide-y divide-border/60 md:hidden">
+    <li
+      *ngFor="let t of transactions"
+      class="flex items-center justify-between gap-3 px-5 py-4"
+    >
+      <div class="min-w-0">
+        <p class="truncate font-medium text-foreground">{{ t.description }}</p>
+        <p class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+          <span class="rounded bg-secondary px-1.5 py-0.5 text-secondary-foreground">{{ t.category }}</span>
+          {{ formatDate(t.date) }}
+        </p>
+      </div>
+      <div class="flex flex-col items-end gap-1.5">
+        <span [class]="mobileAmountClass(t.type)">
+          {{ t.type === 'income' ? '+' : '-' }}{{ formatCurrency(t.amount) }}
+        </span>
+        <span [class]="statusClass(t.status)">
+          <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+          {{ t.status }}
+        </span>
+      </div>
+    </li>
+  </ul>
+</div>
