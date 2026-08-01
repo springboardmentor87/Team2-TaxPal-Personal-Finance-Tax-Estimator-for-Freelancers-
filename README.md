@@ -13,7 +13,7 @@ The project aims to simplify financial management by providing an easy-to-use pl
 - MySQL (with Sequelize ORM)
 - Angular (Frontend)
 
-## 👥 How Team Members Can Run the Backend
+## 👥 Backend Implementation
 
 1. **Install MySQL & Node.js** on their machine.
 2. Go to backend folder: `cd taxpal-backend`
