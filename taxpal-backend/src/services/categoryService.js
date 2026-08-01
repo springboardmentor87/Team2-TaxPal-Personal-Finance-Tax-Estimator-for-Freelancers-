@@ -1,11 +1,8 @@
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
+const { Op } = require('sequelize');
+const { Category, Transaction } = require('../models');
 const AppError = require('../utils/AppError');
-const { getCollection } = require('./mongoService');
 const { roundToTwo } = require('../utils/finance');
 const { serializeDocument, serializeDocuments } = require('../utils/serialize');
-
-const collectionName = 'categories';
 
 const normalizeCategoryInput = (payload) => {
   const name = String(payload.name || '').trim();
@@ -24,74 +21,78 @@ const normalizeCategoryInput = (payload) => {
   };
 };
 
-const getCategoryCollection = () => getCollection(collectionName);
-
 const createCategory = async (userId, payload) => {
-  const category = normalizeCategoryInput(payload);
-  const collection = getCategoryCollection();
-  const now = new Date();
+  const categoryData = normalizeCategoryInput(payload);
 
-  const existing = await collection.findOne({
-    userId,
-    name: { $regex: `^${category.name}$`, $options: 'i' }
+  const existing = await Category.findOne({
+    where: {
+      userId,
+      name: categoryData.name
+    }
   });
 
   if (existing) {
     throw new AppError('Category already exists', 409);
   }
 
-  const document = {
+  const category = await Category.create({
     userId,
-    ...category,
-    createdAt: now,
-    updatedAt: now
-  };
+    ...categoryData
+  });
 
-  const result = await collection.insertOne(document);
-  return serializeDocument({ ...document, _id: result.insertedId });
+  return serializeDocument(category);
 };
 
 const listCategories = async (userId) => {
-  const collection = getCategoryCollection();
-  const manualCategories = await collection.find({ userId }).sort({ createdAt: -1 }).toArray();
-  const transactionCategories = await Transaction.aggregate([
-    { $match: { user: new mongoose.Types.ObjectId(userId) } },
-    {
-      $group: {
-        _id: '$category',
-        totalAmount: { $sum: '$amount' },
-        transactionCount: { $sum: 1 },
-        expenseAmount: {
-          $sum: {
-            $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0]
-          }
-        },
-        incomeAmount: {
-          $sum: {
-            $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0]
-          }
-        }
-      }
-    },
-    { $sort: { expenseAmount: -1, transactionCount: -1 } }
-  ]);
+  const manualCategories = await Category.findAll({
+    where: { userId },
+    order: [['createdAt', 'DESC']]
+  });
+
+  const transactions = await Transaction.findAll({
+    where: { userId }
+  });
+
+  // Calculate aggregations per category in JS
+  const categoryAggregates = {};
+  transactions.forEach((tx) => {
+    const catName = tx.category;
+    if (!categoryAggregates[catName]) {
+      categoryAggregates[catName] = {
+        name: catName,
+        totalAmount: 0,
+        transactionCount: 0,
+        expenseAmount: 0,
+        incomeAmount: 0
+      };
+    }
+    const amt = Number(tx.amount || 0);
+    categoryAggregates[catName].totalAmount += amt;
+    categoryAggregates[catName].transactionCount += 1;
+    if (tx.type === 'expense') {
+      categoryAggregates[catName].expenseAmount += amt;
+    } else if (tx.type === 'income') {
+      categoryAggregates[catName].incomeAmount += amt;
+    }
+  });
 
   const merged = new Map();
 
-  manualCategories.forEach((category) => {
+  manualCategories.forEach((catObj) => {
+    const category = serializeDocument(catObj);
     merged.set(category.name.toLowerCase(), {
-      ...serializeDocument(category),
+      ...category,
       source: 'manual'
     });
   });
 
-  transactionCategories.forEach((category) => {
-    const key = String(category._id || '').toLowerCase();
+  Object.values(categoryAggregates).forEach((category) => {
+    const key = String(category.name || '').toLowerCase();
     const existing = merged.get(key);
 
     merged.set(key, {
       id: existing?.id,
-      name: category._id,
+      name: category.name,
       type: existing?.type || 'derived',
       color: existing?.color || '#718096',
       icon: existing?.icon || 'chart-bar',
@@ -111,12 +112,12 @@ const listCategories = async (userId) => {
 };
 
 const getCategoryById = async (userId, categoryId) => {
-  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-    throw new AppError('Invalid category ID', 400);
-  }
-
-  const collection = getCategoryCollection();
-  const category = await collection.findOne({ _id: new mongoose.Types.ObjectId(categoryId), userId });
+  const category = await Category.findOne({
+    where: {
+      id: categoryId,
+      userId
+    }
+  });
 
   if (!category) {
     throw new AppError('Category not found', 404);
@@ -126,14 +127,14 @@ const getCategoryById = async (userId, categoryId) => {
 };
 
 const updateCategory = async (userId, categoryId, payload) => {
-  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-    throw new AppError('Invalid category ID', 400);
-  }
+  const category = await Category.findOne({
+    where: {
+      id: categoryId,
+      userId
+    }
+  });
 
-  const collection = getCategoryCollection();
-  const existing = await collection.findOne({ _id: new mongoose.Types.ObjectId(categoryId), userId });
-
-  if (!existing) {
+  if (!category) {
     throw new AppError('Category not found', 404);
   }
 
@@ -167,31 +168,25 @@ const updateCategory = async (userId, categoryId, payload) => {
     update.active = Boolean(payload.active);
   }
 
-  const result = await collection.findOneAndUpdate(
-    { _id: new mongoose.Types.ObjectId(categoryId), userId },
-    { $set: { ...update, updatedAt: new Date() } },
-    { returnDocument: 'after' }
-  );
-
-  return serializeDocument(result.value);
+  await category.update(update);
+  return serializeDocument(category);
 };
 
 const deleteCategory = async (userId, categoryId) => {
-  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-    throw new AppError('Invalid category ID', 400);
-  }
-
-  const collection = getCategoryCollection();
-  const result = await collection.findOneAndDelete({
-    _id: new mongoose.Types.ObjectId(categoryId),
-    userId
+  const category = await Category.findOne({
+    where: {
+      id: categoryId,
+      userId
+    }
   });
 
-  if (!result.value) {
+  if (!category) {
     throw new AppError('Category not found', 404);
   }
 
-  return serializeDocument(result.value);
+  const serialized = serializeDocument(category);
+  await category.destroy();
+  return serialized;
 };
 
 const getCategoryAnalytics = async (userId) => {

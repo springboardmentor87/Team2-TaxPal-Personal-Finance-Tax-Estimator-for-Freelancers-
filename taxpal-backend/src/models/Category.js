@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
-const Transaction = sequelize.define(
-  'Transaction',
+const Category = sequelize.define(
+  'Category',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,37 +13,40 @@ const Transaction = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    type: {
-      type: DataTypes.ENUM('income', 'expense'),
-      allowNull: false
-    },
-    amount: {
-      type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
-      get() {
-        const val = this.getDataValue('amount');
-        return val === null ? null : parseFloat(val);
-      }
-    },
-    category: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    type: {
+      type: DataTypes.ENUM('income', 'expense'),
+      allowNull: false,
+      defaultValue: 'expense'
+    },
+    color: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: '#2B6CB0'
+    },
+    icon: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'tag'
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
       defaultValue: ''
     },
-    date: {
-      type: DataTypes.DATE,
+    active: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: DataTypes.NOW
+      defaultValue: true
     }
   },
   {
-    tableName: 'transactions',
+    tableName: 'categories',
     timestamps: true
   }
 );
 
-module.exports = Transaction;
+module.exports = Category;

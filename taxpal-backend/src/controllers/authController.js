@@ -15,7 +15,7 @@ const registerUser = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     const existingUser = await User.findOne({
-      email: normalizedEmail
+      where: { email: normalizedEmail }
     });
 
     if (existingUser) {
@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
     return res.status(201).json({
       message: 'User registered successfully',
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         country: user.country
@@ -64,7 +64,7 @@ const loginUser = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     const user = await User.findOne({
-      email: normalizedEmail
+      where: { email: normalizedEmail }
     });
 
     if (!user) {
@@ -86,7 +86,7 @@ const loginUser = async (req, res) => {
 
     const token = jwt.sign(
       {
-        userId: user._id
+        userId: user.id
       },
       process.env.JWT_SECRET,
       {
@@ -98,7 +98,7 @@ const loginUser = async (req, res) => {
       message: 'Login successful',
       token,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
         country: user.country

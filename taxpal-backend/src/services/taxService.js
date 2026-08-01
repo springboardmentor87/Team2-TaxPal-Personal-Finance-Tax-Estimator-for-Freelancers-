@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const Transaction = require('../models/Transaction');
-const User = require('../models/User');
+const { Op } = require('sequelize');
+const { Transaction, User } = require('../models');
 const AppError = require('../utils/AppError');
 const { roundToTwo, sum } = require('../utils/finance');
+const { serializeDocument, serializeDocuments } = require('../utils/serialize');
 
 const taxRules = {
   india: {
@@ -83,22 +83,26 @@ const computeTax = (taxableIncome, brackets) => {
 
 const getTaxEstimate = async (userId, query = {}, options = {}) => {
   const year = Number.parseInt(query.year, 10) || new Date().getFullYear();
-  const user = await User.findById(userId).select('country name email').lean();
+  const userObj = await User.findByPk(userId);
 
-  if (!user) {
+  if (!userObj) {
     throw new AppError('User not found', 404);
   }
 
+  const user = serializeDocument(userObj);
   const rules = taxRules[String(query.country || user.country || 'default').toLowerCase()] || taxRules.default;
   const now = new Date();
   const startOfYear = new Date(year, 0, 1);
   const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
 
-  const transactions = await Transaction.find({
-    user: new mongoose.Types.ObjectId(userId),
-    date: { $gte: startOfYear, $lte: now < endOfYear ? now : endOfYear }
-  }).lean();
+  const rawTransactions = await Transaction.findAll({
+    where: {
+      userId,
+      date: { [Op.gte]: startOfYear, [Op.lte]: now < endOfYear ? now : endOfYear }
+    }
+  });
 
+  const transactions = serializeDocuments(rawTransactions);
   const incomeTransactions = transactions.filter((transaction) => transaction.type === 'income');
   const expenseTransactions = transactions.filter((transaction) => transaction.type === 'expense');
 
