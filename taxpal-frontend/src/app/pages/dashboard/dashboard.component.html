@@ -1,0 +1,85 @@
+<div class="min-h-screen pb-10">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-30 border-b border-primary-100/60 bg-[#FAF8FF]/85 backdrop-blur-md">
+    <div class="flex items-center justify-between gap-4 px-5 py-4 sm:px-8">
+      <div class="flex items-center gap-3">
+        <button
+          (click)="ui.openSidebar()"
+          class="flex h-10 w-10 items-center justify-center rounded-xl border border-primary-100 bg-white text-[#4B4363] shadow-soft lg:hidden"
+          aria-label="Open menu"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div>
+          <h1 class="font-display text-[19px] font-bold text-[#1E1533] sm:text-[22px]">Good afternoon, Aarav 👋</h1>
+          <p class="mt-0.5 text-[12.5px] text-[#8A7FA5] sm:text-[13px]">Here's your financial snapshot for July 2026</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button class="hidden h-10 w-10 items-center justify-center rounded-xl border border-primary-100 bg-white text-[#4B4363] shadow-soft transition-colors hover:bg-primary-50 sm:flex" aria-label="Notifications">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <button class="flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2.5 text-[13px] font-semibold text-white shadow-soft transition-colors hover:bg-primary-600">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <span class="hidden sm:inline">Add Transaction</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-5 pt-6 sm:px-8">
+    <!-- Summary cards -->
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <app-summary-card
+        class="animate-fadeUp"
+        title="Total Income"
+        amount="$93,400"
+        statusText="+12.4% vs last quarter"
+        trend="up"
+        icon="income"
+      ></app-summary-card>
+
+      <app-summary-card
+        class="animate-fadeUp [animation-delay:60ms]"
+        title="Total Expenses"
+        amount="$58,900"
+        statusText="+4.8% vs last quarter"
+        trend="down"
+        icon="expense"
+      ></app-summary-card>
+
+      <app-summary-card
+        class="animate-fadeUp [animation-delay:120ms]"
+        title="Remaining Balance"
+        amount="$34,500"
+        statusText="On track for savings goal"
+        trend="up"
+        icon="balance"
+      ></app-summary-card>
+
+      <app-summary-card
+        class="animate-fadeUp [animation-delay:180ms]"
+        title="Estimated Tax"
+        amount="$14,010"
+        statusText="Due Sep 15, 2026"
+        trend="neutral"
+        icon="tax"
+      ></app-summary-card>
+    </section>
+
+    <!-- Charts -->
+    <section class="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[1.4fr_1fr]">
+      <app-income-expense-chart></app-income-expense-chart>
+      <app-expense-donut-chart></app-expense-donut-chart>
+    </section>
+
+    <!-- Transactions -->
+    <section class="mt-6">
+      <app-transactions-table></app-transactions-table>
+    </section>
+  </main>
+</div>

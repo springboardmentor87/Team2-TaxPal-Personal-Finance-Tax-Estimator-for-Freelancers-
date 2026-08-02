@@ -1,86 +1,47 @@
-# TaxPal — Angular 17 (Standalone Components)
+# TaxPal — Dashboard
 
-This is a full conversion of the original **Next.js 16 / React 19** TaxPal
-frontend to **Angular 17** using standalone components (no NgModules).
+Personal Finance & Tax Estimator for Freelancers. Angular 17, standalone components, Tailwind CSS.
 
-## Getting started
+## Run it
 
 ```bash
 npm install
-npm start        # ng serve, runs on http://localhost:4200
+npm start
 ```
 
-```bash
-npm run build     # production build to dist/taxpal-angular
-```
+Then open `http://localhost:4200`. The app redirects `/` → `/dashboard`.
 
-## Structure
+## What's in this drop
 
-```
-src/
-  index.html            root document (fonts, favicons, meta tags)
-  styles.css            global Tailwind + design tokens (OKLCH colors, radii)
-  main.ts                bootstrapApplication entry point
-  app/
-    app.component.ts     root shell (<router-outlet/>)
-    app.routes.ts         "/" -> redirect "/income", "/income", "/expense"
-    app.config.ts         router + lucide-angular icon providers
-    models/
-      transaction.model.ts     Transaction, TransactionStatus, CATEGORIES
-    services/
-      dashboard-data.service.ts  seed data + formatCurrency/formatDate
-    utils/
-      cn.ts                clsx + tailwind-merge helper
-      icons.ts             central lucide icon registry
-    components/
-      sidebar/              nav drawer (routerLink/routerLinkActive)
-      topbar/                search, notifications, profile
-      summary-cards/         income-page KPI cards
-      expense-summary-cards/ expense-page KPI cards
-      add-income-card/       reactive form: add income
-      add-expense-card/      reactive form: add expense
-      transactions-table/    desktop table + mobile list, delete action
-      ui/button/              shadcn-style button (kept for parity, cva-based)
-    pages/
-      income/                IncomePageComponent (route: /income)
-      expense/               ExpensePageComponent (route: /expense)
-```
+- `src/app/pages/dashboard` — the dashboard page (topbar, KPI cards, charts, transactions)
+- `src/app/components/sidebar` — TaxPal sidebar with routerLink navigation + user profile footer
+- `src/app/components/summary-card` — reusable KPI card (Income / Expenses / Balance / Tax)
+- `src/app/components/income-expense-chart` — animated bar chart with Year/Quarter/Month toggle
+- `src/app/components/expense-donut-chart` — SVG donut chart with category legend
+- `src/app/components/transactions-table` — searchable, filterable transactions table
+- `src/app/services/ui-state.service.ts` — tiny signal-based service that opens/closes the
+  mobile sidebar drawer (the hamburger button in the dashboard topbar and the sidebar's
+  close button both talk to this)
 
-## Mapping from the original Next.js project
+## Not included on purpose
 
-| Next.js / React                          | Angular 17                                             |
-|-------------------------------------------|----------------------------------------------------------|
-| `app/layout.tsx`                          | `src/index.html` + `app.component.ts`                    |
-| `app/page.tsx` (redirect to `/income`)    | `app.routes.ts` (`redirectTo: 'income'`)                 |
-| `app/income/page.tsx`, `app/expense/...`  | `pages/income`, `pages/expense`                           |
-| `next/link` `<Link>`                      | `RouterLink` / `RouterLinkActive`                          |
-| `useState` / `useMemo`                    | component class fields + plain methods (recalculated on change) |
-| `"use client"` form state (`useState`)    | Angular Reactive Forms (`FormBuilder`, `formGroup`)        |
-| `lucide-react` icons                      | `lucide-angular` (`<lucide-icon name="...">`)              |
-| `cn()` (`clsx` + `tailwind-merge`)        | identical `cn()` helper, ported as-is                       |
-| Tailwind v4 (`@theme inline`, oklch vars) | Tailwind v3 config mapping the same CSS variables/oklch values |
-| `components/ui/button.tsx` (base-ui + cva)| `components/ui/button/button.component.ts` (native `<button>` + cva) |
+Per the brief, **Income and Expense pages are not generated** — they already exist in your
+project. The sidebar links to `/income` and `/expense` via `routerLink` as requested; you just
+need to make sure those routes are registered in your app's route table. See the comments in
+`src/app/app.routes.ts` — merge that file's `dashboard` route into your existing routes array
+(or vice versa) so everything resolves from one router config.
 
-## Notes on functional parity
+The sidebar also links to `/budget`, `/tax-estimator`, `/reports`, and `/settings` since they're
+listed in the nav — wire those up to your existing pages the same way once they're ready.
 
-- All UI, spacing, colors (including the exact OKLCH values and dark-mode
-  variables), and responsive breakpoints are preserved 1:1 via the ported
-  Tailwind design tokens.
-- Form validation logic (amount must be a positive number, description must
-  be non-empty) is preserved exactly, including the client-side error
-  messaging.
-- Each page keeps its own local transaction list, seeded fresh from the same
-  mock dataset — matching the original behavior where navigating between
-  `/income` and `/expense` unmounts/remounts independent React state.
-- One quirk from the original source was preserved intentionally: the
-  "Add Income" form (`add-income-card`) emits `type: "expense"` on submit,
-  just like the original `add-income-card.tsx` did. If this was a bug in the
-  original app rather than intentional, it's a one-line fix in
-  `add-income-card.component.ts` (`type: 'income'`).
+## Theme tokens
 
-## Dependencies of note
+Defined in `tailwind.config.js`:
 
-- `lucide-angular` — icon set (equivalent of `lucide-react`)
-- `class-variance-authority`, `clsx`, `tailwind-merge` — same utility libs as
-  the original project
-- `@angular/forms` — Reactive Forms for the Add Income / Add Expense forms
+- `primary.500` `#7C3AED` (brand purple)
+- `primary.100` / `lavender` `#F3E8FF` (light lavender accent)
+- Card radius: `rounded-2xl` (18px)
+- Shadows: `shadow-card` / `shadow-card-hover` (soft purple-tinted shadows used on hover)
+
+Fonts: **Plus Jakarta Sans** for headings/display, **Inter** for body and table data, loaded
+from Google Fonts in `src/index.html`.

@@ -1,28 +1,11 @@
-export type TransactionType = 'income' | 'expense';
-export type TransactionStatus = 'completed' | 'pending' | 'failed';
+export type TransactionType = 'Income' | 'Expense';
+export type TransactionStatus = 'Completed' | 'Pending' | 'Failed';
 
 export interface Transaction {
-  id: string;
-  date: string; // ISO yyyy-mm-dd
-  category: string;
+  date: string;
   description: string;
+  category: string;
   amount: number;
   type: TransactionType;
   status: TransactionStatus;
 }
-
-export type NewTransaction = Omit<Transaction, 'id'>;
-
-export const CATEGORIES: readonly string[] = [
-  'Salary',
-  'Freelance',
-  'Groceries',
-  'Rent',
-  'Utilities',
-  'Transport',
-  'Dining',
-  'Healthcare',
-  'Entertainment',
-  'Taxes',
-  'Other',
-] as const;

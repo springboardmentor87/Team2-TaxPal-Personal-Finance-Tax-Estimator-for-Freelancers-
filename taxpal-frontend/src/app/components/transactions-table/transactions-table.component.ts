@@ -1,60 +1,48 @@
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import {
-  Transaction,
-  TransactionStatus,
-} from '../../models/transaction.model';
-import { DashboardDataService } from '../../services/dashboard-data.service';
-import { cn } from '../../utils/cn';
+import { FormsModule } from '@angular/forms';
+import { Transaction } from '../../models/transaction.model';
 
-const STATUS_STYLES: Record<TransactionStatus, string> = {
-  completed: 'bg-accent text-accent-foreground',
-  pending: 'bg-primary/10 text-primary',
-  failed: 'bg-destructive/10 text-destructive',
-};
+const TRANSACTIONS: Transaction[] = [
+  { date: 'Jul 28, 2026', description: 'Website redesign — Nimbus Co.', category: 'Client Payment', amount: 2400, type: 'Income', status: 'Completed' },
+  { date: 'Jul 27, 2026', description: 'Figma annual subscription', category: 'Software & Tools', amount: 144, type: 'Expense', status: 'Completed' },
+  { date: 'Jul 25, 2026', description: 'Brand identity — Loop Studio', category: 'Client Payment', amount: 1850, type: 'Income', status: 'Completed' },
+  { date: 'Jul 24, 2026', description: 'Co-working space, July', category: 'Office & Rent', amount: 220, type: 'Expense', status: 'Completed' },
+  { date: 'Jul 22, 2026', description: 'Flight to client meetup — SFO', category: 'Travel', amount: 386, type: 'Expense', status: 'Pending' },
+  { date: 'Jul 20, 2026', description: 'UI audit — Fernweh App', category: 'Client Payment', amount: 960, type: 'Income', status: 'Completed' },
+  { date: 'Jul 18, 2026', description: 'Instagram ad campaign', category: 'Marketing', amount: 150, type: 'Expense', status: 'Failed' },
+  { date: 'Jul 15, 2026', description: 'Quarterly tax set-aside', category: 'Taxes Set Aside', amount: 640, type: 'Expense', status: 'Completed' }
+];
 
 @Component({
   selector: 'app-transactions-table',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './transactions-table.component.html',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './transactions-table.component.html'
 })
 export class TransactionsTableComponent {
-  @Input({ required: true }) transactions: Transaction[] = [];
-  @Output() delete = new EventEmitter<string>();
+  searchTerm = signal('');
 
-  constructor(private readonly data: DashboardDataService) {}
+  transactions = signal<Transaction[]>(TRANSACTIONS);
 
-  formatCurrency(value: number): string {
-    return this.data.formatCurrency(value);
-  }
-
-  formatDate(iso: string): string {
-    return this.data.formatDate(iso);
-  }
-
-  statusClass(status: TransactionStatus): string {
-    return cn(
-      'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium capitalize',
-      STATUS_STYLES[status],
+  filtered = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (!term) return this.transactions();
+    return this.transactions().filter(
+      (t) =>
+        t.description.toLowerCase().includes(term) ||
+        t.category.toLowerCase().includes(term)
     );
-  }
+  });
 
-  amountClass(type: Transaction['type']): string {
-    return cn(
-      'whitespace-nowrap px-4 py-4 text-right font-semibold',
-      type === 'income' ? 'text-success' : 'text-foreground',
-    );
-  }
-
-  mobileAmountClass(type: Transaction['type']): string {
-    return cn(
-      'whitespace-nowrap font-semibold',
-      type === 'income' ? 'text-success' : 'text-foreground',
-    );
-  }
-
-  onDelete(id: string): void {
-    this.delete.emit(id);
+  statusClasses(status: Transaction['status']): string {
+    switch (status) {
+      case 'Completed':
+        return 'bg-emerald-50 text-emerald-600';
+      case 'Pending':
+        return 'bg-amber-50 text-amber-600';
+      case 'Failed':
+        return 'bg-rose-50 text-rose-500';
+    }
   }
 }

@@ -1,0 +1,41 @@
+<div class="rounded-2xl border border-primary-100/60 bg-white p-5 shadow-card sm:p-6">
+  <div>
+    <h3 class="font-display text-[16px] font-bold text-[#1E1533]">Expense Breakdown</h3>
+    <p class="mt-0.5 text-[12.5px] text-[#8A7FA5]">Where your money went this month</p>
+  </div>
+
+  <div class="mt-5 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center">
+    <!-- donut -->
+    <div class="relative h-[190px] w-[190px] shrink-0">
+      <svg viewBox="0 0 100 100" class="h-full w-full -rotate-90">
+        <circle cx="50" cy="50" [attr.r]="radius" fill="none" stroke="#F3E8FF" stroke-width="12" />
+        <circle
+          *ngFor="let seg of segments()"
+          cx="50" cy="50" [attr.r]="radius"
+          fill="none"
+          [attr.stroke]="seg.color"
+          stroke-width="12"
+          stroke-linecap="round"
+          [attr.stroke-dasharray]="seg.dashArray"
+          [attr.stroke-dashoffset]="seg.dashOffset"
+          class="transition-all duration-500 ease-out"
+        />
+      </svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <span class="text-[11.5px] font-medium text-[#8A7FA5]">Total Spent</span>
+        <span class="font-display text-[20px] font-bold text-[#1E1533]">${{ total() | number: '1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- legend -->
+    <ul class="w-full space-y-2.5 sm:max-w-[190px]">
+      <li *ngFor="let seg of segments()" class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-primary-50/70">
+        <div class="flex min-w-0 items-center gap-2.5">
+          <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background]="seg.color"></span>
+          <span class="truncate text-[13px] font-medium text-[#4B4363]">{{ seg.label }}</span>
+        </div>
+        <span class="shrink-0 text-[13px] font-semibold text-[#1E1533]">{{ seg.percent }}%</span>
+      </li>
+    </ul>
+  </div>
+</div>

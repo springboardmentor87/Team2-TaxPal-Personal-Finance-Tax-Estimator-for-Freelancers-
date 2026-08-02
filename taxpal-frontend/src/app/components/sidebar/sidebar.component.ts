@@ -1,34 +1,30 @@
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
+import { UiStateService } from '../../services/ui-state.service';
 
 interface NavItem {
   label: string;
-  icon: string;
-  href: string;
+  route: string;
+  icon: string; // path data rendered inline in the template via [ngSwitch]
 }
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Income', icon: 'TrendingUp', href: '/income' },
-  { label: 'Expenses', icon: 'Receipt', href: '/expense' },
-  { label: 'Reports', icon: 'BarChart3', href: '/reports' },
-  { label: 'Settings', icon: 'Settings', href: '/settings' },
-];
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, LucideAngularModule],
-  templateUrl: './sidebar.component.html',
+  imports: [CommonModule, RouterLink, RouterLinkActive],
+  templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent {
-  @Input() open = false;
-  @Output() closeSidebar = new EventEmitter<void>();
+  ui = inject(UiStateService);
 
-  readonly navItems = NAV_ITEMS;
-
-  onClose(): void {
-    this.closeSidebar.emit();
-  }
+  readonly navItems: NavItem[] = [
+    { label: 'Dashboard', route: '/dashboard', icon: 'grid' },
+    { label: 'Income', route: '/income', icon: 'trending-up' },
+    { label: 'Expense', route: '/expense', icon: 'trending-down' },
+    { label: 'Budget', route: '/budget', icon: 'wallet' },
+    { label: 'Tax Estimator', route: '/tax-estimator', icon: 'calculator' },
+    { label: 'Reports', route: '/reports', icon: 'bar-chart' },
+    { label: 'Settings', route: '/settings', icon: 'settings' }
+  ];
 }

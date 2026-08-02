@@ -1,59 +1,98 @@
-<!-- Mobile overlay -->
+<!-- Mobile scrim -->
 <div
-  *ngIf="open"
-  class="fixed inset-0 z-40 bg-foreground/30 backdrop-blur-sm lg:hidden"
-  (click)="onClose()"
-  aria-hidden="true"
+  *ngIf="ui.mobileSidebarOpen()"
+  (click)="ui.closeSidebar()"
+  class="fixed inset-0 z-40 bg-[#1E1533]/40 backdrop-blur-[2px] lg:hidden"
 ></div>
 
 <aside
-  [class]="
-    'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-sidebar-border bg-sidebar p-5 transition-transform duration-300 ease-out lg:static lg:z-auto lg:translate-x-0 ' +
-    (open ? 'translate-x-0' : '-translate-x-full')
-  "
+  class="fixed inset-y-0 left-0 z-50 flex h-full w-[264px] flex-col border-r border-primary-100/70 bg-white transition-transform duration-300 ease-out lg:translate-x-0"
+  [class.translate-x-0]="ui.mobileSidebarOpen()"
+  [class.-translate-x-full]="!ui.mobileSidebarOpen()"
 >
-  <div class="mb-8 flex items-center justify-between">
-    <div class="flex items-center gap-2.5">
-      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-        <lucide-icon name="Wallet" class="h-5 w-5"></lucide-icon>
-      </div>
-
-      <div>
-        <p class="text-lg font-bold leading-none tracking-tight text-sidebar-foreground">
-          TaxPal
-        </p>
-        <p class="mt-1 text-xs text-muted-foreground">Finance Suite</p>
-      </div>
-    </div>
-
+  <!-- Logo -->
+  <div class="flex items-center justify-between px-6 pt-7 pb-6">
+    <a routerLink="/dashboard" class="flex items-center gap-2.5">
+      <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-soft">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M4 17L10 11L14 15L20 7" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 7H20V13" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="font-display text-[19px] font-extrabold tracking-tight text-[#1E1533]">
+        Tax<span class="text-primary-500">Pal</span>
+      </span>
+    </a>
     <button
-      (click)="onClose()"
-      class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent lg:hidden"
+      (click)="ui.closeSidebar()"
+      class="rounded-lg p-1.5 text-[#6B6280] hover:bg-primary-50 lg:hidden"
+      aria-label="Close menu"
     >
-      <lucide-icon name="X" class="h-5 w-5"></lucide-icon>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button>
   </div>
 
-  <nav class="flex flex-1 flex-col gap-2">
-    <a
-      *ngFor="let item of navItems"
-      [routerLink]="item.href"
-      routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground"
-      (click)="onClose()"
-      class="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-sidebar-foreground transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-    >
-      <lucide-icon
-        [name]="item.icon"
-        class="h-5 w-5 text-muted-foreground group-hover:text-sidebar-accent-foreground transition-transform duration-200 group-hover:scale-110"
-      ></lucide-icon>
-      {{ item.label }}
-    </a>
+  <!-- Nav -->
+  <nav class="flex-1 overflow-y-auto px-4 py-1 scrollbar-thin">
+    <p class="px-3 pb-2 pt-2 text-[11px] font-semibold uppercase tracking-wider text-[#A79BC7]">Menu</p>
+    <ul class="space-y-1">
+      <li *ngFor="let item of navItems">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="bg-primary-50 text-primary-700 shadow-[inset_0_0_0_1px_theme(colors.primary.100)]"
+          [routerLinkActiveOptions]="{ exact: false }"
+          (click)="ui.closeSidebar()"
+          class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] font-medium text-[#4B4363] transition-all duration-200 hover:bg-primary-50 hover:text-primary-700"
+        >
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F6F2FE] text-primary-500 transition-colors group-hover:bg-white">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [ngSwitch]="item.icon">
+              <ng-container *ngSwitchCase="'grid'">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'trending-up'">
+                <path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'trending-down'">
+                <path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'wallet'">
+                <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18a1 1 0 0 1 1 1v2"/>
+                <rect x="3" y="7" width="18" height="12" rx="2"/>
+                <path d="M16 13.5h2.5"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'calculator'">
+                <rect x="4" y="2.5" width="16" height="19" rx="2"/>
+                <path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'bar-chart'">
+                <path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/>
+              </ng-container>
+              <ng-container *ngSwitchCase="'settings'">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.63 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.63a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.37 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.96z"/>
+              </ng-container>
+            </svg>
+          </span>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
   </nav>
 
-  <div class="mt-auto rounded-2xl bg-accent/60 p-4">
-    <p class="text-sm font-semibold text-accent-foreground">Tax Season Ready</p>
-    <p class="mt-1 text-xs text-muted-foreground">
-      Your records are up to date. Export reports anytime.
-    </p>
+  <!-- User profile -->
+  <div class="border-t border-primary-100/70 p-4">
+    <button class="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-primary-50">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 font-display text-[13px] font-bold text-white">
+        AM
+      </span>
+      <span class="min-w-0 flex-1">
+        <span class="block truncate text-[14px] font-semibold text-[#1E1533]">Aarav Mehta</span>
+        <span class="block truncate text-[12.5px] text-[#8A7FA5]">Freelance Designer</span>
+      </span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="shrink-0 text-[#B8ACD6]">
+        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 </aside>

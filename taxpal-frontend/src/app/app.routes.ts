@@ -1,11 +1,24 @@
+
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'income', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./pages/dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent,
+      ),
+    title: 'TaxPal — Dashboard',
+  },
+
   {
     path: 'income',
     loadComponent: () =>
-      import('./pages/income/income.page').then((m) => m.IncomePageComponent),
+      import('./pages/income/income.page').then(
+        (m) => m.IncomePageComponent,
+      ),
     title: 'TaxPal — Income',
   },
   {
@@ -16,5 +29,6 @@ export const routes: Routes = [
       ),
     title: 'TaxPal — Expenses',
   },
-  { path: '**', redirectTo: 'income' },
+
+  { path: '**', redirectTo: 'dashboard' },
 ];
