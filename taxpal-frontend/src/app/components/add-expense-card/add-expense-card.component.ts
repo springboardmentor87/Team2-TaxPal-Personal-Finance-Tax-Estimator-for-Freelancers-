@@ -48,8 +48,7 @@ export class AddExpenseCardComponent {
       category: category ?? CATEGORIES[2],
       date: date ?? today(),
       description: description.trim(),
-      type: 'expense',
-      status: 'completed',
+      type: 'expense'
     });
 
     this.form.reset({

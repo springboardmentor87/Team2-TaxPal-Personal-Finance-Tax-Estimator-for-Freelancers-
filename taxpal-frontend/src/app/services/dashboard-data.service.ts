@@ -3,67 +3,60 @@ import { Transaction } from '../models/transaction.model';
 
 const SEED_TRANSACTIONS: Transaction[] = [
   {
-    id: 't1',
+    id: 1,
     date: '2026-07-22',
     category: 'Salary',
     description: 'Monthly paycheck',
     amount: 5200,
-    type: 'income',
-    status: 'completed',
+    type: 'income'
   },
   {
-    id: 't2',
+    id: 2,
     date: '2026-07-21',
     category: 'Rent',
     description: 'July apartment rent',
     amount: 1650,
-    type: 'expense',
-    status: 'completed',
+    type: 'expense'
   },
   {
-    id: 't3',
+    id: 3,
     date: '2026-07-20',
     category: 'Groceries',
     description: 'Whole Foods weekly shop',
     amount: 142.38,
-    type: 'expense',
-    status: 'completed',
+    type: 'expense'
   },
   {
-    id: 't4',
+    id: 4,
     date: '2026-07-19',
     category: 'Freelance',
     description: 'Logo design project',
     amount: 850,
-    type: 'income',
-    status: 'pending',
+    type: 'income'
   },
   {
-    id: 't5',
+    id: 5,
     date: '2026-07-18',
     category: 'Dining',
     description: 'Dinner with clients',
     amount: 96.5,
-    type: 'expense',
-    status: 'completed',
+    type: 'expense'
   },
   {
-    id: 't6',
+    id: 6,
     date: '2026-07-17',
     category: 'Utilities',
     description: 'Electricity & water',
     amount: 213.12,
-    type: 'expense',
-    status: 'failed',
+    type: 'expense'
   },
   {
-    id: 't7',
+    id: 7,
     date: '2026-07-16',
     category: 'Transport',
     description: 'Monthly transit pass',
     amount: 78,
-    type: 'expense',
-    status: 'completed',
+    type: 'expense'
   },
 ];
 
@@ -90,7 +83,8 @@ export class DashboardDataService {
   }
 
   formatDate(iso: string): string {
-    const d = new Date(iso + 'T00:00:00');
+    const dateStr = iso.includes('T') ? iso : iso + 'T00:00:00';
+    const d = new Date(dateStr);
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',

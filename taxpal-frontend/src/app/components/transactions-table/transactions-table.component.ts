@@ -1,17 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import {
-  Transaction,
-  TransactionStatus,
-} from '../../models/transaction.model';
+import { Transaction } from '../../models/transaction.model';
 import { DashboardDataService } from '../../services/dashboard-data.service';
 import { cn } from '../../utils/cn';
-
-const STATUS_STYLES: Record<TransactionStatus, string> = {
-  completed: 'bg-accent text-accent-foreground',
-  pending: 'bg-primary/10 text-primary',
-  failed: 'bg-destructive/10 text-destructive',
-};
 
 @Component({
   selector: 'app-transactions-table',
@@ -21,7 +12,7 @@ const STATUS_STYLES: Record<TransactionStatus, string> = {
 })
 export class TransactionsTableComponent {
   @Input({ required: true }) transactions: Transaction[] = [];
-  @Output() delete = new EventEmitter<string>();
+  @Output() delete = new EventEmitter<number>();
 
   constructor(private readonly data: DashboardDataService) {}
 
@@ -31,13 +22,6 @@ export class TransactionsTableComponent {
 
   formatDate(iso: string): string {
     return this.data.formatDate(iso);
-  }
-
-  statusClass(status: TransactionStatus): string {
-    return cn(
-      'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium capitalize',
-      STATUS_STYLES[status],
-    );
   }
 
   amountClass(type: Transaction['type']): string {
@@ -54,7 +38,8 @@ export class TransactionsTableComponent {
     );
   }
 
-  onDelete(id: string): void {
+  onDelete(id: number): void {
     this.delete.emit(id);
   }
 }
+

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
@@ -8,9 +8,11 @@ import { LucideAngularModule } from 'lucide-angular';
   templateUrl: './topbar.component.html',
 })
 export class TopbarComponent {
+  @Input() userName?: string;
   @Output() menuClick = new EventEmitter<void>();
 
   onMenuClick(): void {
     this.menuClick.emit();
   }
 }
+
