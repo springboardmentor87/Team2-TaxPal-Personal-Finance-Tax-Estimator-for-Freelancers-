@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface Category {
@@ -16,12 +16,12 @@ interface Segment extends Category {
 const RADIUS = 42;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-const CATEGORIES: Category[] = [
-  { label: 'Software & Tools', value: 1240, color: '#7C3AED' },
-  { label: 'Office & Rent', value: 980, color: '#9D5CF0' },
-  { label: 'Travel', value: 620, color: '#B588F5' },
-  { label: 'Marketing', value: 430, color: '#CBAAFC' },
-  { label: 'Taxes Set Aside', value: 310, color: '#E4D2FE' }
+const FALLBACK_CATEGORIES: Category[] = [
+  { label: 'Software & Tools', value: 0, color: '#7C3AED' },
+  { label: 'Office & Rent', value: 0, color: '#9D5CF0' },
+  { label: 'Travel', value: 0, color: '#B588F5' },
+  { label: 'Marketing', value: 0, color: '#CBAAFC' },
+  { label: 'Taxes Set Aside', value: 0, color: '#E4D2FE' }
 ];
 
 @Component({
@@ -34,13 +34,31 @@ export class ExpenseDonutChartComponent {
   readonly radius = RADIUS;
   readonly circumference = CIRCUMFERENCE;
 
-  total = computed(() => CATEGORIES.reduce((sum, c) => sum + c.value, 0));
+  @Input() topCategories: any[] = [];
+
+  dynamicCategories = signal<Category[]>(FALLBACK_CATEGORIES);
+
+  ngOnChanges(): void {
+    if (this.topCategories && this.topCategories.length > 0) {
+      const colors = ['#7C3AED', '#9D5CF0', '#B588F5', '#CBAAFC', '#E4D2FE'];
+      const mapped = this.topCategories.slice(0, 5).map((c, i) => ({
+        label: c.category,
+        value: c.expense,
+        color: colors[i % colors.length]
+      }));
+      this.dynamicCategories.set(mapped);
+    } else if (this.topCategories && this.topCategories.length === 0) {
+      this.dynamicCategories.set([]);
+    }
+  }
+
+  total = computed(() => this.dynamicCategories().reduce((sum, c) => sum + c.value, 0));
 
   segments = computed<Segment[]>(() => {
     let offsetAccum = 0;
     const total = this.total();
 
-    return CATEGORIES.map((cat) => {
+    return this.dynamicCategories().map((cat) => {
       const percent = (cat.value / total) * 100;
       const dashLength = (percent / 100) * CIRCUMFERENCE;
       const segment: Segment = {

@@ -14,15 +14,15 @@
     </div>
 
     <!-- Period buttons -->
-    <div class="flex items-center gap-1 rounded-full bg-primary-50 p-1">
+    <div class="flex items-center gap-1 rounded-full bg-secondary p-1">
       <button
         *ngFor="let p of periods"
         (click)="setPeriod(p.key)"
         class="rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-all duration-200"
-        [class.bg-primary-500]="activePeriod() === p.key"
-        [class.text-white]="activePeriod() === p.key"
-        [class.shadow-soft]="activePeriod() === p.key"
-        [class.text-primary-600]="activePeriod() !== p.key"
+        [class.bg-primary]="activePeriod() === p.key"
+        [class.text-primary-foreground]="activePeriod() === p.key"
+        [class.shadow-sm]="activePeriod() === p.key"
+        [class.text-muted-foreground]="activePeriod() !== p.key"
       >
         {{ p.label }}
       </button>

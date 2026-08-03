@@ -1,10 +1,25 @@
 import { Routes } from "@angular/router";
+import { authGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
   { path: "", redirectTo: "dashboard", pathMatch: "full" },
 
   {
+    path: "login",
+    loadComponent: () =>
+      import("./pages/login/login.page").then((m) => m.LoginPageComponent),
+    title: "TaxPal — Sign In",
+  },
+  {
+    path: "register",
+    loadComponent: () =>
+      import("./pages/register/register.page").then((m) => m.RegisterPageComponent),
+    title: "TaxPal — Create Account",
+  },
+
+  {
     path: "dashboard",
+    canActivate: [authGuard],
     loadComponent: () =>
       import("./pages/dashboard/dashboard.component").then(
         (m) => m.DashboardComponent,
@@ -14,6 +29,7 @@ export const routes: Routes = [
 
   {
     path: "income",
+    canActivate: [authGuard],
     loadComponent: () =>
       import("./pages/income/income.page").then((m) => m.IncomePageComponent),
     title: "TaxPal — Income",
@@ -21,6 +37,7 @@ export const routes: Routes = [
 
   {
     path: "expense",
+    canActivate: [authGuard],
     loadComponent: () =>
       import("./pages/expense/expense.page").then(
         (m) => m.ExpensePageComponent,

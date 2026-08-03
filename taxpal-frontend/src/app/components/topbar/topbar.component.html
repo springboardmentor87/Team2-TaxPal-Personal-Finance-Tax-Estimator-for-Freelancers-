@@ -10,7 +10,7 @@
   <div class="hidden flex-1 md:block">
     <h1 class="text-lg font-semibold tracking-tight text-foreground">Dashboard</h1>
     <p class="text-sm text-muted-foreground">
-      Welcome back, here's your financial overview.
+      Welcome back {{ userName ? userName : '' }}, here's your financial overview.
     </p>
   </div>
 
@@ -37,11 +37,12 @@
     aria-label="User profile"
   >
     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
-      AM
+      {{ userName ? userName.charAt(0).toUpperCase() : 'U' }}
     </span>
     <span class="hidden text-left sm:block">
-      <span class="block text-sm font-medium leading-none text-foreground">User</span>
+      <span class="block text-sm font-medium leading-none text-foreground">{{ userName || 'User' }}</span>
       <span class="mt-0.5 block text-xs text-muted-foreground">Premium</span>
     </span>
   </button>
 </header>
+

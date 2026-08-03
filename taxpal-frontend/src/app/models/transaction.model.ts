@@ -1,14 +1,12 @@
 export type TransactionType = 'income' | 'expense';
-export type TransactionStatus = 'completed' | 'pending' | 'failed';
 
 export interface Transaction {
-  id: string;
+  id: number;
   date: string; // ISO yyyy-mm-dd
   category: string;
   description: string;
   amount: number;
   type: TransactionType;
-  status: TransactionStatus;
 }
 
 export type NewTransaction = Omit<Transaction, 'id'>;

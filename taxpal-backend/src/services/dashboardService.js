@@ -80,9 +80,23 @@ const getDashboardSummary = async (userId) => {
     Alert.count({ where: { userId, read: false } })
   ]);
 
+  const rawAllTransactions = await Transaction.findAll({ where: { userId } });
+  const allTransactions = serializeDocuments(rawAllTransactions);
+
+  const totalIncome = roundToTwo(sum(allTransactions.filter((t) => t.type === 'income').map((t) => t.amount)));
+  const totalExpenses = roundToTwo(sum(allTransactions.filter((t) => t.type === 'expense').map((t) => t.amount)));
+  const currentBalance = roundToTwo(totalIncome - totalExpenses);
+
   return {
     user,
+    totalIncome,
+    totalExpenses,
+    currentBalance,
+    latest5Transactions: recentTransactions,
     summary: {
+      totalIncome,
+      totalExpenses,
+      currentBalance,
       monthlyIncome,
       monthlyExpenses,
       netCashFlow,

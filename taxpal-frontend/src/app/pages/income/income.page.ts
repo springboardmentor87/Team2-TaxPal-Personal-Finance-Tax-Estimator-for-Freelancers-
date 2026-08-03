@@ -1,16 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { AddIncomeCardComponent } from '../../components/add-income-card/add-income-card.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { SummaryCardsComponent } from '../../components/summary-cards/summary-cards.component';
 import { TopbarComponent } from '../../components/topbar/topbar.component';
 import { TransactionsTableComponent } from '../../components/transactions-table/transactions-table.component';
 import { NewTransaction, Transaction } from '../../models/transaction.model';
-import { DashboardDataService } from '../../services/dashboard-data.service';
+import { TransactionService } from '../../services/transaction.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-income-page',
   standalone: true,
   imports: [
+    CommonModule,
+    CurrencyPipe,
     SidebarComponent,
     TopbarComponent,
     SummaryCardsComponent,
@@ -19,17 +23,39 @@ import { DashboardDataService } from '../../services/dashboard-data.service';
   ],
   templateUrl: './income.page.html',
 })
-export class IncomePageComponent {
+export class IncomePageComponent implements OnInit {
   sidebarOpen = false;
-  transactions: Transaction[];
+  transactions: Transaction[] = [];
 
   income = 0;
   expenses = 0;
   balance = 0;
 
-  constructor(private readonly data: DashboardDataService) {
-    this.transactions = this.data.getInitialTransactions();
-    this.recalculateTotals();
+  auth = inject(AuthService);
+
+  constructor(private readonly transactionService: TransactionService) {}
+
+  ngOnInit(): void {
+    this.loadTransactions();
+  }
+
+  loadTransactions(): void {
+    this.transactionService.getTransactions('income').subscribe({
+      next: (res) => {
+        this.transactions = res.data?.transactions || [];
+      },
+      error: (err) => console.error('Error loading transactions', err)
+    });
+    
+    this.transactionService.getDashboardSummary().subscribe({
+      next: (res) => {
+        const summary = res.data.summary;
+        this.income = summary.totalIncome || 0;
+        this.expenses = summary.totalExpenses || 0;
+        this.balance = summary.currentBalance || 0;
+      },
+      error: (err) => console.error('Error loading summary', err)
+    });
   }
 
   openSidebar(): void {
@@ -41,25 +67,19 @@ export class IncomePageComponent {
   }
 
   handleAdd(t: NewTransaction): void {
-    const next: Transaction = { ...t, id: `t${Date.now()}` };
-    this.transactions = [next, ...this.transactions].sort((a, b) =>
-      b.date.localeCompare(a.date),
-    );
-    this.recalculateTotals();
+    const data = { ...t, type: 'income' as const };
+    this.transactionService.addTransaction(data).subscribe({
+      next: () => this.loadTransactions(),
+      error: (err) => console.error('Error adding transaction', err)
+    });
   }
 
-  handleDelete(id: string): void {
-    this.transactions = this.transactions.filter((t) => t.id !== id);
-    this.recalculateTotals();
+  handleDelete(id: number): void {
+    this.transactionService.deleteTransaction(id).subscribe({
+      next: () => this.loadTransactions(),
+      error: (err) => console.error('Error deleting transaction', err)
+    });
   }
 
-  private recalculateTotals(): void {
-    this.income = this.transactions
-      .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
-    this.expenses = this.transactions
-      .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
-    this.balance = this.income - this.expenses;
-  }
 }
+
