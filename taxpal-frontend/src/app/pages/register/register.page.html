@@ -1,0 +1,105 @@
+<div class="min-h-screen flex items-center justify-center bg-[#FAF8FF] px-4 py-12 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md space-y-8 bg-white p-8 sm:p-10 rounded-2xl border border-purple-100/70 shadow-xl shadow-purple-500/5">
+    <!-- Header -->
+    <div class="text-center">
+      <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg shadow-purple-500/20 mb-4">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M4 17L10 11L14 15L20 7" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 7H20V13" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-extrabold tracking-tight text-[#1E1533]">Create your TaxPal account</h2>
+      <p class="mt-2 text-sm text-[#7A6F9B]">Personal Finance & Tax Estimator for Freelancers</p>
+    </div>
+
+    <!-- Alert Error -->
+    <div *ngIf="errorMessage" class="rounded-xl bg-red-50 p-4 border border-red-200">
+      <div class="flex items-center gap-3">
+        <svg class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span class="text-xs font-medium text-red-700">{{ errorMessage }}</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()" class="mt-8 space-y-4">
+      <div>
+        <label for="name" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Full Name</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          [(ngModel)]="name"
+          placeholder="Aarav Mehta"
+          class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] placeholder-[#A399C2] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+        />
+      </div>
+
+      <div>
+        <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Email address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          [(ngModel)]="email"
+          placeholder="aarav@taxpal.com"
+          class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] placeholder-[#A399C2] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+        />
+      </div>
+
+      <div>
+        <label for="country" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Country (Tax Region)</label>
+        <select
+          id="country"
+          name="country"
+          [(ngModel)]="country"
+          class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+        >
+          <option value="India">India (₹ INR)</option>
+          <option value="USA">United States ($ USD)</option>
+          <option value="UK">United Kingdom (£ GBP)</option>
+          <option value="Canada">Canada ($ CAD)</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] placeholder-[#A399C2] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+        />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full flex justify-center items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 py-3.5 px-4 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500/40 disabled:opacity-50 transition-all cursor-pointer mt-2"
+      >
+        <span *ngIf="!loading">Create Free Account</span>
+        <span *ngIf="loading" class="flex items-center gap-2">
+          <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Creating Account...
+        </span>
+      </button>
+    </form>
+
+    <!-- Footer Login Link -->
+    <div class="text-center pt-2 border-t border-purple-100/60">
+      <p class="text-sm text-[#7A6F9B]">
+        Already have a TaxPal account?
+        <a routerLink="/login" class="font-semibold text-purple-600 hover:text-purple-700 hover:underline">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>

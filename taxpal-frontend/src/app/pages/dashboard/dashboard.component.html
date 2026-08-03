@@ -1,0 +1,55 @@
+<div class="flex min-h-screen">
+  <app-sidebar
+    [open]="sidebarOpen"
+    (closeSidebar)="closeSidebar()"
+  ></app-sidebar>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <app-topbar (menuClick)="openSidebar()" [userName]="auth.currentUser()?.name"></app-topbar>
+
+    <main class="px-5 pt-6 sm:px-8" *ngIf="summary">
+      <!-- Summary cards -->
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <app-summary-cards
+          class="animate-fadeUp"
+          title="Total Income"
+          [amount]="(summary.totalIncome | currency:'USD':'symbol':'1.0-0') || '$0'"
+          icon="income"
+        ></app-summary-cards>
+
+        <app-summary-cards
+          class="animate-fadeUp [animation-delay:60ms]"
+          title="Total Expenses"
+          [amount]="(summary.totalExpenses | currency:'USD':'symbol':'1.0-0') || '$0'"
+          icon="expense"
+        ></app-summary-cards>
+
+        <app-summary-cards
+          class="animate-fadeUp [animation-delay:120ms]"
+          title="Remaining Balance"
+          [amount]="(summary.currentBalance | currency:'USD':'symbol':'1.0-0') || '$0'"
+          statusText="On track for savings goal"
+          trend="up"
+          icon="balance"
+        ></app-summary-cards>
+
+        <app-summary-cards
+          class="animate-fadeUp [animation-delay:180ms]"
+          title="Estimated Tax"
+          [amount]="( (summary.totalIncome * 0.15) | currency:'USD':'symbol':'1.0-0') || '$0'"
+          statusText="Due Sep 15, 2026"
+          trend="neutral"
+          icon="tax"
+        ></app-summary-cards>
+      </section>
+
+      <!-- Charts -->
+      <section class="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[1.4fr_1fr]">
+        <app-income-expense-chart [monthlyTrend]="summary.monthlyTrend"></app-income-expense-chart>
+
+        <app-expense-donut-chart [topCategories]="summary.topCategories"></app-expense-donut-chart>
+      </section>
+    </main>
+  </div>
+</div>
+

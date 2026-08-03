@@ -5,6 +5,7 @@ const { getDashboardAnalytics, getDashboardSummary } = require('../controllers/d
 const router = express.Router();
 
 router.use(protect);
+router.get('/', getDashboardSummary);
 router.get('/analytics', getDashboardAnalytics);
 router.get('/summary', getDashboardSummary);
 

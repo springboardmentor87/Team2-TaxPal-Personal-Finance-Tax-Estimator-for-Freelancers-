@@ -1,20 +1,49 @@
-import { Routes } from '@angular/router';
+import { Routes } from "@angular/router";
+import { authGuard } from "./guards/auth.guard";
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'income', pathMatch: 'full' },
+  { path: "", redirectTo: "dashboard", pathMatch: "full" },
+
   {
-    path: 'income',
+    path: "login",
     loadComponent: () =>
-      import('./pages/income/income.page').then((m) => m.IncomePageComponent),
-    title: 'TaxPal — Income',
+      import("./pages/login/login.page").then((m) => m.LoginPageComponent),
+    title: "TaxPal — Sign In",
   },
   {
-    path: 'expense',
+    path: "register",
     loadComponent: () =>
-      import('./pages/expense/expense.page').then(
+      import("./pages/register/register.page").then((m) => m.RegisterPageComponent),
+    title: "TaxPal — Create Account",
+  },
+
+  {
+    path: "dashboard",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/dashboard/dashboard.component").then(
+        (m) => m.DashboardComponent,
+      ),
+    title: "TaxPal — Dashboard",
+  },
+
+  {
+    path: "income",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/income/income.page").then((m) => m.IncomePageComponent),
+    title: "TaxPal — Income",
+  },
+
+  {
+    path: "expense",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/expense/expense.page").then(
         (m) => m.ExpensePageComponent,
       ),
-    title: 'TaxPal — Expenses',
+    title: "TaxPal — Expenses",
   },
-  { path: '**', redirectTo: 'income' },
+
+  { path: "**", redirectTo: "dashboard" },
 ];

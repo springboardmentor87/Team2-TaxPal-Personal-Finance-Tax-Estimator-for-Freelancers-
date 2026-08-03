@@ -2,14 +2,28 @@
   <app-sidebar [open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
 
   <div class="flex min-w-0 flex-1 flex-col">
-    <app-topbar (menuClick)="openSidebar()"></app-topbar>
+    <app-topbar (menuClick)="openSidebar()" [userName]="auth.currentUser()?.name"></app-topbar>
 
     <main class="flex-1 space-y-5 p-4 md:space-y-6 md:p-8">
-      <app-expense-summary-cards
-        [income]="income"
-        [expenses]="expenses"
-        [balance]="balance"
-      ></app-expense-summary-cards>
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <app-summary-cards
+          title="Total Expenses"
+          [amount]="(expenses | currency:'USD':'symbol':'1.0-0') || '$0'"
+          icon="expense"
+        ></app-summary-cards>
+        <app-summary-cards
+          title="Remaining Balance"
+          [amount]="(balance | currency:'USD':'symbol':'1.0-0') || '$0'"
+          [statusText]="balance >= 0 ? 'Available' : 'Over Budget'"
+          [trend]="balance >= 0 ? 'up' : 'down'"
+          icon="balance"
+        ></app-summary-cards>
+        <app-summary-cards
+          title="Total Transactions"
+          [amount]="(income + expenses | currency:'USD':'symbol':'1.0-0') || '$0'"
+          icon="income"
+        ></app-summary-cards>
+      </section>
 
       <div class="grid grid-cols-1 gap-5 md:gap-6 xl:grid-cols-[380px_1fr]">
         <app-add-expense-card (add)="handleAdd($event)"></app-add-expense-card>
