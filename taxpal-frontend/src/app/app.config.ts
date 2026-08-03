@@ -1,12 +1,13 @@
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
+
 import { routes } from './app.routes';
+import { APP_ICONS } from './utils/icons';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(
-      routes,
-      withInMemoryScrolling({ scrollPositionRestoration: 'top' })
-    )
-  ]
+    provideRouter(routes),
+    importProvidersFrom(LucideAngularModule.pick(APP_ICONS)),
+  ],
 };

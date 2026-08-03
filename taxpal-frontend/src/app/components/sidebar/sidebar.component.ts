@@ -1,30 +1,36 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { UiStateService } from '../../services/ui-state.service';
+import { CommonModule } from "@angular/common";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { RouterLink, RouterLinkActive } from "@angular/router";
+import { LucideAngularModule } from "lucide-angular";
 
 interface NavItem {
   label: string;
-  route: string;
-  icon: string; // path data rendered inline in the template via [ngSwitch]
+  icon: string;
+  href: string;
 }
 
+const NAV_ITEMS: NavItem[] = [
+  { label: "Dashboard", icon: "grid", href: "/dashboard" },
+  { label: "Income", icon: "trending-up", href: "/income" },
+  { label: "Expenses", icon: "trending-down", href: "/expense" },
+  { label: "Budget", icon: "wallet", href: "" },
+  { label: "Tax Estimator", icon: "calculator", href: "" },
+  { label: "Reports", icon: "bar-chart", href: "" },
+  { label: "Settings", icon: "settings", href: "" },
+];
 @Component({
-  selector: 'app-sidebar',
+  selector: "app-sidebar",
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
-  templateUrl: './sidebar.component.html'
+  imports: [CommonModule, RouterLink, RouterLinkActive, LucideAngularModule],
+  templateUrl: "./sidebar.component.html",
 })
 export class SidebarComponent {
-  ui = inject(UiStateService);
+  @Input() open = false;
+  @Output() closeSidebar = new EventEmitter<void>();
 
-  readonly navItems: NavItem[] = [
-    { label: 'Dashboard', route: '/dashboard', icon: 'grid' },
-    { label: 'Income', route: '/income', icon: 'trending-up' },
-    { label: 'Expense', route: '/expense', icon: 'trending-down' },
-    { label: 'Budget', route: '/budget', icon: 'wallet' },
-    { label: 'Tax Estimator', route: '/tax-estimator', icon: 'calculator' },
-    { label: 'Reports', route: '/reports', icon: 'bar-chart' },
-    { label: 'Settings', route: '/settings', icon: 'settings' }
-  ];
+  readonly navItems = NAV_ITEMS;
+
+  onClose(): void {
+    this.closeSidebar.emit();
+  }
 }

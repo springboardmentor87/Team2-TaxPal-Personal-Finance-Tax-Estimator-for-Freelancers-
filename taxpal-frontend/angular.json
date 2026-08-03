@@ -3,12 +3,12 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "taxpal-dashboard": {
+    "taxpal-angular": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "standalone": true,
-          "style": "css"
+          "style": "css",
+          "standalone": true
         }
       },
       "root": "",
@@ -18,20 +18,29 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/taxpal-dashboard",
+            "outputPath": "dist/taxpal-angular",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/assets"],
+
+            "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.css"],
             "scripts": []
           },
           "configurations": {
             "production": {
               "budgets": [
-                { "type": "initial", "maximumWarning": "500kb", "maximumError": "1mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "4kb", "maximumError": "8kb" }
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
+                }
               ],
               "outputHashing": "all"
             },
@@ -49,8 +58,12 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": { "buildTarget": "taxpal-dashboard:build:production" },
-            "development": { "buildTarget": "taxpal-dashboard:build:development" }
+            "production": {
+              "buildTarget": "taxpal-angular:build:production"
+            },
+            "development": {
+              "buildTarget": "taxpal-angular:build:development"
+            }
           },
           "defaultConfiguration": "development"
         }

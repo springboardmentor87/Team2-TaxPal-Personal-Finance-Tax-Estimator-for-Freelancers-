@@ -1,98 +1,132 @@
-<!-- Mobile scrim -->
+<!-- Mobile overlay -->
 <div
-  *ngIf="ui.mobileSidebarOpen()"
-  (click)="ui.closeSidebar()"
-  class="fixed inset-0 z-40 bg-[#1E1533]/40 backdrop-blur-[2px] lg:hidden"
+  *ngIf="open"
+  (click)="onClose()"
+  class="fixed inset-0 z-40 bg-[#1E1533]/40 backdrop-blur-sm lg:hidden"
 ></div>
 
+<!-- Sidebar -->
 <aside
-  class="fixed inset-y-0 left-0 z-50 flex h-full w-[264px] flex-col border-r border-primary-100/70 bg-white transition-transform duration-300 ease-out lg:translate-x-0"
-  [class.translate-x-0]="ui.mobileSidebarOpen()"
-  [class.-translate-x-full]="!ui.mobileSidebarOpen()"
+  class="fixed inset-y-0 left-0 z-50 flex h-full w-[264px] flex-col border-r border-primary-100/70 bg-white transition-transform duration-300 lg:static lg:translate-x-0"
+  [class.translate-x-0]="open"
+  [class.-translate-x-full]="!open"
 >
   <!-- Logo -->
   <div class="flex items-center justify-between px-6 pt-7 pb-6">
-    <a routerLink="/dashboard" class="flex items-center gap-2.5">
-      <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-soft">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M4 17L10 11L14 15L20 7" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 7H20V13" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <a routerLink="/dashboard" class="flex items-center gap-3">
+      <span
+        class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M4 17L10 11L14 15L20 7"
+            stroke="white"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M14 7H20V13"
+            stroke="white"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </span>
-      <span class="font-display text-[19px] font-extrabold tracking-tight text-[#1E1533]">
-        Tax<span class="text-primary-500">Pal</span>
+
+      <span class="font-bold text-xl text-[#1E1533]">
+        Tax<span class="text-purple-600">Pal</span>
       </span>
     </a>
-    <button
-      (click)="ui.closeSidebar()"
-      class="rounded-lg p-1.5 text-[#6B6280] hover:bg-primary-50 lg:hidden"
-      aria-label="Close menu"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+
+    <button (click)="onClose()" class="lg:hidden text-gray-500 text-xl">
+      ✕
     </button>
   </div>
 
-  <!-- Nav -->
-  <nav class="flex-1 overflow-y-auto px-4 py-1 scrollbar-thin">
-    <p class="px-3 pb-2 pt-2 text-[11px] font-semibold uppercase tracking-wider text-[#A79BC7]">Menu</p>
-    <ul class="space-y-1">
-      <li *ngFor="let item of navItems">
+  <!-- Navigation -->
+
+  <nav class="flex-1 px-4">
+    <p
+      class="px-3 mb-3 text-[11px] font-semibold uppercase tracking-wider text-purple-300"
+    >
+      Menu
+    </p>
+
+    <ul class="space-y-2">
+      <!-- Dashboard -->
+      <li>
         <a
-          [routerLink]="item.route"
-          routerLinkActive="bg-primary-50 text-primary-700 shadow-[inset_0_0_0_1px_theme(colors.primary.100)]"
-          [routerLinkActiveOptions]="{ exact: false }"
-          (click)="ui.closeSidebar()"
-          class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] font-medium text-[#4B4363] transition-all duration-200 hover:bg-primary-50 hover:text-primary-700"
+          routerLink="/dashboard"
+          routerLinkActive="bg-purple-50 text-purple-700"
+          class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition"
         >
-          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F6F2FE] text-primary-500 transition-colors group-hover:bg-white">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [ngSwitch]="item.icon">
-              <ng-container *ngSwitchCase="'grid'">
-                <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'trending-up'">
-                <path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'trending-down'">
-                <path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'wallet'">
-                <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18a1 1 0 0 1 1 1v2"/>
-                <rect x="3" y="7" width="18" height="12" rx="2"/>
-                <path d="M16 13.5h2.5"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'calculator'">
-                <rect x="4" y="2.5" width="16" height="19" rx="2"/>
-                <path d="M8 7h8"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'bar-chart'">
-                <path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/>
-              </ng-container>
-              <ng-container *ngSwitchCase="'settings'">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.63 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.63a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.37 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.96z"/>
-              </ng-container>
-            </svg>
-          </span>
-          <span>{{ item.label }}</span>
+          <span class="text-purple-500"> 🏠 </span>
+
+          Dashboard
+        </a>
+      </li>
+
+      <!-- Income -->
+      <li>
+        <a
+          routerLink="/income"
+          routerLinkActive="bg-purple-50 text-purple-700"
+          class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition"
+        >
+          <span class="text-purple-500"> 📈 </span>
+
+          Income
+        </a>
+      </li>
+
+      <!-- Expense -->
+      <li>
+        <a
+          routerLink="/expense"
+          routerLinkActive="bg-purple-50 text-purple-700"
+          class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition"
+        >
+          <span class="text-purple-500"> 💳 </span>
+
+          Expenses
+        </a>
+      </li>
+
+      <!-- Disabled items -->
+
+      <li
+        *ngFor="let item of ['Budget', 'Tax Estimator', 'Reports', 'Settings']"
+      >
+        <a
+          class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
+        >
+          <span> ⚙️ </span>
+
+          {{ item }}
         </a>
       </li>
     </ul>
   </nav>
 
-  <!-- User profile -->
-  <div class="border-t border-primary-100/70 p-4">
-    <button class="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-primary-50">
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 font-display text-[13px] font-bold text-white">
+  <!-- Bottom profile -->
+
+  <div class="border-t border-purple-100 p-4">
+    <div
+      class="flex items-center gap-3 rounded-xl p-3 hover:bg-purple-50 transition"
+    >
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white font-bold"
+      >
         AM
-      </span>
-      <span class="min-w-0 flex-1">
-        <span class="block truncate text-[14px] font-semibold text-[#1E1533]">Aarav Mehta</span>
-        <span class="block truncate text-[12.5px] text-[#8A7FA5]">Freelance Designer</span>
-      </span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="shrink-0 text-[#B8ACD6]">
-        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+      </div>
+
+      <div>
+        <p class="text-sm font-semibold text-[#1E1533]">Aarav Mehta</p>
+
+        <p class="text-xs text-gray-400">User</p>
+      </div>
+    </div>
   </div>
 </aside>

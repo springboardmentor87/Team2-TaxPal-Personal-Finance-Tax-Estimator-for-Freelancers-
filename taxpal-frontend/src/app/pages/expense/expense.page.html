@@ -1,0 +1,26 @@
+<div class="flex min-h-screen bg-background">
+  <app-sidebar [open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <app-topbar (menuClick)="openSidebar()"></app-topbar>
+
+    <main class="flex-1 space-y-5 p-4 md:space-y-6 md:p-8">
+      <app-expense-summary-cards
+        [income]="income"
+        [expenses]="expenses"
+        [balance]="balance"
+      ></app-expense-summary-cards>
+
+      <div class="grid grid-cols-1 gap-5 md:gap-6 xl:grid-cols-[380px_1fr]">
+        <app-add-expense-card (add)="handleAdd($event)"></app-add-expense-card>
+
+        <div class="min-w-0">
+          <app-transactions-table
+            [transactions]="transactions"
+            (delete)="handleDelete($event)"
+          ></app-transactions-table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
