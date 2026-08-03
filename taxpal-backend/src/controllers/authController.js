@@ -43,10 +43,11 @@ const registerUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Register error:', error.message);
+    console.error('Register error:', error);
 
     return res.status(500).json({
-      message: 'Server error while registering user'
+      message: 'Server error while registering user',
+      details: error.message
     });
   }
 };
@@ -105,10 +106,11 @@ const loginUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error.message);
+    console.error('Login error:', error);
 
     return res.status(500).json({
-      message: 'Server error while logging in'
+      message: 'Server error while logging in',
+      details: error.message
     });
   }
 };

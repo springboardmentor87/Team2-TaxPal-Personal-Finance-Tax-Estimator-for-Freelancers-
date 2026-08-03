@@ -8,8 +8,8 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST || '127.0.0.1',
     port: process.env.DB_PORT || 3306,
-    dialect: 'mysql',
-    logging: false
+    dialect: (process.env.DB_DIALECT || 'mysql').toLowerCase(),
+    logging: false,
   }
 );
 
@@ -19,7 +19,7 @@ const ensureDatabaseExists = async () => {
       host: process.env.DB_HOST || '127.0.0.1',
       port: process.env.DB_PORT || 3306,
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || ''
+      password: process.env.DB_PASSWORD || '',
     });
 
     const dbName = process.env.DB_NAME || 'taxpal';
@@ -36,10 +36,7 @@ const connectDB = async () => {
     await sequelize.authenticate();
     console.log('✅ MySQL connected successfully via Sequelize');
 
-    // Ensure models are registered before sync
     require('../models');
-
-    // Synchronize models with database schema
     await sequelize.sync();
     console.log('✅ MySQL models & tables synchronized successfully');
   } catch (error) {
@@ -49,5 +46,5 @@ const connectDB = async () => {
 
 module.exports = {
   sequelize,
-  connectDB
+  connectDB,
 };
