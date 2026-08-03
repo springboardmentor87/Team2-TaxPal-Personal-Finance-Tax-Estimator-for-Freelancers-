@@ -1,0 +1,391 @@
+
+<div class="container" [class.active]="isRegisterMode">
+
+  <!-- ================= Login Form ================= -->
+
+  <div class="form-box login"
+   *ngIf="!isRegisterMode && !isForgotPasswordMode"
+  >
+
+    <div class="brand">TaxPal</div>
+
+    <h1>Welcome Back</h1>
+    <p class="subtitle">Sign in to your account to continue</p>
+
+    <form (ngSubmit)="login()">
+
+      <!-- Username -->
+      <div class="input-box">
+
+        <label for="loginUsername">Username</label>
+
+        <input
+        id="loginUsername"
+          type="text"
+          [(ngModel)]="loginData.username"
+          name="loginUsername"
+          placeholder="Enter your username"
+          required
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="input-box">
+        <label for="loginPassword">Password</label>
+
+        <div class="password-box">
+
+          <input
+          id="loginPassword"
+            [type]="showLoginPassword ? 'text' : 'password'"
+            [(ngModel)]="loginData.password"
+            name="loginPassword"
+            placeholder="Enter your password"
+            required
+          />
+
+          <button
+            type="button"
+            class="show-btn"
+            (click)="toggleLoginPassword()"
+            >
+            {{ showLoginPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Remember + Forgot Password -->
+      <div class="options">
+        <label for="rememberMe">
+          <input
+          id="rememberMe"
+          type="checkbox"
+          [(ngModel)]="rememberMe"
+          name="rememberMe"
+          />
+          Remember me
+        </label>
+
+        <a href="#"(click)="forgotPassword($event)">
+          Forgot password?
+        </a>
+      </div>
+
+      <!-- Login Button -->
+      <button type="submit" class="btn">
+        Sign In
+      </button>
+
+      <!---Create Account-->
+
+      <p class="bottom-text">
+        Don't have an account?
+        <a href="#" (click)="showRegister($event)">Create one</a>
+      </p>
+
+    </form>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- REGISTER / SIGNUP FORM -->
+  <!-- ================================================= -->
+
+
+
+
+  <div class="form-box register"
+  *ngIf="isRegisterMode && !isForgotPasswordMode"
+  >
+
+    <div class="brand">TaxPal</div>
+
+    <h1>Create Account</h1>
+    <p class="subtitle">Get started with your free account</p>
+
+    <form (ngSubmit)="register()">
+
+      <!-- Username -->
+      <div class="input-box">
+        <label for="registerUsername">Username</label>
+
+        <input
+         id="registerUsername"
+          type="text"
+          [(ngModel)]="registerData.username"
+          name="registerUsername"
+          placeholder="Enter your username"
+          required
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="input-box">
+        <label for="registerEmail">Email Address</label>
+
+        <input
+        id="registerEmail"
+          type="email"
+          [(ngModel)]="registerData.email"
+          name="email"
+          placeholder="Enter your email"
+          required
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="input-box">
+        <label for="registerPassword">Password</label>
+
+        <div class="password-box">
+          <input
+            id="registerPassword"
+            [type]="showRegisterPassword ? 'text' : 'password'"
+            [(ngModel)]="registerData.password"
+            name="registerPassword"
+            placeholder="Create a password"
+            required
+          />
+
+          <button
+            type="button"
+            class="show-btn"
+            (click)="toggleRegisterPassword()">
+            {{ showRegisterPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="input-box">
+        <label for="confirmPassword">Confirm Password</label>
+
+        <div class="password-box">
+          <input
+          id="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            [(ngModel)]="registerData.confirmPassword"
+            name="confirmPassword"
+            placeholder="Confirm your password"
+            required
+          />
+
+          <button
+            type="button"
+            class="show-btn"
+            (click)="toggleConfirmPassword()">
+            {{ showConfirmPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Country -->
+      <div class="input-box">
+        <label for="country">Country</label>
+
+         <select
+         id="country"
+          [(ngModel)]="registerData.country"
+          name="country"
+          required>
+
+          <option value="">Select Country</option>
+          <option value="India">India</option>
+          <option value="USA">USA</option>
+          <option value="UK">UK</option>
+          <option value="Canada">Canada</option>
+
+        </select>
+      </div>
+
+      <!-- Income Bracket -->
+      <div class="input-box">
+        <label for="incomeBracket">Income Bracket</label>
+
+        <select
+        id="incomeBracket"
+        [(ngModel)]="registerData.incomeBracket"
+          name="incomeBracket"
+          required>
+
+          <option value="">Select Income Bracket</option>
+          <option value="Below ₹5,00,000">
+            Below ₹5,00,000
+          </option>
+
+          <option value="₹5,00,000 - ₹10,00,000">
+            ₹5,00,000 - ₹10,00,000
+          </option>
+
+          <option value="₹10,00,000 - ₹15,00,000">
+            ₹10,00,000 - ₹15,00,000
+          </option>
+
+          <option value="Above ₹15,00,000">
+            Above ₹15,00,000
+          </option>
+
+        </select>
+      </div>
+
+      <!-- Terms -->
+       <div class="terms">
+
+
+        <input
+        id="agreeTerms"
+          type="checkbox"
+          [(ngModel)]="registerData.agreeTerms"
+          name="agreeTerms"
+          required
+        />
+
+        <label for="agreeTerms">
+          I agree to the
+          <a href="#">Terms of Service</a>
+          and
+          <a href="#">Privacy Policy</a>
+        </label>
+
+      </div>
+
+      <!--(Create Account) Register -->
+      <button type="submit" class="btn">
+        Create Account
+      </button>
+
+      <!---Back to Login-->
+      <p class="bottom-text">
+        Already have an account?
+        <a href="#" (click)="showLogin($event)">Sign In</a>
+      </p>
+
+    </form>
+
+  </div>
+
+   <!-- ================================================= -->
+  <!-- FORGOT PASSWORD FORM -->
+  <!-- ================================================= -->
+
+
+  <div class="form-box forgot-password"
+  *ngIf="isForgotPasswordMode"
+  >
+
+   <div class="brand">
+      TaxPal
+    </div>
+
+
+    <h1>
+      Forgot Password?
+    </h1>
+
+
+    <p class="subtitle">
+      Enter your email  to reset password.
+    </p>
+
+     <form
+      (ngSubmit)="forgotPasswordSubmit()"
+    >
+
+        <!-- Email -->
+    <div class="input-box">
+
+    <label for="forgotPasswordEmail">
+      Email Address
+    </label>
+
+     <input
+        id="forgotPasswordEmail"
+        type="email"
+        [(ngModel)]="forgotPasswordEmail"
+        name="forgotPasswordEmail"
+        placeholder="Enter your email address"
+        required
+      />
+
+    </div>
+
+   <!-- Send Reset Link -->
+    <button
+      type="submit"
+      class="btn"
+    >
+      Send Reset Link
+    </button>
+
+     <!-- Back to Login -->
+    <p class="bottom-text">
+
+      Remember your password?
+
+      <a
+        href="#"
+        (click)="showLogin($event)"
+      >
+        Back to Sign In
+      </a>
+
+    </p>
+
+  </form>
+
+</div>
+
+
+
+<!-- ================= ANIMATED PURPLE PANEL ================= -->
+
+  <div class="toggle-box"
+
+  >
+
+      <!---Login Side-->
+    <div class="toggle-panel toggle-left">
+
+      <div class="circle-logo"></div>
+
+      <h2>Start Your Financial Journey</h2>
+
+      <p>
+        Create your account and manage your
+        finances efficiently with TaxPal
+      </p>
+
+      <button
+        type="button"
+        class="toggle-btn"
+        (click)="showRegister($event)">
+        Create Account
+      </button>
+
+    </div>
+
+     <!--Register Side-->
+    <div class="toggle-panel toggle-right">
+
+      <div class="circle-logo"></div>
+
+      <h2>Manage Your Finances Like a Pro</h2>
+
+      <p>
+       Join TaxPal and manage your taxes,
+        income and financial planning easily.
+      </p>
+
+      <button
+        class="toggle-btn"
+        (click)="showLogin($event)">
+        Sign In
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+

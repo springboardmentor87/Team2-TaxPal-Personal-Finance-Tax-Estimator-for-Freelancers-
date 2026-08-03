@@ -1,0 +1,721 @@
+/* =====================================================
+   GLOBAL RESET
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter', sans-serif;
+    background:linear-gradient(135deg,#e8ebff,#d9dcff);
+    min-height:100vh;
+}
+
+/* =====================================================
+   MAIN CONTAINER
+===================================================== */
+
+.container{
+    position:relative;
+    width:900px;
+    max-width:95%;
+    height:600px;
+    margin:40px auto;
+    background:#fff;
+    border-radius:25px;
+    overflow:hidden;
+    box-shadow:0 20px 45px rgba(0,0,0,.15);
+}
+
+/* =====================================================
+   COMMON FORM BOX
+===================================================== */
+
+.form-box{
+    position:absolute;
+    top:0;
+    width:50%;
+    height:100%;
+    background:#fff;
+    padding:45px 55px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+    overflow-y:auto;
+    transition:.6s ease-in-out;
+    z-index:5;
+}
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+.form-box.login{
+    right:0;
+    opacity:1;
+}
+
+/* =====================================================
+   REGISTER
+===================================================== */
+
+.form-box.register{
+    left:0;
+    opacity:0;
+    pointer-events:none;
+}
+
+/* =====================================================
+   REGISTER ACTIVE
+===================================================== */
+
+.container.active .form-box.login{
+    opacity:0;
+    pointer-events:none;
+}
+
+.container.active .form-box.register{
+    opacity:1;
+    pointer-events:auto;
+}
+
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.form-box form{
+    width:100%;
+    max-width:420px;
+    margin-top:20px;
+}
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.brand{
+    font-size:30px;
+    font-weight:700;
+    color:oklch(0.58 0.19 300);
+    margin-bottom:18px;
+    text-align:center;
+    font-family:'Inter',sans-serif ;
+}
+
+/* =====================================================
+   HEADING
+===================================================== */
+
+.form-box h1{
+  display: block;
+    font-size:34px;
+    font-weight:700;
+    color:black;
+    margin-bottom:10px;
+    text-align:center;
+}
+
+.subtitle{
+    color:#777;
+    font-size:15px;
+    text-align:center;
+    margin-bottom:28px;
+    line-height:1.6;
+}
+
+/* =====================================================
+   INPUT BOX
+===================================================== */
+
+.input-box{
+    margin-bottom:18px;
+}
+
+.input-box label{
+    display:block;
+    text-align:left;
+    margin-bottom:7px;
+    font-size:13px;
+    font-weight:600;
+    color:#444;
+}
+
+/* =====================================================
+   INPUTS
+===================================================== */
+
+.input-box input,
+.input-box select{
+
+    width:100%;
+    height:46px;
+
+    border:1px solid #ddd;
+    border-radius:8px;
+
+    background:#f6f7fc;
+
+    padding:0 15px;
+
+    font-size:14px;
+
+    outline:none;
+
+    transition:.3s;
+}
+
+.input-box input:focus,
+.input-box select:focus{
+
+    border-color:#6c63ff;
+
+    background:#fff;
+
+    box-shadow:0 0 0 3px rgba(108,99,255,.15);
+
+}
+
+/* =====================================================
+   PASSWORD BOX
+===================================================== */
+
+.password-box{
+    position:relative;
+}
+
+.password-box input{
+    padding-right:70px;
+}
+
+.show-btn{
+
+    position:absolute;
+
+    top:50%;
+    right:15px;
+
+    transform:translateY(-50%);
+
+    border:none;
+
+    background:none;
+
+    color:#6757d9;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+}
+
+.show-btn:hover{
+
+    text-decoration:underline;
+
+}
+
+/* =====================================================
+   OPTIONS
+===================================================== */
+
+.options{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin:10px 0 22px;
+
+    font-size:13px;
+
+}
+
+.options label{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+}
+
+.options input{
+
+    accent-color:#6757d9;
+
+}
+
+.options a{
+
+    text-decoration:none;
+
+    color:#6757d9;
+
+    font-weight:600;
+
+}
+
+.options a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* =====================================================
+   MAIN BUTTON
+===================================================== */
+
+.btn{
+
+    width:100%;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:linear-gradient(90deg,#6c63ff,#8a5cff);
+
+    color:#fff;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(108,99,255,.35);
+
+}
+
+/* =====================================================
+   TERMS
+===================================================== */
+
+.terms{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:8px;
+
+    margin:18px 0;
+
+    font-size:12px;
+
+    color:#666;
+
+}
+
+.terms input{
+
+    margin-top:3px;
+
+    accent-color:#6757d9;
+
+}
+
+.terms a{
+
+    color:#6757d9;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}
+
+.terms a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* =====================================================
+   BOTTOM TEXT
+===================================================== */
+
+.bottom-text{
+
+    text-align:center;
+
+    margin-top:20px;
+
+    color:#666;
+
+    font-size:13px;
+
+}
+
+.bottom-text a{
+
+    color:#6757d9;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+}
+
+.bottom-text a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* =====================================================
+   TOGGLE BOX
+===================================================== */
+
+.toggle-box{
+    position:absolute;
+    top:0;
+    left:0;
+    width:50%;
+    height:100%;
+    background:linear-gradient(135deg,#6b5cff,#7b42d8);
+    border-radius:25px 0 0 25px;
+    overflow:hidden;
+    transition:.6s ease-in-out;
+    z-index:10;
+}
+
+/* Move to right in Register mode */
+
+.container.active .toggle-box{
+    left:50%;
+    border-radius:0 25px 25px 0;
+}
+
+/* =====================================================
+   TOGGLE PANEL
+===================================================== */
+
+.toggle-panel{
+    position:absolute;
+    width:100%;
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    padding:45px;
+
+    color:#fff;
+
+    transition:.6s ease-in-out;
+}
+
+.toggle-left{
+    transform:translateX(0);
+}
+
+.toggle-right{
+    transform:translateX(100%);
+}
+
+.container.active .toggle-left{
+    transform:translateX(-100%);
+}
+
+.container.active .toggle-right{
+    transform:translateX(0);
+}
+
+/* =====================================================
+   CIRCLE LOGO
+===================================================== */
+
+.circle-logo{
+
+    width:120px;
+    height:120px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.18);
+
+    margin-bottom:35px;
+
+    position:relative;
+}
+
+.circle-logo::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:70px;
+    height:70px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.28);
+
+    top:25px;
+    left:25px;
+
+}
+
+/* =====================================================
+   TOGGLE CONTENT
+===================================================== */
+
+.toggle-panel h2{
+
+    font-size:30px;
+
+    margin-bottom:15px;
+
+    line-height:1.3;
+
+}
+
+.toggle-panel p{
+
+    font-size:15px;
+
+    line-height:1.7;
+
+    max-width:320px;
+
+    margin-bottom:28px;
+
+    color:rgba(255,255,255,.95);
+
+}
+
+.toggle-btn{
+
+    padding:12px 35px;
+
+    border:2px solid #fff;
+
+    border-radius:8px;
+
+    background:transparent;
+
+    color:#fff;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.toggle-btn:hover{
+
+    background:#fff;
+
+    color:#6b5cff;
+
+}
+
+/* =====================================================
+   REGISTER SCROLLBAR
+===================================================== */
+
+
+
+
+.form-box.register::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.form-box.register::-webkit-scrollbar-thumb{
+
+    background:#bfbfbf;
+
+    border-radius:20px;
+
+}
+
+/* =====================================================
+   FORGOT PASSWORD
+===================================================== */
+
+.form-box.forgot-password{
+
+    right:0;
+
+    width:50%;
+
+    opacity:1;
+
+    pointer-events:auto;
+
+}
+
+.form-box.forgot-password .subtitle{
+
+    margin-bottom:30px;
+
+    line-height:1.6;
+
+}
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media(max-width:900px){
+
+.container{
+
+    width:95%;
+
+}
+
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:768px){
+
+.container{
+
+    width:95%;
+
+    height:auto;
+
+    min-height:650px;
+
+    margin:20px auto;
+
+}
+
+.toggle-box{
+
+    display:none;
+
+}
+
+.form-box,
+
+.form-box.login,
+
+.form-box.register,
+
+.form-box.forgot-password{
+
+    position:relative;
+
+    width:100%;
+
+    left:0;
+
+    right:0;
+
+    opacity:1;
+
+    transform:none;
+
+    pointer-events:auto;
+
+    padding:35px 25px;
+
+}
+
+.form-box.register{
+
+    display:none;
+
+}
+
+.container.active .form-box.login{
+
+    display:none;
+
+}
+
+.container.active .form-box.register{
+
+    display:flex;
+
+}
+
+}
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media(max-width:480px){
+
+.form-box{
+
+    padding:28px 20px;
+
+}
+
+.brand{
+
+    font-size:24px;
+
+}
+
+.form-box h1{
+
+    font-size:28px;
+
+}
+
+.subtitle{
+
+    font-size:13px;
+
+}
+
+.btn{
+
+    height:45px;
+
+}
+
+.options{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:10px;
+
+}
+
+}
