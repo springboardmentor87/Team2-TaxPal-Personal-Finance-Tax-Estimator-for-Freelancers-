@@ -15,6 +15,7 @@ const router = express.Router();
 
 router.use(protect);
 router.get('/refresh', refresh);
+router.post('/refresh', refresh);
 router.get('/', getAlerts);
 router.get('/:id', getAlert);
 router.post('/', createAlert);
