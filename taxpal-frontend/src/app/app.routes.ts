@@ -45,5 +45,15 @@ export const routes: Routes = [
     title: "TaxPal — Expenses",
   },
 
+  {
+    path: "settings",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/settings/settings.page").then(
+        (m) => m.SettingsPageComponent,
+      ),
+    title: "TaxPal — Settings",
+  },
+
   { path: "**", redirectTo: "dashboard" },
 ];

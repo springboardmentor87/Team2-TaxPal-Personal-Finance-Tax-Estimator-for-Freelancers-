@@ -60,6 +60,25 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  getProfile(): Observable<{ user: User }> {
+    return this.http.get<{ user: User }>(`${this.API_URL}/profile`);
+  }
+
+  updateProfile(data: { name: string; email: string; country: string }): Observable<any> {
+    return this.http.put<any>(`${this.API_URL}/profile`, data).pipe(
+      tap((res) => {
+        if (res.user) {
+          localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
+          this.currentUser.set(res.user);
+        }
+      })
+    );
+  }
+
+  updatePassword(data: { currentPassword: string; newPassword: string }): Observable<any> {
+    return this.http.put<any>(`${this.API_URL}/password`, data);
+  }
+
   private setSession(token: string, user: User): void {
     localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
