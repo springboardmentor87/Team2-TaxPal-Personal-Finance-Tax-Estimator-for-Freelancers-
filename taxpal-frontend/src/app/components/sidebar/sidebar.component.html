@@ -94,10 +94,23 @@
         </a>
       </li>
 
+      <!-- Settings -->
+      <li>
+        <a
+          routerLink="/settings"
+          routerLinkActive="bg-purple-50 text-purple-700"
+          class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition"
+        >
+          <span class="text-purple-500"> ⚙️ </span>
+
+          Settings
+        </a>
+      </li>
+
       <!-- Disabled items -->
 
       <li
-        *ngFor="let item of ['Budget', 'Tax Estimator', 'Reports', 'Settings']"
+        *ngFor="let item of ['Budget', 'Tax Estimator', 'Reports']"
       >
         <a
           class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
