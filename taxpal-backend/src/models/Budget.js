@@ -15,11 +15,15 @@ const Budget = sequelize.define(
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     category: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    month: {
+      type: DataTypes.STRING(7),
+      allowNull: true
     },
     period: {
       type: DataTypes.ENUM('weekly', 'monthly', 'quarterly', 'yearly'),

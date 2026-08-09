@@ -18,6 +18,7 @@ router.get('/progress', getProgress);
 router.get('/', getBudgets);
 router.get('/:id', getBudget);
 router.post('/', createBudget);
+router.put('/:id', updateBudget);
 router.patch('/:id', updateBudget);
 router.delete('/:id', deleteBudget);
 

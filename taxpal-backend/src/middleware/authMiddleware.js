@@ -20,7 +20,7 @@ const protect = (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    req.userId = decoded.userId;
+    req.userId = decoded.userId || decoded.id;
 
     next();
   } catch (error) {
