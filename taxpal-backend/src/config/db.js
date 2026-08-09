@@ -40,7 +40,7 @@ const connectDB = async () => {
     require('../models');
 
     // Synchronize models with database schema
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log('✅ MySQL models & tables synchronized successfully');
   } catch (error) {
     console.error('❌ MySQL connection failed:', error.message);
