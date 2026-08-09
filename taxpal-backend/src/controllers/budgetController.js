@@ -6,6 +6,7 @@ const {
   getBudgetAnalytics,
   getBudgetById,
   getBudgetOverview,
+  getBudgetProgress,
   listBudgets,
   updateBudget: updateBudgetService
 } = require('../services/budgetService');
@@ -48,11 +49,17 @@ const getAnalytics = asyncHandler(async (req, res) => {
   return sendSuccess(res, 200, 'Budget analytics fetched successfully', analytics);
 });
 
+const getProgress = asyncHandler(async (req, res) => {
+  const progress = await getBudgetProgress(req.userId);
+  return sendSuccess(res, 200, 'Budget progress calculated successfully', progress);
+});
+
 module.exports = {
   createBudget,
   deleteBudget,
   getAnalytics,
   getBudget,
   getBudgets,
+  getProgress,
   updateBudget
 };

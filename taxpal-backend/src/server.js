@@ -1,8 +1,10 @@
 const path = require("path");
 const dotenv = require("dotenv");
-dotenv.config({ path: path.join(__dirname, ".env") });
-
 const express = require("express");
+
+
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
+
 const cors = require("cors");
 const { connectDB } = require("./config/db");
 const apiRoutes = require("./routes");
