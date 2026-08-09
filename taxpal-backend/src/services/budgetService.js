@@ -50,26 +50,34 @@ const getPeriodRange = (period, referenceDate = new Date()) => {
 };
 
 const normalizeBudgetInput = (payload) => {
-  const name = String(payload.name || '').trim();
   const category = String(payload.category || '').trim();
-  const period = normalizePeriod(payload.period);
-  const amount = Number(payload.amount);
+  const rawAmount = payload.limit !== undefined ? payload.limit : payload.amount;
+  const amount = Number(rawAmount);
+  const period = payload.period ? normalizePeriod(payload.period) : 'monthly';
 
-  if (!name) {
-    throw new AppError('Budget name is required', 400);
-  }
+  let name = String(payload.name || '').trim();
 
   if (!category) {
     throw new AppError('Budget category is required', 400);
   }
 
+  if (!name) {
+    name = `${category} Budget`;
+  }
+
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new AppError('Budget amount must be greater than zero', 400);
+    throw new AppError('Budget limit must be a positive number', 400);
+  }
+
+  let month = payload.month ? String(payload.month).trim() : null;
+  if (month && !/^\d{4}-\d{2}$/.test(month)) {
+    throw new AppError('Month must be in YYYY-MM format', 400);
   }
 
   return {
     name,
     category,
+    month,
     amount: roundToTwo(amount),
     period,
     alertThreshold: payload.threshold !== undefined ? Number(payload.threshold) / 100 : 0.8
@@ -82,7 +90,16 @@ const getBudgetWithUsage = async (userId, budgetObj) => {
   }
 
   const budget = serializeDocument(budgetObj);
-  const range = getPeriodRange(budget.period, new Date());
+  let range;
+
+  if (budget.month && /^\d{4}-\d{2}$/.test(budget.month)) {
+    const [year, monthNum] = budget.month.split('-').map(Number);
+    const start = new Date(year, monthNum - 1, 1, 0, 0, 0, 0);
+    const end = new Date(year, monthNum, 0, 23, 59, 59, 999);
+    range = { start, end };
+  } else {
+    range = getPeriodRange(budget.period, new Date());
+  }
 
   const spentTransactions = await Transaction.findAll({
     where: {
@@ -104,6 +121,7 @@ const getBudgetWithUsage = async (userId, budgetObj) => {
 
   return {
     ...budget,
+    limit: budget.amount,
     threshold: thresholdPercent,
     usage: {
       spent,
@@ -167,10 +185,7 @@ const updateBudget = async (userId, budgetId, payload) => {
 
   if (payload.name !== undefined) {
     const name = String(payload.name).trim();
-    if (!name) {
-      throw new AppError('Budget name is required', 400);
-    }
-    update.name = name;
+    update.name = name || `${budget.category} Budget`;
   }
 
   if (payload.category !== undefined) {
@@ -181,12 +196,21 @@ const updateBudget = async (userId, budgetId, payload) => {
     update.category = category;
   }
 
-  if (payload.amount !== undefined) {
-    const amount = Number(payload.amount);
+  const rawAmount = payload.limit !== undefined ? payload.limit : payload.amount;
+  if (rawAmount !== undefined) {
+    const amount = Number(rawAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      throw new AppError('Budget amount must be greater than zero', 400);
+      throw new AppError('Budget limit must be greater than zero', 400);
     }
     update.amount = roundToTwo(amount);
+  }
+
+  if (payload.month !== undefined) {
+    const month = String(payload.month).trim();
+    if (month && !/^\d{4}-\d{2}$/.test(month)) {
+      throw new AppError('Month must be in YYYY-MM format', 400);
+    }
+    update.month = month;
   }
 
   if (payload.period !== undefined) {

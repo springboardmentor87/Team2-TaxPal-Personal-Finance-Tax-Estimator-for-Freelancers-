@@ -43,8 +43,9 @@ CREATE TABLE IF NOT EXISTS `transactions` (
 CREATE TABLE IF NOT EXISTS `budgets` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `userId` INT NOT NULL,
-  `name` VARCHAR(255) NOT NULL,
+  `name` VARCHAR(255),
   `category` VARCHAR(100) NOT NULL,
+  `month` VARCHAR(7),
   `period` ENUM('weekly', 'monthly', 'quarterly', 'yearly') NOT NULL DEFAULT 'monthly',
   `amount` DECIMAL(12, 2) NOT NULL,
   `alertThreshold` FLOAT NOT NULL DEFAULT 0.8,
