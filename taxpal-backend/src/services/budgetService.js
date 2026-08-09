@@ -231,6 +231,50 @@ const getBudgetOverview = async (userId) => {
   };
 };
 
+const getBudgetProgress = async (userId) => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const [budgets, rawExpenses] = await Promise.all([
+    Budget.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']]
+    }),
+    Transaction.findAll({
+      where: {
+        userId,
+        type: 'expense',
+        date: {
+          [Op.gte]: startOfMonth,
+          [Op.lt]: startOfNextMonth
+        }
+      }
+    })
+  ]);
+
+  const expenses = serializeDocuments(rawExpenses);
+
+  return budgets.map((budgetObj) => {
+    const budget = serializeDocument(budgetObj);
+    const spent = roundToTwo(sum(
+      expenses
+        .filter((transaction) => transaction.category === budget.category)
+        .map((transaction) => transaction.amount)
+    ));
+    const budgetAmount = Number(budget.amount || 0);
+    const remaining = roundToTwo(budgetAmount - spent);
+
+    return {
+      category: budget.category,
+      budget: roundToTwo(budgetAmount),
+      spent,
+      remaining,
+      status: spent > budgetAmount ? 'Over Budget' : 'Within Budget'
+    };
+  });
+};
+
 const getBudgetAnalytics = async (userId) => {
   const budgets = await listBudgets(userId);
   const byCategory = budgets.reduce((accumulator, budget) => {
@@ -267,6 +311,7 @@ module.exports = {
   getBudgetAnalytics,
   getBudgetById,
   getBudgetOverview,
+  getBudgetProgress,
   getBudgetWithUsage,
   listBudgets,
   updateBudget

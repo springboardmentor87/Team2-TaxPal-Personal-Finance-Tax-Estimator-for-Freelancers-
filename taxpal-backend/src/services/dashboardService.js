@@ -184,7 +184,32 @@ const getDashboardAnalytics = async (userId) => {
   };
 };
 
+const getSpendingBreakdown = async (userId) => {
+  const rawExpenses = await Transaction.findAll({
+    where: {
+      userId,
+      type: 'expense'
+    }
+  });
+
+  const expenses = serializeDocuments(rawExpenses);
+
+  const categoryTotals = expenses.reduce((accumulator, transaction) => {
+    const category = transaction.category || 'Uncategorized';
+    accumulator[category] = (accumulator[category] || 0) + Number(transaction.amount || 0);
+    return accumulator;
+  }, {});
+
+  return Object.entries(categoryTotals)
+    .map(([category, amount]) => ({
+      category,
+      amount: roundToTwo(amount)
+    }))
+    .sort((left, right) => right.amount - left.amount);
+};
+
 module.exports = {
   getDashboardAnalytics,
-  getDashboardSummary
+  getDashboardSummary,
+  getSpendingBreakdown
 };

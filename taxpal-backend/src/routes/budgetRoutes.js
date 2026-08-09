@@ -6,6 +6,7 @@ const {
   getAnalytics,
   getBudget,
   getBudgets,
+  getProgress,
   updateBudget
 } = require('../controllers/budgetController');
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.use(protect);
 router.get('/analytics', getAnalytics);
+router.get('/progress', getProgress);
 router.get('/', getBudgets);
 router.get('/:id', getBudget);
 router.post('/', createBudget);
