@@ -23,7 +23,7 @@
       </svg>
       <div class="absolute inset-0 flex flex-col items-center justify-center">
         <span class="text-[11.5px] font-medium text-[#8A7FA5]">Total Spent</span>
-        <span class="font-display text-[20px] font-bold text-[#1E1533]">${{ total() | number: '1.0-0' }}</span>
+        <span class="font-display text-[20px] font-bold text-[#1E1533]">{{ currency.format(total(), 0, 0) }}</span>
       </div>
     </div>
 

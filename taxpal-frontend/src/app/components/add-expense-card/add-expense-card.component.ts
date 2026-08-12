@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { NewTransaction } from '../../models/transaction.model';
 import { CategoryService, CategoryItem } from '../../services/category.service';
+import { CurrencyService } from '../../services/currency.service';
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -33,6 +34,7 @@ export class AddExpenseCardComponent implements OnInit {
   @Output() add = new EventEmitter<NewTransaction>();
 
   categoryService = inject(CategoryService);
+  currency = inject(CurrencyService);
   categories: string[] = DEFAULT_EXPENSE_CATEGORIES;
   error = '';
 

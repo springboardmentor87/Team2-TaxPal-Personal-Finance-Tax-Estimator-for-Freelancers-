@@ -48,14 +48,14 @@
         <!-- Total Budget Card -->
         <div class="rounded-2xl border border-purple-100/70 bg-white p-5 shadow-sm">
           <p class="text-xs font-semibold uppercase tracking-wider text-[#7A6F9B]">Total Budget</p>
-          <p class="mt-2 text-2xl font-bold text-[#1E1533]">${{ totalBudget | number: '1.2-2' }}</p>
+          <p class="mt-2 text-2xl font-bold text-[#1E1533]">{{ currency.format(totalBudget) }}</p>
           <p class="mt-1 text-xs text-[#8A7FA5]">Combined category limits</p>
         </div>
 
         <!-- Currently Spent Card -->
         <div class="rounded-2xl border border-purple-100/70 bg-white p-5 shadow-sm">
           <p class="text-xs font-semibold uppercase tracking-wider text-[#7A6F9B]">Currently Spent</p>
-          <p class="mt-2 text-2xl font-bold text-purple-700">${{ totalSpent | number: '1.2-2' }}</p>
+          <p class="mt-2 text-2xl font-bold text-purple-700">{{ currency.format(totalSpent) }}</p>
           <p class="mt-1 text-xs text-[#8A7FA5]">Total logged expenses</p>
         </div>
 
@@ -66,7 +66,7 @@
             class="mt-2 text-2xl font-bold"
             [ngClass]="totalRemaining >= 0 ? 'text-emerald-600' : 'text-rose-600'"
           >
-            ${{ totalRemaining | number: '1.2-2' }}
+            {{ currency.format(totalRemaining) }}
           </p>
           <p class="mt-1 text-xs text-[#8A7FA5]">{{ totalRemaining >= 0 ? 'Available balance' : 'Over budget overall' }}</p>
         </div>
@@ -119,9 +119,9 @@
 
             <!-- Amount Input -->
             <div>
-              <label for="amount" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Budget Limit ($ / ₹)</label>
+              <label for="amount" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Budget Limit ({{ currency.currencySymbol() }})</label>
               <div class="relative flex items-center">
-                <span class="pointer-events-none absolute left-4 text-sm font-bold text-[#7A6F9B]">$</span>
+                <span class="pointer-events-none absolute left-4 min-w-5 text-sm font-bold text-[#7A6F9B]">{{ currency.currencySymbol() }}</span>
                 <input
                   id="amount"
                   name="amount"
@@ -131,7 +131,7 @@
                   placeholder="Enter limit amount"
                   [(ngModel)]="budget.amount"
                   required
-                  class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] pl-9 pr-4 py-3 text-sm text-[#1E1533] placeholder-[#A399C2] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
+                  class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] pl-10 pr-4 py-3 text-sm text-[#1E1533] placeholder-[#A399C2] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all"
                 />
               </div>
             </div>
@@ -206,10 +206,10 @@
             <tbody class="divide-y divide-purple-100 text-sm">
               <tr *ngFor="let item of budgets" class="hover:bg-purple-50/30 transition-colors">
                 <td class="py-3.5 px-4 font-semibold text-[#1E1533]">{{ item.category }}</td>
-                <td class="py-3.5 px-4 font-bold text-[#1E1533]">${{ item.amount | number: '1.2-2' }}</td>
-                <td class="py-3.5 px-4 text-[#4B4363]">${{ item.usage?.spent || 0 | number: '1.2-2' }}</td>
+                <td class="py-3.5 px-4 font-bold text-[#1E1533]">{{ currency.format(item.amount) }}</td>
+                <td class="py-3.5 px-4 text-[#4B4363]">{{ currency.format(item.usage?.spent || 0) }}</td>
                 <td class="py-3.5 px-4 font-semibold" [ngClass]="(item.usage?.remaining || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                  ${{ item.usage?.remaining || 0 | number: '1.2-2' }}
+                  {{ currency.format(item.usage?.remaining || 0) }}
                 </td>
                 <td class="py-3.5 px-4 w-40">
                   <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
