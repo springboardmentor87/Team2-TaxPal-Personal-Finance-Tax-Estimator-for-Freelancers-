@@ -7,26 +7,29 @@ export type BudgetPeriod =
 export type BudgetStatus =
   | 'healthy'
   | 'warning'
-  | 'over';
+  | 'over'
+  | 'Within Budget'
+  | 'Over Budget';
 
 export interface BudgetUsage {
   spent: number;
   remaining: number;
   utilization: number;
   status: BudgetStatus;
-  periodStart: string;
-  periodEnd: string;
+  periodStart?: string;
+  periodEnd?: string;
 }
 
 export interface Budget {
   id: number;
-  userId: number;
-  name: string;
+  userId?: number;
+  name?: string;
   category: string;
   month: string | null;
   period: BudgetPeriod;
   amount: number;
-  alertThreshold: number;
+  limit?: number;
+  alertThreshold?: number;
   usage?: BudgetUsage;
   createdAt?: string;
   updatedAt?: string;
@@ -35,6 +38,7 @@ export interface Budget {
 export interface NewBudget {
   category: string;
   amount: number;
+  limit?: number;
   month?: string | null;
   period?: BudgetPeriod;
   name?: string;

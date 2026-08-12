@@ -8,9 +8,9 @@
   </button>
 
   <div class="hidden flex-1 md:block">
-    <h1 class="text-lg font-semibold tracking-tight text-foreground">Dashboard</h1>
+    <h1 class="text-lg font-semibold tracking-tight text-foreground">{{ title }}</h1>
     <p class="text-sm text-muted-foreground">
-      Welcome back {{ userName ? userName : '' }}, here's your financial overview.
+      {{ subtitle || ("Welcome back " + (userName ? userName : '') + ", here's your financial overview.") }}
     </p>
   </div>
 
@@ -45,4 +45,3 @@
     </span>
   </button>
 </header>
-
