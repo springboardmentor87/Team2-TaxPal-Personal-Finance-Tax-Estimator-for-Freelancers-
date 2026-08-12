@@ -10,16 +10,18 @@
     <div>
       <label for="amount" class="mb-1.5 block text-sm font-medium text-foreground">Amount</label>
       <div class="relative">
-        <lucide-icon name="DollarSign" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"></lucide-icon>
+        <span class="pointer-events-none absolute left-3 top-1/2 flex h-4 min-w-5 -translate-y-1/2 items-center justify-center text-sm font-semibold text-muted-foreground">
+          {{ currency.currencySymbol() }}
+        </span>
         <input
           id="amount"
           type="number"
           inputmode="decimal"
           step="0.01"
           min="0"
-          placeholder="Enter amount (₹)"
+          [placeholder]="'Enter amount (' + currency.currencySymbol() + ')'"
           formControlName="amount"
-          class="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground outline-none transition-shadow placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40 pl-9"
+          class="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground outline-none transition-shadow placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/40 pl-10"
         />
       </div>
     </div>

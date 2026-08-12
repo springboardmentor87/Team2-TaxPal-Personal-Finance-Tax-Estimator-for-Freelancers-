@@ -1,5 +1,6 @@
-import { Component, computed, signal, Input, OnChanges } from '@angular/core';
+import { Component, computed, signal, Input, OnChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CurrencyService } from '../../services/currency.service';
 
 interface Category {
   label: string;
@@ -33,6 +34,7 @@ const FALLBACK_CATEGORIES: Category[] = [
 export class ExpenseDonutChartComponent {
   readonly radius = RADIUS;
   readonly circumference = CIRCUMFERENCE;
+  currency = inject(CurrencyService);
 
   @Input() topCategories: any[] = [];
 

@@ -7,6 +7,7 @@ import { TopbarComponent } from '../../components/topbar/topbar.component';
 import { AuthService } from '../../services/auth.service';
 import { BudgetService } from '../../services/budget.service';
 import { CategoryService, CategoryItem } from '../../services/category.service';
+import { CurrencyService } from '../../services/currency.service';
 import {
   Budget,
   NewBudget,
@@ -66,6 +67,7 @@ export class BudgetComponent implements OnInit {
   ];
 
   categoryService = inject(CategoryService);
+  currency = inject(CurrencyService);
 
   constructor(
     private budgetService: BudgetService,

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Transaction } from '../models/transaction.model';
+import { CurrencyService } from './currency.service';
 
 const SEED_TRANSACTIONS: Transaction[] = [
   {
@@ -68,18 +69,15 @@ const SEED_TRANSACTIONS: Transaction[] = [
  */
 @Injectable({ providedIn: 'root' })
 export class DashboardDataService {
+  constructor(private readonly currency: CurrencyService) {}
+
   /** Returns a fresh, independent copy of the seed transactions. */
   getInitialTransactions(): Transaction[] {
     return SEED_TRANSACTIONS.map((t) => ({ ...t }));
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+    return this.currency.format(value);
   }
 
   formatDate(iso: string): string {
