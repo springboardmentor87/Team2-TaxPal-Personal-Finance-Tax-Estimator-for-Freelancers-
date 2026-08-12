@@ -1,0 +1,239 @@
+<!-- Page Header -->
+<div class="page-header">
+
+    <h1>Budget Planner</h1>
+
+    <div class="budget-health">
+        Budget Health:
+        <span>{{ budgetHealth }}</span>
+    </div>
+
+</div>
+
+
+<!-- Create Budget -->
+<div class="budget-card">
+
+    <h2>{{ editingBudgetId !== null ? 'Edit Budget' : 'Create New Budget' }}</h2>
+
+    <form (ngSubmit)="createBudget() ">
+
+        <!-- Category + Amount -->
+        <div class="form-row">
+
+            <!-- Category -->
+            <div class="form-group">
+
+                <label for="category">
+                    Category
+                </label>
+
+                <select
+                    id="category"
+                    name="category"
+                    [(ngModel)]="budget.category"
+                    required>
+
+                    <option value="">
+                        -- Select a Category --
+                    </option>
+
+                    <option value="Groceries">
+                        Groceries
+                    </option>
+
+                    <option value="Rent">
+                        Rent
+                    </option>
+
+                    <option value="Transport">
+                        Transport
+                    </option>
+
+                    <option value="Shopping">
+                        Shopping
+                    </option>
+
+                    <option value="Utilities">
+                        Utilities
+                    </option>
+
+                    <option value="Entertainment">
+                        Entertainment
+                    </option>
+
+                    <option value="Saving">
+                        Saving
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Amount -->
+            <div class="form-group">
+
+                <label for="amount">
+                    Amount
+                </label>
+
+                <div class="amount-input">
+
+                    <span>$</span>
+
+                    <input
+                        id="amount"
+                        name="amount"
+                        type="number"
+                        placeholder="Enter Amount"
+                        min="0"
+                        [(ngModel)]="budget.amount"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Month + Period-->
+        <div class="form-row">
+
+        
+        <div class="form-group month-group">
+
+            <label for="month">
+                Month
+            </label>
+
+            <input
+                id="month"
+                name="month"
+                type="month"
+                [(ngModel)]="budget.month"
+                required
+            >
+
+        </div>
+
+
+
+        <!-- Period -->
+            <div class="form-group">
+
+                <label for="period">
+                    Period
+                </label>
+
+                <select
+                    id="period"
+                    name="period"
+                    [(ngModel)]="budget.period"
+                    required>
+
+                    <option value="monthly">Monthly</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        
+        <!-- Create Button -->
+        <div class="btn-section">
+
+            <button type="submit">
+                {{ editingBudgetId !== null ? 'Update Budget' : 'Create Budget' }}
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+
+
+<!-- Saved Budgets -->
+<div class="budget-card">
+
+    <h2>Saved Budgets</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Month</th>
+                <th>Period</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            <tr *ngFor="let item of budgets">
+
+                <td>
+                    {{ item.category }}
+                </td>
+
+                <td>
+                    ${{ item.amount }}
+                </td>
+
+                <td>
+                    {{ item.month || '-' }}
+                </td>
+
+                <td>
+                    {{ item.period }}
+                </td>
+
+                <td>
+                    {{ item.usage?.status || '-' }}
+                </td>
+
+                <td>
+
+                    <button
+                        type="button"
+                        class="edit-btn"
+                        (click)="editBudget(item)">
+                        Edit
+                    </button>
+
+                    <button
+                        type="button"
+                        class="delete-btn"
+                        (click)="deleteBudget(item)">
+                        Delete
+                    </button>
+
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>

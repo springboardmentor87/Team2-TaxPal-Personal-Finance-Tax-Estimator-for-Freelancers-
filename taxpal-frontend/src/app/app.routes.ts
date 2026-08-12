@@ -45,6 +45,17 @@ export const routes: Routes = [
     title: "TaxPal — Expenses",
   },
 
+  
+{
+  path: "budget",
+  canActivate: [authGuard],
+  loadComponent: () =>
+    import("./pages/budget/budget.component").then(
+      (m) => m.BudgetComponent
+    ),
+  title: "TaxPal — Budget",
+},
+
   {
     path: "settings",
     canActivate: [authGuard],
