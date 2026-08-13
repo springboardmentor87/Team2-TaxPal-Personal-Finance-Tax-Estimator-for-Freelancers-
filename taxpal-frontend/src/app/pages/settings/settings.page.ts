@@ -93,17 +93,11 @@ export class SettingsPageComponent implements OnInit {
   loadCategories(): void {
     this.loadingCategories = true;
     this.categoryService.getCategories().subscribe({
-      next: (res: any) => {
-        const fetched = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        if (fetched.length > 0) {
-          this.categories = fetched;
-        } else {
-          this.categories = [...this.defaultExpenseCategories, ...this.defaultIncomeCategories];
-        }
+      next: (cats) => {
+        this.categories = cats;
         this.loadingCategories = false;
       },
       error: () => {
-        this.categories = [...this.defaultExpenseCategories, ...this.defaultIncomeCategories];
         this.loadingCategories = false;
       }
     });
@@ -137,12 +131,9 @@ export class SettingsPageComponent implements OnInit {
       this.categoryService.updateCategory(this.editingCategoryId, payload).subscribe({
         next: () => {
           this.categorySuccess = 'Category updated successfully!';
-          this.loadCategories();
           this.resetCategoryForm();
         },
         error: () => {
-          // Local fallback update
-          this.categories = this.categories.map((c) => (c.id === this.editingCategoryId ? { ...c, ...payload } : c));
           this.categorySuccess = 'Category updated!';
           this.resetCategoryForm();
         }
@@ -153,13 +144,9 @@ export class SettingsPageComponent implements OnInit {
     this.categoryService.createCategory(payload).subscribe({
       next: () => {
         this.categorySuccess = 'New category added successfully!';
-        this.loadCategories();
         this.resetCategoryForm();
       },
       error: () => {
-        // Local fallback insert
-        const newCat: CategoryItem = { ...payload, id: Date.now() };
-        this.categories = [newCat, ...this.categories];
         this.categorySuccess = 'New category added!';
         this.resetCategoryForm();
       }
@@ -178,11 +165,9 @@ export class SettingsPageComponent implements OnInit {
     if (!item.id) return;
     this.categoryService.deleteCategory(item.id).subscribe({
       next: () => {
-        this.categories = this.categories.filter((c) => c.id !== item.id);
         this.categorySuccess = 'Category removed.';
       },
       error: () => {
-        this.categories = this.categories.filter((c) => c.id !== item.id);
         this.categorySuccess = 'Category removed.';
       }
     });
