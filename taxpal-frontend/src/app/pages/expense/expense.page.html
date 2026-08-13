@@ -8,19 +8,19 @@
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <app-summary-cards
           title="Total Expenses"
-          [amount]="(expenses | currency:'USD':'symbol':'1.0-0') || '$0'"
+          [amount]="currency.format(expenses, 0, 0)"
           icon="expense"
         ></app-summary-cards>
         <app-summary-cards
           title="Remaining Balance"
-          [amount]="(balance | currency:'USD':'symbol':'1.0-0') || '$0'"
+          [amount]="currency.format(balance, 0, 0)"
           [statusText]="balance >= 0 ? 'Available' : 'Over Budget'"
           [trend]="balance >= 0 ? 'up' : 'down'"
           icon="balance"
         ></app-summary-cards>
         <app-summary-cards
           title="Total Transactions"
-          [amount]="(income + expenses | currency:'USD':'symbol':'1.0-0') || '$0'"
+          [amount]="currency.format(income + expenses, 0, 0)"
           icon="income"
         ></app-summary-cards>
       </section>

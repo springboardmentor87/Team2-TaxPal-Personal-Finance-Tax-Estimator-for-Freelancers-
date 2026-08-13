@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from "@angular/core";
-import { CommonModule, CurrencyPipe } from "@angular/common";
+import { CommonModule } from "@angular/common";
 import { SidebarComponent } from "../../components/sidebar/sidebar.component";
 import { UiStateService } from "../../services/ui-state.service";
 import { SummaryCardsComponent } from "../../components/summary-cards/summary-cards.component";
@@ -9,13 +9,13 @@ import { ExpenseDonutChartComponent } from "../../components/expense-donut-chart
 import { TransactionsTableComponent } from "../../components/transactions-table/transactions-table.component";
 import { TransactionService } from "../../services/transaction.service";
 import { AuthService } from "../../services/auth.service";
+import { CurrencyService } from "../../services/currency.service";
 
 @Component({
   selector: "app-dashboard",
   standalone: true,
   imports: [
     CommonModule,
-    CurrencyPipe,
     SummaryCardsComponent,
     TopbarComponent,
     SidebarComponent,
@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit {
   sidebarOpen = false;
   ui = inject(UiStateService);
   auth = inject(AuthService);
+  currency = inject(CurrencyService);
   private readonly transactionService = inject(TransactionService);
 
   summary: any = null;
