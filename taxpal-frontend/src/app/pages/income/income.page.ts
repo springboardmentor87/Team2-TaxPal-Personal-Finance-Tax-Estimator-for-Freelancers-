@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AddIncomeCardComponent } from '../../components/add-income-card/add-income-card.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { SummaryCardsComponent } from '../../components/summary-cards/summary-cards.component';
@@ -8,13 +8,13 @@ import { TransactionsTableComponent } from '../../components/transactions-table/
 import { NewTransaction, Transaction } from '../../models/transaction.model';
 import { TransactionService } from '../../services/transaction.service';
 import { AuthService } from '../../services/auth.service';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-income-page',
   standalone: true,
   imports: [
     CommonModule,
-    CurrencyPipe,
     SidebarComponent,
     TopbarComponent,
     SummaryCardsComponent,
@@ -32,6 +32,7 @@ export class IncomePageComponent implements OnInit {
   balance = 0;
 
   auth = inject(AuthService);
+  currency = inject(CurrencyService);
 
   constructor(private readonly transactionService: TransactionService) {}
 
