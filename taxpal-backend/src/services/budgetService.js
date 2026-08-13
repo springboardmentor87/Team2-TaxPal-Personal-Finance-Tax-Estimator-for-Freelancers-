@@ -101,20 +101,32 @@ const getBudgetWithUsage = async (userId, budgetObj) => {
     range = getPeriodRange(budget.period, new Date());
   }
 
-  const spentTransactions = await Transaction.findAll({
+  const allExpenseTransactions = await Transaction.findAll({
     where: {
       userId,
-      type: 'expense',
-      category: budget.category,
-      date: {
-        [Op.gte]: range.start,
-        [Op.lte]: range.end
-      }
+      type: 'expense'
     }
   });
 
-  const transactions = serializeDocuments(spentTransactions);
-  const spent = roundToTwo(sum(transactions.map((transaction) => transaction.amount)));
+  const transactions = serializeDocuments(allExpenseTransactions);
+  const targetCategory = String(budget.category || '').trim().toLowerCase();
+
+  const matchingTransactions = transactions.filter((t) => {
+    const tCategory = String(t.category || '').trim().toLowerCase();
+    if (tCategory !== targetCategory) {
+      return false;
+    }
+
+    if (t.date && range) {
+      const tDate = new Date(t.date);
+      if (!Number.isNaN(tDate.getTime())) {
+        return tDate >= range.start && tDate <= range.end;
+      }
+    }
+    return true;
+  });
+
+  const spent = roundToTwo(sum(matchingTransactions.map((transaction) => transaction.amount)));
   const remaining = roundToTwo(Number(budget.amount || 0) - spent);
   const utilization = budget.amount ? roundToTwo((spent / Number(budget.amount)) * 100) : 0;
   const thresholdPercent = (budget.alertThreshold || 0.8) * 100;
@@ -281,9 +293,10 @@ const getBudgetProgress = async (userId) => {
 
   return budgets.map((budgetObj) => {
     const budget = serializeDocument(budgetObj);
+    const budgetCategory = String(budget.category || '').trim().toLowerCase();
     const spent = roundToTwo(sum(
       expenses
-        .filter((transaction) => transaction.category === budget.category)
+        .filter((transaction) => String(transaction.category || '').trim().toLowerCase() === budgetCategory)
         .map((transaction) => transaction.amount)
     ));
     const budgetAmount = Number(budget.amount || 0);
