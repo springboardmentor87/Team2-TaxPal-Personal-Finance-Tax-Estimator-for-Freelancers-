@@ -10,11 +10,11 @@ interface NavItem {
   icon: string;
   href: string;
 }
-
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", icon: "grid", href: "/dashboard" },
   { label: "Income", icon: "trending-up", href: "/income" },
   { label: "Expenses", icon: "trending-down", href: "/expense" },
+  { label: "Tax Estimator", icon: "calculator", href: "/tax-estimator" },
 ];
 @Component({
   selector: "app-sidebar",
@@ -31,8 +31,8 @@ export class SidebarComponent {
 
   get initials(): string {
     const user = this.authService.currentUser();
-    if (!user || !user.name) return 'TP';
-    const parts = user.name.trim().split(' ');
+    if (!user || !user.name) return "TP";
+    const parts = user.name.trim().split(" ");
     if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     return user.name.slice(0, 2).toUpperCase();
   }

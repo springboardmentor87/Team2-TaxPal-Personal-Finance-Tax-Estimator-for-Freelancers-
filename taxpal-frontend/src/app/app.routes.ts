@@ -13,7 +13,9 @@ export const routes: Routes = [
   {
     path: "register",
     loadComponent: () =>
-      import("./pages/register/register.page").then((m) => m.RegisterPageComponent),
+      import("./pages/register/register.page").then(
+        (m) => m.RegisterPageComponent,
+      ),
     title: "TaxPal — Create Account",
   },
 
@@ -45,16 +47,13 @@ export const routes: Routes = [
     title: "TaxPal — Expenses",
   },
 
-  
-{
-  path: "budget",
-  canActivate: [authGuard],
-  loadComponent: () =>
-    import("./pages/budget/budget.component").then(
-      (m) => m.BudgetComponent
-    ),
-  title: "TaxPal — Budget",
-},
+  {
+    path: "budget",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/budget/budget.component").then((m) => m.BudgetComponent),
+    title: "TaxPal — Budget",
+  },
 
   {
     path: "settings",
@@ -65,6 +64,14 @@ export const routes: Routes = [
       ),
     title: "TaxPal — Settings",
   },
-
+  {
+    path: "tax-estimator",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/tax-estimator/tax-estimator.component").then(
+        (m) => m.TaxEstimatorComponent,
+      ),
+    title: "TaxPal — Tax Estimator",
+  },
   { path: "**", redirectTo: "dashboard" },
 ];

@@ -1,0 +1,516 @@
+/* =====================================================
+   TaxPal — Tax Estimator
+   Purple premium FinTech theme
+====================================================== */
+
+:host {
+  --tp-primary: #7c3aed;
+  --tp-primary-dark: #6d28d9;
+  --tp-primary-light: #a78bfa;
+  --tp-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  --tp-bg: #f7f6fb;
+  --tp-card: #ffffff;
+  --tp-border: #e7e3f5;
+  --tp-text: #1f1730;
+  --tp-text-muted: #736b8a;
+  --tp-shadow: 0 4px 24px rgba(124, 58, 237, 0.08);
+  --tp-shadow-hover: 0 8px 32px rgba(124, 58, 237, 0.14);
+  --tp-radius: 16px;
+
+  display: block;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: var(--tp-text);
+  background: var(--tp-bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.taxpal-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* =====================================================
+   SIDEBAR
+====================================================== */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--tp-card);
+  border-right: 1px solid var(--tp-border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+}
+
+.sidebar-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 0 12px 24px;
+  background: var(--tp-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--tp-text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.nav-item:hover {
+  background: #f3effc;
+  color: var(--tp-primary-dark);
+}
+
+.nav-item.active {
+  background: var(--tp-gradient);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+}
+
+.nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--tp-border);
+  padding-top: 16px;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--tp-gradient);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: var(--tp-text-muted);
+}
+
+/* =====================================================
+   MAIN CONTENT
+====================================================== */
+.main-content {
+  flex: 1;
+  padding: 40px 48px;
+  max-width: 1200px;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: var(--tp-text-muted);
+  margin: 0;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* =====================================================
+   CARDS
+====================================================== */
+.card {
+  background: var(--tp-card);
+  border: 1px solid var(--tp-border);
+  border-radius: var(--tp-radius);
+  padding: 28px;
+  box-shadow: var(--tp-shadow);
+  transition: box-shadow 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: var(--tp-shadow-hover);
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 20px;
+}
+
+/* =====================================================
+   FORM FIELDS
+====================================================== */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tp-text-muted);
+}
+
+.field select,
+.field input {
+  border: 1px solid var(--tp-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--tp-text);
+  background: #fbfaff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.field select:focus,
+.field input:focus {
+  outline: none;
+  border-color: var(--tp-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  background: #ffffff;
+}
+
+.currency-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--tp-border);
+  border-radius: 10px;
+  background: #fbfaff;
+  padding: 0 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.currency-input:focus-within {
+  border-color: var(--tp-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  background: #ffffff;
+}
+
+.currency-symbol {
+  color: var(--tp-text-muted);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.currency-input input {
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  box-shadow: none !important;
+}
+
+.currency-input input:focus {
+  box-shadow: none !important;
+}
+
+.section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--tp-border);
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+/* =====================================================
+   CALCULATE BUTTON
+====================================================== */
+.calculate-btn {
+  margin-top: 24px;
+  width: 100%;
+  padding: 13px 24px;
+  border: none;
+  border-radius: 10px;
+  background: var(--tp-gradient);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.28);
+}
+
+.calculate-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.34);
+}
+
+.calculate-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.24);
+}
+
+.calculate-btn:disabled {
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.btn-spinner-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  animation: spin 0.7s linear infinite;
+}
+
+/* =====================================================
+   TAX SUMMARY — empty / loading / result states
+====================================================== */
+.summary-card {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.empty-state,
+.loading-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 8px;
+  gap: 14px;
+}
+
+.empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f3effc;
+  color: var(--tp-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.empty-text {
+  font-size: 0.85rem;
+  color: var(--tp-text-muted);
+  line-height: 1.5;
+  max-width: 220px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #ece7fa;
+  border-top-color: var(--tp-primary);
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  font-size: 0.85rem;
+  color: var(--tp-text-muted);
+  margin: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.result-state {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--tp-border);
+  font-size: 0.87rem;
+}
+
+.result-row:last-of-type {
+  border-bottom: none;
+}
+
+.result-label {
+  color: var(--tp-text-muted);
+}
+
+.result-value {
+  font-weight: 600;
+}
+
+.result-highlight {
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--tp-gradient);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.highlight-label {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.highlight-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.rate-row {
+  border-top: 1px solid var(--tp-border);
+}
+
+.tax-tip {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f7f4fe;
+  font-size: 0.78rem;
+  color: var(--tp-text-muted);
+  line-height: 1.4;
+}
+
+.tip-icon {
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   RESPONSIVE
+====================================================== */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 32px;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .taxpal-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}

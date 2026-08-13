@@ -1,0 +1,387 @@
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <app-sidebar
+    [open]="sidebarOpen"
+    (closeSidebar)="closeSidebar()"
+  ></app-sidebar>
+
+  <!-- Main area -->
+  <div class="flex min-w-0 flex-1 flex-col">
+    <!-- Topbar -->
+    <app-topbar (menuClick)="openSidebar()"></app-topbar>
+
+    <!-- Tax Estimator Content -->
+    <main class="px-5 pt-6 sm:px-8">
+      <header class="page-header">
+        <h1 class="page-title">Tax Estimator</h1>
+        <p class="page-subtitle">Calculate your estimated tax obligations</p>
+      </header>
+
+      <div class="content-grid">
+        <!-- ================= CALCULATOR CARD ================= -->
+        <section class="card calculator-card">
+          <h2 class="card-title">Quarterly Tax Calculator</h2>
+
+          <form [formGroup]="taxForm" (ngSubmit)="calculateTax()">
+            <!-- Country / State -->
+            <div class="field-row">
+              <div class="field">
+                <label for="country"> Country/Region </label>
+
+                <select id="country" formControlName="country">
+                  <option *ngFor="let opt of countryOptions" [value]="opt">
+                    {{ opt }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="state"> State/Province </label>
+
+                <select id="state" formControlName="state">
+                  <option *ngFor="let opt of stateOptions" [value]="opt">
+                    {{ opt }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Filing Status / Tax Year -->
+            <div class="field-row">
+              <div class="field">
+                <label for="filingStatus"> Filing Status </label>
+
+                <select id="filingStatus" formControlName="filingStatus">
+                  <option *ngFor="let opt of filingStatusOptions" [value]="opt">
+                    {{ opt }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="year"> Tax Year </label>
+
+                <select id="year" formControlName="year">
+                  <option *ngFor="let year of yearOptions" [value]="year">
+                    {{ year }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quarter -->
+            <div class="field-row">
+              <div class="field">
+                <label for="quarter"> Quarter </label>
+
+                <select id="quarter" formControlName="quarter">
+                  <option
+                    *ngFor="let quarter of quarterOptions"
+                    [value]="quarter.value"
+                  >
+                    {{ quarter.label }} {{ selectedYear }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Income -->
+            <div class="section">
+              <h3 class="section-title">Income</h3>
+
+              <div class="field">
+                <label for="grossIncome"> Gross Income for Quarter </label>
+
+                <div class="currency-input">
+                  <span class="currency-symbol">$</span>
+
+                  <input
+                    id="grossIncome"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    formControlName="grossIncome"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Deductions -->
+            <div class="section">
+              <h3 class="section-title">Deductions</h3>
+
+              <!-- Row -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="businessExpenses"> Business Expenses </label>
+
+                  <div class="currency-input">
+                    <span class="currency-symbol">$</span>
+
+                    <input
+                      id="businessExpenses"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      formControlName="businessExpenses"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="retirementContributions">
+                    Retirement Contributions
+                  </label>
+
+                  <div class="currency-input">
+                    <span class="currency-symbol">$</span>
+
+                    <input
+                      id="retirementContributions"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      formControlName="retirementContributions"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row -->
+              <div class="field-row">
+                <div class="field">
+                  <label for="healthInsurancePremiums">
+                    Health Insurance Premiums
+                  </label>
+
+                  <div class="currency-input">
+                    <span class="currency-symbol">$</span>
+
+                    <input
+                      id="healthInsurancePremiums"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      formControlName="healthInsurancePremiums"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="homeOfficeDeduction">
+                    Home Office Deduction
+                  </label>
+
+                  <div class="currency-input">
+                    <span class="currency-symbol">$</span>
+
+                    <input
+                      id="homeOfficeDeduction"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      formControlName="homeOfficeDeduction"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <button
+              type="submit"
+              class="calculate-btn"
+              [class.loading]="isCalculating"
+              [disabled]="isCalculating"
+            >
+              <span *ngIf="!isCalculating"> Calculate Estimated Tax </span>
+
+              <span *ngIf="isCalculating" class="btn-spinner-wrap">
+                <span class="btn-spinner"></span>
+                Calculating...
+              </span>
+            </button>
+          </form>
+        </section>
+
+        <!-- ================= TAX SUMMARY ================= -->
+        <aside class="card summary-card">
+          <h2 class="card-title">Tax Summary</h2>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="!hasResult && !isCalculating">
+            <div class="empty-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  x="4"
+                  y="2"
+                  width="16"
+                  height="20"
+                  rx="2"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+
+                <line
+                  x1="8"
+                  y1="6"
+                  x2="16"
+                  y2="6"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="7"
+                  y1="11"
+                  x2="9"
+                  y2="11"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="11"
+                  y1="11"
+                  x2="13"
+                  y2="11"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="15"
+                  y1="11"
+                  x2="17"
+                  y2="11"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="7"
+                  y1="15"
+                  x2="9"
+                  y2="15"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="11"
+                  y1="15"
+                  x2="13"
+                  y2="15"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="15"
+                  y1="15"
+                  x2="17"
+                  y2="15"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+
+                <line
+                  x1="7"
+                  y1="19"
+                  x2="13"
+                  y2="19"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+
+            <p class="empty-text">
+              Enter your income and deduction details to calculate your
+              estimated quarterly tax.
+            </p>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading-state" *ngIf="isCalculating">
+            <span class="loading-spinner"></span>
+
+            <p class="loading-text">Calculating your estimate&hellip;</p>
+          </div>
+
+          <!-- Result -->
+          <div
+            class="result-state"
+            *ngIf="hasResult && result && !isCalculating"
+          >
+            <div class="result-row">
+              <span class="result-label"> Gross Income </span>
+
+              <span class="result-value">
+                ${{ result.grossIncome.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label"> Total Deductions </span>
+
+              <span class="result-value">
+                -${{ result.totalDeductions.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label"> Taxable Income </span>
+
+              <span class="result-value">
+                ${{ result.taxableIncome.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="result-highlight">
+              <span class="highlight-label"> Estimated Tax </span>
+
+              <span class="highlight-value">
+                ${{ result.estimatedTax.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="result-row rate-row">
+              <span class="result-label"> Effective Tax Rate </span>
+
+              <span class="result-value">
+                {{ result.effectiveTaxRate.toFixed(1) }}%
+              </span>
+            </div>
+
+            <div class="tax-tip">
+              <span class="tip-icon">💡</span>
+
+              <span>
+                Contributing more to retirement accounts can lower your taxable
+                income.
+              </span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
