@@ -78,15 +78,10 @@ export class BudgetComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (res: any) => {
-        const fetched: CategoryItem[] = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        const expenseCats = fetched.filter((c) => c.type === 'expense').map((c) => c.name);
-        if (expenseCats.length > 0) {
-          this.categoriesList = expenseCats;
-        }
-      },
-      error: () => {}
+    this.categoryService.getExpenseCategoryNames().subscribe((names) => {
+      if (names.length > 0) {
+        this.categoriesList = names;
+      }
     });
   }
 

@@ -3,20 +3,11 @@ import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { NewTransaction } from '../../models/transaction.model';
-import { CategoryService, CategoryItem } from '../../services/category.service';
+import { CategoryService } from '../../services/category.service';
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
-
-const DEFAULT_INCOME_CATEGORIES = [
-  'Freelance',
-  'Salary',
-  'Consulting',
-  'Client Retainer',
-  'Product Sales',
-  'Other'
-];
 
 @Component({
   selector: 'app-add-income-card',
@@ -28,12 +19,12 @@ export class AddIncomeCardComponent implements OnInit {
   @Output() add = new EventEmitter<NewTransaction>();
 
   categoryService = inject(CategoryService);
-  categories: string[] = DEFAULT_INCOME_CATEGORIES;
+  categories: string[] = [];
   error = '';
 
   readonly form = this.fb.group({
     amount: [''],
-    category: [DEFAULT_INCOME_CATEGORIES[0]],
+    category: [''],
     date: [today()],
     description: [''],
   });
@@ -41,21 +32,10 @@ export class AddIncomeCardComponent implements OnInit {
   constructor(private readonly fb: FormBuilder) {}
 
   ngOnInit(): void {
-    this.loadCategories();
-  }
-
-  loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (res: any) => {
-        const fetched: CategoryItem[] = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        const incomeCats = fetched.filter((c) => c.type === 'income').map((c) => c.name);
-        if (incomeCats.length > 0) {
-          this.categories = incomeCats;
-          this.form.patchValue({ category: incomeCats[0] });
-        }
-      },
-      error: () => {
-        this.categories = DEFAULT_INCOME_CATEGORIES;
+    this.categoryService.getIncomeCategoryNames().subscribe((names) => {
+      this.categories = names;
+      if (names.length > 0 && !this.form.value.category) {
+        this.form.patchValue({ category: names[0] });
       }
     });
   }
@@ -74,9 +54,11 @@ export class AddIncomeCardComponent implements OnInit {
     }
 
     this.error = '';
+    const selectedCategory = category || (this.categories.length > 0 ? this.categories[0] : 'Freelance');
+
     this.add.emit({
       amount: value,
-      category: category ?? this.categories[0],
+      category: selectedCategory,
       date: date ?? today(),
       description: description.trim(),
       type: 'income'
@@ -84,7 +66,7 @@ export class AddIncomeCardComponent implements OnInit {
 
     this.form.reset({
       amount: '',
-      category: this.categories[0],
+      category: selectedCategory,
       date: today(),
       description: '',
     });

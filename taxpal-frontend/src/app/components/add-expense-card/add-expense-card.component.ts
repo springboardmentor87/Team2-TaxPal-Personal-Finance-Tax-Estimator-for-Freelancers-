@@ -3,25 +3,11 @@ import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { NewTransaction } from '../../models/transaction.model';
-import { CategoryService, CategoryItem } from '../../services/category.service';
+import { CategoryService } from '../../services/category.service';
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
-
-const DEFAULT_EXPENSE_CATEGORIES = [
-  'Business Expenses',
-  'Office Rent',
-  'Software Subscriptions',
-  'Professional Development',
-  'Marketing',
-  'Travel',
-  'Meals & Entertainment',
-  'Utilities',
-  'Groceries',
-  'Rent',
-  'Other'
-];
 
 @Component({
   selector: 'app-add-expense-card',
@@ -33,12 +19,12 @@ export class AddExpenseCardComponent implements OnInit {
   @Output() add = new EventEmitter<NewTransaction>();
 
   categoryService = inject(CategoryService);
-  categories: string[] = DEFAULT_EXPENSE_CATEGORIES;
+  categories: string[] = [];
   error = '';
 
   readonly form = this.fb.group({
     amount: [''],
-    category: [DEFAULT_EXPENSE_CATEGORIES[0]],
+    category: [''],
     date: [today()],
     description: [''],
   });
@@ -46,21 +32,10 @@ export class AddExpenseCardComponent implements OnInit {
   constructor(private readonly fb: FormBuilder) {}
 
   ngOnInit(): void {
-    this.loadCategories();
-  }
-
-  loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (res: any) => {
-        const fetched: CategoryItem[] = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        const expenseCats = fetched.filter((c) => c.type === 'expense').map((c) => c.name);
-        if (expenseCats.length > 0) {
-          this.categories = expenseCats;
-          this.form.patchValue({ category: expenseCats[0] });
-        }
-      },
-      error: () => {
-        this.categories = DEFAULT_EXPENSE_CATEGORIES;
+    this.categoryService.getExpenseCategoryNames().subscribe((names) => {
+      this.categories = names;
+      if (names.length > 0 && !this.form.value.category) {
+        this.form.patchValue({ category: names[0] });
       }
     });
   }
@@ -79,9 +54,11 @@ export class AddExpenseCardComponent implements OnInit {
     }
 
     this.error = '';
+    const selectedCategory = category || (this.categories.length > 0 ? this.categories[0] : 'Business Expenses');
+
     this.add.emit({
       amount: value,
-      category: category ?? this.categories[0],
+      category: selectedCategory,
       date: date ?? today(),
       description: description.trim(),
       type: 'expense'
@@ -89,7 +66,7 @@ export class AddExpenseCardComponent implements OnInit {
 
     this.form.reset({
       amount: '',
-      category: this.categories[0],
+      category: selectedCategory,
       date: today(),
       description: '',
     });
