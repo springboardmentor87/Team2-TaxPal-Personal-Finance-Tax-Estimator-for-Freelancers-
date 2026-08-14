@@ -15,6 +15,7 @@ import {
 
 import { SidebarComponent } from "../../components/sidebar/sidebar.component";
 import { TopbarComponent } from "../../components/topbar/topbar.component";
+import { AuthService } from "../../services/auth.service";
 
 @Component({
   selector: "app-tax-estimator",
@@ -46,6 +47,38 @@ export class TaxEstimatorComponent {
   }
 
   // ============================================================
+  // SERVICES
+  // ============================================================
+
+  constructor(
+    private fb: FormBuilder,
+    private taxService: TaxService,
+    public authService: AuthService,
+  ) {
+    this.taxForm = this.fb.group({
+      country: ["India", Validators.required],
+
+      state: ["Andhra Pradesh", Validators.required],
+
+      filingStatus: ["Single", Validators.required],
+
+      year: [2025, Validators.required],
+
+      quarter: ["Q2", Validators.required],
+
+      grossIncome: [0, [Validators.required, Validators.min(0)]],
+
+      businessExpenses: [0, [Validators.min(0)]],
+
+      retirementContributions: [0, [Validators.min(0)]],
+
+      healthInsurancePremiums: [0, [Validators.min(0)]],
+
+      homeOfficeDeduction: [0, [Validators.min(0)]],
+    });
+  }
+
+  // ============================================================
   // COUNTRY OPTIONS
   // ============================================================
 
@@ -57,17 +90,32 @@ export class TaxEstimatorComponent {
   ];
 
   // ============================================================
-  // CURRENCY
+  // CURRENCY SYMBOL
   // ============================================================
 
   currencySymbol = "₹";
+
+  private currencySymbols: {
+    [country: string]: string;
+  } = {
+    India: "₹",
+    "United States": "$",
+    Canada: "C$",
+    "United Kingdom": "£",
+  };
 
   // ============================================================
   // STATE / PROVINCE / REGION OPTIONS
   // ============================================================
 
-  statesByCountry: { [country: string]: string[] } = {
+  statesByCountry: {
+    [country: string]: string[];
+  } = {
+    // ==========================================================
     // INDIA
+    // 28 STATES + 8 UNION TERRITORIES
+    // ==========================================================
+
     India: [
       "Andhra Pradesh",
       "Arunachal Pradesh",
@@ -108,7 +156,11 @@ export class TaxEstimatorComponent {
       "Puducherry",
     ],
 
+    // ==========================================================
     // UNITED STATES
+    // 50 STATES + DISTRICT OF COLUMBIA
+    // ==========================================================
+
     "United States": [
       "Alabama",
       "Alaska",
@@ -163,7 +215,11 @@ export class TaxEstimatorComponent {
       "District of Columbia",
     ],
 
+    // ==========================================================
     // CANADA
+    // 10 PROVINCES + 3 TERRITORIES
+    // ==========================================================
+
     Canada: [
       "Alberta",
       "British Columbia",
@@ -180,14 +236,18 @@ export class TaxEstimatorComponent {
       "Yukon",
     ],
 
+    // ==========================================================
     // UNITED KINGDOM
+    // ==========================================================
+
     "United Kingdom": ["England", "Northern Ireland", "Scotland", "Wales"],
   };
 
+  // Currently displayed states/provinces/regions
   stateOptions: string[] = this.statesByCountry["India"];
 
   // ============================================================
-  // FILING STATUS
+  // FILING STATUS OPTIONS
   // ============================================================
 
   filingStatusOptions: string[] = [
@@ -235,42 +295,15 @@ export class TaxEstimatorComponent {
 
   taxForm: FormGroup;
 
+  // ============================================================
+  // RESULT / LOADING
+  // ============================================================
+
   isCalculating = false;
 
   hasResult = false;
 
   result: TaxEstimateResult | null = null;
-
-  // ============================================================
-  // CONSTRUCTOR
-  // ============================================================
-
-  constructor(
-    private fb: FormBuilder,
-    private taxService: TaxService,
-  ) {
-    this.taxForm = this.fb.group({
-      country: ["India", Validators.required],
-
-      state: ["Andhra Pradesh", Validators.required],
-
-      filingStatus: ["Single", Validators.required],
-
-      year: [2025, Validators.required],
-
-      quarter: ["Q2", Validators.required],
-
-      grossIncome: [0, [Validators.required, Validators.min(0)]],
-
-      businessExpenses: [0, Validators.min(0)],
-
-      retirementContributions: [0, Validators.min(0)],
-
-      healthInsurancePremiums: [0, Validators.min(0)],
-
-      homeOfficeDeduction: [0, Validators.min(0)],
-    });
-  }
 
   // ============================================================
   // COUNTRY CHANGE
@@ -279,34 +312,21 @@ export class TaxEstimatorComponent {
   onCountryChange(): void {
     const selectedCountry = this.taxForm.get("country")?.value;
 
+    // Update state/province/region list
     this.stateOptions = this.statesByCountry[selectedCountry] || [];
 
-    // Change state/province/region
+    // Select first available state/province/region
     this.taxForm.patchValue({
       state: this.stateOptions[0] || "",
     });
 
-    // Change currency
-    switch (selectedCountry) {
-      case "India":
-        this.currencySymbol = "₹";
-        break;
+    // Update currency symbol
+    this.currencySymbol = this.currencySymbols[selectedCountry] || "$";
 
-      case "United States":
-        this.currencySymbol = "$";
-        break;
-
-      case "Canada":
-        this.currencySymbol = "C$";
-        break;
-
-      case "United Kingdom":
-        this.currencySymbol = "£";
-        break;
-
-      default:
-        this.currencySymbol = "$";
-    }
+    // Reset filing status when country changes
+    this.taxForm.patchValue({
+      filingStatus: "Single",
+    });
   }
 
   // ============================================================
