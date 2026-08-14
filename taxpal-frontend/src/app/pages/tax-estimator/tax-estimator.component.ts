@@ -19,19 +19,21 @@ import { TopbarComponent } from "../../components/topbar/topbar.component";
 @Component({
   selector: "app-tax-estimator",
   standalone: true,
+
   imports: [
     CommonModule,
     ReactiveFormsModule,
     SidebarComponent,
     TopbarComponent,
   ],
+
   templateUrl: "./tax-estimator.component.html",
   styleUrls: ["./tax-estimator.component.css"],
 })
 export class TaxEstimatorComponent {
-  // ------------------------------------------------------------
-  // Sidebar
-  // ------------------------------------------------------------
+  // ============================================================
+  // SIDEBAR
+  // ============================================================
 
   sidebarOpen = false;
 
@@ -43,71 +45,152 @@ export class TaxEstimatorComponent {
     this.sidebarOpen = false;
   }
 
-  // ------------------------------------------------------------
-  // Country / State options
-  // ------------------------------------------------------------
+  // ============================================================
+  // COUNTRY OPTIONS
+  // ============================================================
 
-  countryOptions = ["United States"];
-
-  stateOptions: string[] = [
-    "Alabama",
-    "Alaska",
-    "Arizona",
-    "Arkansas",
-    "California",
-    "Colorado",
-    "Connecticut",
-    "Delaware",
-    "Florida",
-    "Georgia",
-    "Hawaii",
-    "Idaho",
-    "Illinois",
-    "Indiana",
-    "Iowa",
-    "Kansas",
-    "Kentucky",
-    "Louisiana",
-    "Maine",
-    "Maryland",
-    "Massachusetts",
-    "Michigan",
-    "Minnesota",
-    "Mississippi",
-    "Missouri",
-    "Montana",
-    "Nebraska",
-    "Nevada",
-    "New Hampshire",
-    "New Jersey",
-    "New Mexico",
-    "New York",
-    "North Carolina",
-    "North Dakota",
-    "Ohio",
-    "Oklahoma",
-    "Oregon",
-    "Pennsylvania",
-    "Rhode Island",
-    "South Carolina",
-    "South Dakota",
-    "Tennessee",
-    "Texas",
-    "Utah",
-    "Vermont",
-    "Virginia",
-    "Washington",
-    "West Virginia",
-    "Wisconsin",
-    "Wyoming",
-    "District of Columbia",
+  countryOptions: string[] = [
+    "India",
+    "United States",
+    "Canada",
+    "United Kingdom",
   ];
 
-  // ------------------------------------------------------------
-  // Filing status
-  // ------------------------------------------------------------
+  // ============================================================
+  // CURRENCY
+  // ============================================================
 
-  filingStatusOptions = [
+  currencySymbol = "₹";
+
+  // ============================================================
+  // STATE / PROVINCE / REGION OPTIONS
+  // ============================================================
+
+  statesByCountry: { [country: string]: string[] } = {
+    // INDIA
+    India: [
+      "Andhra Pradesh",
+      "Arunachal Pradesh",
+      "Assam",
+      "Bihar",
+      "Chhattisgarh",
+      "Goa",
+      "Gujarat",
+      "Haryana",
+      "Himachal Pradesh",
+      "Jharkhand",
+      "Karnataka",
+      "Kerala",
+      "Madhya Pradesh",
+      "Maharashtra",
+      "Manipur",
+      "Meghalaya",
+      "Mizoram",
+      "Nagaland",
+      "Odisha",
+      "Punjab",
+      "Rajasthan",
+      "Sikkim",
+      "Tamil Nadu",
+      "Telangana",
+      "Tripura",
+      "Uttar Pradesh",
+      "Uttarakhand",
+      "West Bengal",
+
+      "Andaman and Nicobar Islands",
+      "Chandigarh",
+      "Dadra and Nagar Haveli and Daman and Diu",
+      "Delhi",
+      "Jammu and Kashmir",
+      "Ladakh",
+      "Lakshadweep",
+      "Puducherry",
+    ],
+
+    // UNITED STATES
+    "United States": [
+      "Alabama",
+      "Alaska",
+      "Arizona",
+      "Arkansas",
+      "California",
+      "Colorado",
+      "Connecticut",
+      "Delaware",
+      "Florida",
+      "Georgia",
+      "Hawaii",
+      "Idaho",
+      "Illinois",
+      "Indiana",
+      "Iowa",
+      "Kansas",
+      "Kentucky",
+      "Louisiana",
+      "Maine",
+      "Maryland",
+      "Massachusetts",
+      "Michigan",
+      "Minnesota",
+      "Mississippi",
+      "Missouri",
+      "Montana",
+      "Nebraska",
+      "Nevada",
+      "New Hampshire",
+      "New Jersey",
+      "New Mexico",
+      "New York",
+      "North Carolina",
+      "North Dakota",
+      "Ohio",
+      "Oklahoma",
+      "Oregon",
+      "Pennsylvania",
+      "Rhode Island",
+      "South Carolina",
+      "South Dakota",
+      "Tennessee",
+      "Texas",
+      "Utah",
+      "Vermont",
+      "Virginia",
+      "Washington",
+      "West Virginia",
+      "Wisconsin",
+      "Wyoming",
+      "District of Columbia",
+    ],
+
+    // CANADA
+    Canada: [
+      "Alberta",
+      "British Columbia",
+      "Manitoba",
+      "New Brunswick",
+      "Newfoundland and Labrador",
+      "Nova Scotia",
+      "Ontario",
+      "Prince Edward Island",
+      "Quebec",
+      "Saskatchewan",
+      "Northwest Territories",
+      "Nunavut",
+      "Yukon",
+    ],
+
+    // UNITED KINGDOM
+    "United Kingdom": ["England", "Northern Ireland", "Scotland", "Wales"],
+  };
+
+  stateOptions: string[] = this.statesByCountry["India"];
+
+  // ============================================================
+  // FILING STATUS
+  // ============================================================
+
+  filingStatusOptions: string[] = [
     "Single",
     "Married Filing Jointly",
     "Married Filing Separately",
@@ -115,15 +198,17 @@ export class TaxEstimatorComponent {
     "Qualifying Surviving Spouse",
   ];
 
-  // ------------------------------------------------------------
-  // Tax Year
-  // ------------------------------------------------------------
+  // ============================================================
+  // TAX YEARS
+  // ============================================================
 
-  yearOptions = [2025, 2026];
+  yearOptions: number[] = [2025, 2024, 2023];
 
-  // ------------------------------------------------------------
-  // Quarter options
-  // ------------------------------------------------------------
+  selectedYear = 2025;
+
+  // ============================================================
+  // QUARTERS
+  // ============================================================
 
   quarterOptions = [
     {
@@ -144,59 +229,97 @@ export class TaxEstimatorComponent {
     },
   ];
 
-  // ------------------------------------------------------------
-  // Form and result state
-  // ------------------------------------------------------------
+  // ============================================================
+  // FORM
+  // ============================================================
 
   taxForm: FormGroup;
 
   isCalculating = false;
+
   hasResult = false;
 
   result: TaxEstimateResult | null = null;
 
-  // ------------------------------------------------------------
-  // Constructor
-  // ------------------------------------------------------------
+  // ============================================================
+  // CONSTRUCTOR
+  // ============================================================
 
   constructor(
     private fb: FormBuilder,
     private taxService: TaxService,
   ) {
     this.taxForm = this.fb.group({
-      country: ["United States", Validators.required],
+      country: ["India", Validators.required],
 
-      state: ["California", Validators.required],
+      state: ["Andhra Pradesh", Validators.required],
 
       filingStatus: ["Single", Validators.required],
 
-      year: [2026, Validators.required],
+      year: [2025, Validators.required],
 
       quarter: ["Q2", Validators.required],
 
       grossIncome: [0, [Validators.required, Validators.min(0)]],
 
-      businessExpenses: [0, [Validators.min(0)]],
+      businessExpenses: [0, Validators.min(0)],
 
-      retirementContributions: [0, [Validators.min(0)]],
+      retirementContributions: [0, Validators.min(0)],
 
-      healthInsurancePremiums: [0, [Validators.min(0)]],
+      healthInsurancePremiums: [0, Validators.min(0)],
 
-      homeOfficeDeduction: [0, [Validators.min(0)]],
+      homeOfficeDeduction: [0, Validators.min(0)],
     });
   }
 
-  // ------------------------------------------------------------
-  // Selected year
-  // ------------------------------------------------------------
+  // ============================================================
+  // COUNTRY CHANGE
+  // ============================================================
 
-  get selectedYear(): number {
-    return Number(this.taxForm.get("year")?.value || 2026);
+  onCountryChange(): void {
+    const selectedCountry = this.taxForm.get("country")?.value;
+
+    this.stateOptions = this.statesByCountry[selectedCountry] || [];
+
+    // Change state/province/region
+    this.taxForm.patchValue({
+      state: this.stateOptions[0] || "",
+    });
+
+    // Change currency
+    switch (selectedCountry) {
+      case "India":
+        this.currencySymbol = "₹";
+        break;
+
+      case "United States":
+        this.currencySymbol = "$";
+        break;
+
+      case "Canada":
+        this.currencySymbol = "C$";
+        break;
+
+      case "United Kingdom":
+        this.currencySymbol = "£";
+        break;
+
+      default:
+        this.currencySymbol = "$";
+    }
   }
 
-  // ------------------------------------------------------------
-  // Calculate Tax
-  // ------------------------------------------------------------
+  // ============================================================
+  // YEAR CHANGE
+  // ============================================================
+
+  onYearChange(): void {
+    this.selectedYear = Number(this.taxForm.get("year")?.value || 2025);
+  }
+
+  // ============================================================
+  // CALCULATE TAX
+  // ============================================================
 
   calculateTax(): void {
     if (this.taxForm.invalid) {
@@ -215,7 +338,7 @@ export class TaxEstimatorComponent {
 
       filingStatus: this.taxForm.get("filingStatus")?.value,
 
-      year: Number(this.taxForm.get("year")?.value),
+      year: Number(this.taxForm.get("year")?.value || 2025),
 
       quarter: this.taxForm.get("quarter")?.value,
 
@@ -238,6 +361,8 @@ export class TaxEstimatorComponent {
       ),
     };
 
+    console.log("Tax calculation request:", formData);
+
     this.taxService.calculateTax(formData).subscribe({
       next: (result: TaxEstimateResult) => {
         this.result = result;
@@ -247,6 +372,7 @@ export class TaxEstimatorComponent {
 
       error: (err: unknown) => {
         console.error("Tax calculation failed:", err);
+
         this.isCalculating = false;
         this.hasResult = false;
       },

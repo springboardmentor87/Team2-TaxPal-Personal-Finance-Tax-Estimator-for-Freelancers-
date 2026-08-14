@@ -1,44 +1,66 @@
-<div class="flex min-h-screen">
-  <!-- Sidebar -->
-  <app-sidebar
-    [open]="sidebarOpen"
-    (closeSidebar)="closeSidebar()"
-  ></app-sidebar>
+<div class="min-h-screen bg-[#F8F7FC]">
+  <!-- Main Content -->
+  <main class="min-h-screen">
+    <!-- Page Header -->
+    <header class="px-6 pt-8 pb-6 lg:px-8">
+      <h1 class="text-2xl font-bold text-[#1E1533]">Tax Estimator</h1>
 
-  <!-- Main area -->
-  <div class="flex min-w-0 flex-1 flex-col">
-    <!-- Topbar -->
-    <app-topbar (menuClick)="openSidebar()"></app-topbar>
+      <p class="mt-1 text-sm text-[#6B6380]">
+        Calculate your estimated tax obligations
+      </p>
+    </header>
 
-    <!-- Tax Estimator Content -->
-    <main class="px-5 pt-6 sm:px-8">
-      <header class="page-header">
-        <h1 class="page-title">Tax Estimator</h1>
-        <p class="page-subtitle">Calculate your estimated tax obligations</p>
-      </header>
-
-      <div class="content-grid">
-        <!-- ================= CALCULATOR CARD ================= -->
-        <section class="card calculator-card">
-          <h2 class="card-title">Quarterly Tax Calculator</h2>
+    <!-- Content -->
+    <div class="px-6 pb-8 lg:px-8">
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <!-- =====================================================
+             CALCULATOR CARD
+        ====================================================== -->
+        <section
+          class="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm"
+        >
+          <h2 class="mb-6 text-lg font-bold text-[#1E1533]">
+            Quarterly Tax Calculator
+          </h2>
 
           <form [formGroup]="taxForm" (ngSubmit)="calculateTax()">
-            <!-- Country / State -->
-            <div class="field-row">
-              <div class="field">
-                <label for="country"> Country/Region </label>
+            <!-- Country + State -->
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <!-- Country -->
+              <div>
+                <label
+                  for="country"
+                  class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                >
+                  Country/Region
+                </label>
 
-                <select id="country" formControlName="country">
+                <select
+                  id="country"
+                  formControlName="country"
+                  (change)="onCountryChange()"
+                  class="w-full rounded-xl border border-purple-100 bg-white px-4 py-3 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                >
                   <option *ngFor="let opt of countryOptions" [value]="opt">
                     {{ opt }}
                   </option>
                 </select>
               </div>
 
-              <div class="field">
-                <label for="state"> State/Province </label>
+              <!-- State / Province -->
+              <div>
+                <label
+                  for="state"
+                  class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                >
+                  State/Province/Region
+                </label>
 
-                <select id="state" formControlName="state">
+                <select
+                  id="state"
+                  formControlName="state"
+                  class="w-full rounded-xl border border-purple-100 bg-white px-4 py-3 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                >
                   <option *ngFor="let opt of stateOptions" [value]="opt">
                     {{ opt }}
                   </option>
@@ -46,22 +68,43 @@
               </div>
             </div>
 
-            <!-- Filing Status / Tax Year -->
-            <div class="field-row">
-              <div class="field">
-                <label for="filingStatus"> Filing Status </label>
+            <!-- Filing Status + Year -->
+            <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+              <!-- Filing Status -->
+              <div>
+                <label
+                  for="filingStatus"
+                  class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                >
+                  Filing Status
+                </label>
 
-                <select id="filingStatus" formControlName="filingStatus">
+                <select
+                  id="filingStatus"
+                  formControlName="filingStatus"
+                  class="w-full rounded-xl border border-purple-100 bg-white px-4 py-3 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                >
                   <option *ngFor="let opt of filingStatusOptions" [value]="opt">
                     {{ opt }}
                   </option>
                 </select>
               </div>
 
-              <div class="field">
-                <label for="year"> Tax Year </label>
+              <!-- Tax Year -->
+              <div>
+                <label
+                  for="year"
+                  class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                >
+                  Tax Year
+                </label>
 
-                <select id="year" formControlName="year">
+                <select
+                  id="year"
+                  formControlName="year"
+                  (change)="onYearChange()"
+                  class="w-full rounded-xl border border-purple-100 bg-white px-4 py-3 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                >
                   <option *ngFor="let year of yearOptions" [value]="year">
                     {{ year }}
                   </option>
@@ -70,30 +113,50 @@
             </div>
 
             <!-- Quarter -->
-            <div class="field-row">
-              <div class="field">
-                <label for="quarter"> Quarter </label>
+            <div class="mt-5">
+              <label
+                for="quarter"
+                class="mb-2 block text-sm font-semibold text-[#4B4363]"
+              >
+                Quarter
+              </label>
 
-                <select id="quarter" formControlName="quarter">
-                  <option
-                    *ngFor="let quarter of quarterOptions"
-                    [value]="quarter.value"
-                  >
-                    {{ quarter.label }} {{ selectedYear }}
-                  </option>
-                </select>
-              </div>
+              <select
+                id="quarter"
+                formControlName="quarter"
+                class="w-full rounded-xl border border-purple-100 bg-white px-4 py-3 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+              >
+                <option *ngFor="let opt of quarterOptions" [value]="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
             </div>
 
-            <!-- Income -->
-            <div class="section">
-              <h3 class="section-title">Income</h3>
+            <!-- =================================================
+                 INCOME
+            ================================================== -->
 
-              <div class="field">
-                <label for="grossIncome"> Gross Income for Quarter </label>
+            <div class="mt-7">
+              <h3
+                class="mb-4 text-sm font-bold uppercase tracking-wide text-purple-600"
+              >
+                Income
+              </h3>
 
-                <div class="currency-input">
-                  <span class="currency-symbol">$</span>
+              <div>
+                <label
+                  for="grossIncome"
+                  class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                >
+                  Gross Income for Quarter
+                </label>
+
+                <div class="relative">
+                  <span
+                    class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-purple-500"
+                  >
+                    {{ currencySymbol }}
+                  </span>
 
                   <input
                     id="grossIncome"
@@ -102,22 +165,39 @@
                     step="0.01"
                     formControlName="grossIncome"
                     placeholder="0.00"
+                    class="w-full rounded-xl border border-purple-100 bg-white py-3 pl-9 pr-4 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
                   />
                 </div>
               </div>
             </div>
 
-            <!-- Deductions -->
-            <div class="section">
-              <h3 class="section-title">Deductions</h3>
+            <!-- =================================================
+                 DEDUCTIONS
+            ================================================== -->
 
-              <!-- Row -->
-              <div class="field-row">
-                <div class="field">
-                  <label for="businessExpenses"> Business Expenses </label>
+            <div class="mt-7">
+              <h3
+                class="mb-4 text-sm font-bold uppercase tracking-wide text-purple-600"
+              >
+                Deductions
+              </h3>
 
-                  <div class="currency-input">
-                    <span class="currency-symbol">$</span>
+              <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <!-- Business Expenses -->
+                <div>
+                  <label
+                    for="businessExpenses"
+                    class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                  >
+                    Business Expenses
+                  </label>
+
+                  <div class="relative">
+                    <span
+                      class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-purple-500"
+                    >
+                      {{ currencySymbol }}
+                    </span>
 
                     <input
                       id="businessExpenses"
@@ -126,17 +206,26 @@
                       step="0.01"
                       formControlName="businessExpenses"
                       placeholder="0.00"
+                      class="w-full rounded-xl border border-purple-100 bg-white py-3 pl-9 pr-4 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
                     />
                   </div>
                 </div>
 
-                <div class="field">
-                  <label for="retirementContributions">
+                <!-- Retirement Contributions -->
+                <div>
+                  <label
+                    for="retirementContributions"
+                    class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                  >
                     Retirement Contributions
                   </label>
 
-                  <div class="currency-input">
-                    <span class="currency-symbol">$</span>
+                  <div class="relative">
+                    <span
+                      class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-purple-500"
+                    >
+                      {{ currencySymbol }}
+                    </span>
 
                     <input
                       id="retirementContributions"
@@ -145,20 +234,26 @@
                       step="0.01"
                       formControlName="retirementContributions"
                       placeholder="0.00"
+                      class="w-full rounded-xl border border-purple-100 bg-white py-3 pl-9 pr-4 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
                     />
                   </div>
                 </div>
-              </div>
 
-              <!-- Row -->
-              <div class="field-row">
-                <div class="field">
-                  <label for="healthInsurancePremiums">
+                <!-- Health Insurance -->
+                <div>
+                  <label
+                    for="healthInsurancePremiums"
+                    class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                  >
                     Health Insurance Premiums
                   </label>
 
-                  <div class="currency-input">
-                    <span class="currency-symbol">$</span>
+                  <div class="relative">
+                    <span
+                      class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-purple-500"
+                    >
+                      {{ currencySymbol }}
+                    </span>
 
                     <input
                       id="healthInsurancePremiums"
@@ -167,17 +262,26 @@
                       step="0.01"
                       formControlName="healthInsurancePremiums"
                       placeholder="0.00"
+                      class="w-full rounded-xl border border-purple-100 bg-white py-3 pl-9 pr-4 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
                     />
                   </div>
                 </div>
 
-                <div class="field">
-                  <label for="homeOfficeDeduction">
+                <!-- Home Office -->
+                <div>
+                  <label
+                    for="homeOfficeDeduction"
+                    class="mb-2 block text-sm font-semibold text-[#4B4363]"
+                  >
                     Home Office Deduction
                   </label>
 
-                  <div class="currency-input">
-                    <span class="currency-symbol">$</span>
+                  <div class="relative">
+                    <span
+                      class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-purple-500"
+                    >
+                      {{ currencySymbol }}
+                    </span>
 
                     <input
                       id="homeOfficeDeduction"
@@ -186,6 +290,7 @@
                       step="0.01"
                       formControlName="homeOfficeDeduction"
                       placeholder="0.00"
+                      class="w-full rounded-xl border border-purple-100 bg-white py-3 pl-9 pr-4 text-sm text-[#1E1533] outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
                     />
                   </div>
                 </div>
@@ -195,13 +300,15 @@
             <!-- Calculate Button -->
             <button
               type="submit"
-              class="calculate-btn"
-              [class.loading]="isCalculating"
               [disabled]="isCalculating"
+              class="mt-7 w-full rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-3.5 text-sm font-bold text-white shadow-md transition hover:from-purple-700 hover:to-purple-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span *ngIf="!isCalculating"> Calculate Estimated Tax </span>
 
-              <span *ngIf="isCalculating" class="btn-spinner-wrap">
+              <span
+                *ngIf="isCalculating"
+                class="flex items-center justify-center gap-2"
+              >
                 <span class="btn-spinner"></span>
                 Calculating...
               </span>
@@ -209,14 +316,26 @@
           </form>
         </section>
 
-        <!-- ================= TAX SUMMARY ================= -->
-        <aside class="card summary-card">
-          <h2 class="card-title">Tax Summary</h2>
+        <!-- =====================================================
+             TAX SUMMARY
+        ====================================================== -->
+
+        <aside
+          class="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm"
+        >
+          <h2 class="mb-6 text-lg font-bold text-[#1E1533]">Tax Summary</h2>
 
           <!-- Empty State -->
-          <div class="empty-state" *ngIf="!hasResult && !isCalculating">
-            <div class="empty-icon">
+          <div
+            *ngIf="!hasResult && !isCalculating"
+            class="flex min-h-[350px] flex-col items-center justify-center text-center"
+          >
+            <div
+              class="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-50 text-purple-500"
+            >
               <svg
+                width="32"
+                height="32"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -313,75 +432,97 @@
               </svg>
             </div>
 
-            <p class="empty-text">
+            <p class="max-w-sm text-sm leading-6 text-[#6B6380]">
               Enter your income and deduction details to calculate your
               estimated quarterly tax.
             </p>
           </div>
 
           <!-- Loading -->
-          <div class="loading-state" *ngIf="isCalculating">
+          <div
+            *ngIf="isCalculating"
+            class="flex min-h-[350px] flex-col items-center justify-center"
+          >
             <span class="loading-spinner"></span>
 
-            <p class="loading-text">Calculating your estimate&hellip;</p>
+            <p class="mt-4 text-sm text-[#6B6380]">
+              Calculating your estimate&hellip;
+            </p>
           </div>
 
           <!-- Result -->
-          <div
-            class="result-state"
-            *ngIf="hasResult && result && !isCalculating"
-          >
-            <div class="result-row">
-              <span class="result-label"> Gross Income </span>
+          <div *ngIf="hasResult && result && !isCalculating" class="space-y-4">
+            <!-- Gross Income -->
+            <div
+              class="flex items-center justify-between border-b border-purple-50 pb-4"
+            >
+              <span class="text-sm text-[#6B6380]"> Gross Income </span>
 
-              <span class="result-value">
-                ${{ result.grossIncome.toFixed(2) }}
+              <span class="font-semibold text-[#1E1533]">
+                {{ currencySymbol }}{{ result.grossIncome.toFixed(2) }}
               </span>
             </div>
 
-            <div class="result-row">
-              <span class="result-label"> Total Deductions </span>
+            <!-- Total Deductions -->
+            <div
+              class="flex items-center justify-between border-b border-purple-50 pb-4"
+            >
+              <span class="text-sm text-[#6B6380]"> Total Deductions </span>
 
-              <span class="result-value">
-                -${{ result.totalDeductions.toFixed(2) }}
+              <span class="font-semibold text-red-500">
+                -{{ currencySymbol }}{{ result.totalDeductions.toFixed(2) }}
               </span>
             </div>
 
-            <div class="result-row">
-              <span class="result-label"> Taxable Income </span>
+            <!-- Taxable Income -->
+            <div
+              class="flex items-center justify-between border-b border-purple-50 pb-4"
+            >
+              <span class="text-sm text-[#6B6380]"> Taxable Income </span>
 
-              <span class="result-value">
-                ${{ result.taxableIncome.toFixed(2) }}
+              <span class="font-semibold text-[#1E1533]">
+                {{ currencySymbol }}{{ result.taxableIncome.toFixed(2) }}
               </span>
             </div>
 
-            <div class="result-highlight">
-              <span class="highlight-label"> Estimated Tax </span>
+            <!-- Estimated Tax -->
+            <div class="rounded-2xl bg-purple-50 p-5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-purple-700">
+                  Estimated Tax
+                </span>
 
-              <span class="highlight-value">
-                ${{ result.estimatedTax.toFixed(2) }}
-              </span>
+                <span class="text-xl font-bold text-purple-700">
+                  {{ currencySymbol }}{{ result.estimatedTax.toFixed(2) }}
+                </span>
+              </div>
             </div>
 
-            <div class="result-row rate-row">
-              <span class="result-label"> Effective Tax Rate </span>
+            <!-- Effective Tax Rate -->
+            <div
+              class="flex items-center justify-between border-b border-purple-50 pb-4"
+            >
+              <span class="text-sm text-[#6B6380]"> Effective Tax Rate </span>
 
-              <span class="result-value">
+              <span class="font-semibold text-[#1E1533]">
                 {{ result.effectiveTaxRate.toFixed(1) }}%
               </span>
             </div>
 
-            <div class="tax-tip">
-              <span class="tip-icon">💡</span>
+            <!-- Tip -->
+            <div class="rounded-xl bg-purple-50/70 p-4">
+              <div class="flex gap-3">
+                <span class="text-lg"> 💡 </span>
 
-              <span>
-                Contributing more to retirement accounts can lower your taxable
-                income.
-              </span>
+                <span class="text-sm leading-6 text-[#5C5472]">
+                  Contributing more to retirement accounts can lower your
+                  taxable income.
+                </span>
+              </div>
             </div>
           </div>
         </aside>
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
 </div>
