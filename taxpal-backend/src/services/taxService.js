@@ -155,7 +155,98 @@ const getTaxEstimate = async (userId, query = {}, options = {}) => {
   return result;
 };
 
+const calculateQuarterlyTax = async (userId, payload) => {
+  const userObj = await User.findByPk(userId);
+  const countryKey = String(payload.country || userObj?.country || 'usa').toLowerCase();
+  const rules = taxRules[countryKey] || taxRules.default;
+
+  const grossIncome = Number(payload.grossIncome || 0);
+  const businessExpenses = Number(payload.businessExpenses || 0);
+  const retirementContributions = Number(payload.retirementContributions || 0);
+  const healthInsurance = Number(payload.healthInsurance || payload.healthInsurancePremiums || 0);
+  const homeOfficeDeduction = Number(payload.homeOfficeDeduction || 0);
+
+  const totalDeductions = roundToTwo(businessExpenses + retirementContributions + healthInsurance + homeOfficeDeduction);
+  const quarterlyStandardDeduction = roundToTwo(rules.standardDeduction / 4);
+  const taxableIncome = Math.max(0, grossIncome - totalDeductions - quarterlyStandardDeduction);
+
+  const quarterlyBrackets = rules.brackets.map((b) => ({
+    upTo: b.upTo === Infinity ? Infinity : b.upTo / 4,
+    rate: b.rate
+  }));
+
+  const estimatedQuarterlyTax = computeTax(taxableIncome, quarterlyBrackets);
+  const effectiveTaxRate = taxableIncome > 0 ? roundToTwo((estimatedQuarterlyTax / taxableIncome) * 100) : 0;
+  const monthlySetAside = roundToTwo(estimatedQuarterlyTax / 3);
+
+  return {
+    country: payload.country || userObj?.country || 'USA',
+    state: payload.state || 'California',
+    filingStatus: payload.filingStatus || 'Single',
+    quarter: payload.quarter || 'Q3 (Jul-Sep)',
+    grossIncome: roundToTwo(grossIncome),
+    deductions: {
+      businessExpenses: roundToTwo(businessExpenses),
+      retirementContributions: roundToTwo(retirementContributions),
+      healthInsurance: roundToTwo(healthInsurance),
+      homeOfficeDeduction: roundToTwo(homeOfficeDeduction),
+      totalDeductions
+    },
+    taxSummary: {
+      standardDeduction: quarterlyStandardDeduction,
+      taxableIncome: roundToTwo(taxableIncome),
+      estimatedQuarterlyTax: roundToTwo(estimatedQuarterlyTax),
+      effectiveTaxRate,
+      monthlySetAside
+    }
+  };
+};
+
+const getTaxCalendar = async (userId, yearInput) => {
+  const year = Number(yearInput) || new Date().getFullYear();
+  return [
+    {
+      month: `April ${year}`,
+      title: 'Reminder: Q1 Estimated Tax Payment',
+      date: `Apr 1, ${year}`,
+      dueDate: `Apr 15, ${year}`,
+      description: 'First quarter estimated tax payment due.',
+      type: 'reminder',
+      status: 'upcoming'
+    },
+    {
+      month: `June ${year}`,
+      title: 'Reminder: Q2 Estimated Tax Payment',
+      date: `Jun 1, ${year}`,
+      dueDate: `Jun 15, ${year}`,
+      description: 'Second quarter estimated tax payment due.',
+      type: 'reminder',
+      status: 'upcoming'
+    },
+    {
+      month: `September ${year}`,
+      title: 'Reminder: Q3 Estimated Tax Payment',
+      date: `Sep 1, ${year}`,
+      dueDate: `Sep 15, ${year}`,
+      description: 'Third quarter estimated tax payment due.',
+      type: 'reminder',
+      status: 'upcoming'
+    },
+    {
+      month: `January ${year + 1}`,
+      title: 'Reminder: Q4 Estimated Tax Payment',
+      date: `Jan 1, ${year + 1}`,
+      dueDate: `Jan 15, ${year + 1}`,
+      description: 'Fourth quarter estimated tax payment due.',
+      type: 'reminder',
+      status: 'upcoming'
+    }
+  ];
+};
+
 module.exports = {
+  calculateQuarterlyTax,
   computeTax,
+  getTaxCalendar,
   getTaxEstimate
 };
