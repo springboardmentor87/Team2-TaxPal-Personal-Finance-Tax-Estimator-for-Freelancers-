@@ -62,7 +62,7 @@ export class TaxEstimatorComponent {
 
       filingStatus: ["Single", Validators.required],
 
-      year: [2025, Validators.required],
+      year: [2026, Validators.required],
 
       quarter: ["Q2", Validators.required],
 
@@ -262,9 +262,9 @@ export class TaxEstimatorComponent {
   // TAX YEARS
   // ============================================================
 
-  yearOptions: number[] = [2025, 2024, 2023];
+  yearOptions: number[] = [2026, 2025, 2024, 2023];
 
-  selectedYear = 2025;
+  selectedYear = 2026;
 
   // ============================================================
   // QUARTERS
@@ -334,7 +334,7 @@ export class TaxEstimatorComponent {
   // ============================================================
 
   onYearChange(): void {
-    this.selectedYear = Number(this.taxForm.get("year")?.value || 2025);
+    this.selectedYear = Number(this.taxForm.get("year")?.value || 2026);
   }
 
   // ============================================================
@@ -358,7 +358,7 @@ export class TaxEstimatorComponent {
 
       filingStatus: this.taxForm.get("filingStatus")?.value,
 
-      year: Number(this.taxForm.get("year")?.value || 2025),
+      year: Number(this.taxForm.get("year")?.value || 2026),
 
       quarter: this.taxForm.get("quarter")?.value,
 
