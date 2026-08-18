@@ -101,7 +101,7 @@
         </div>
 
         <form (ngSubmit)="createBudget()" class="space-y-4">
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <!-- Category Selector -->
             <div>
               <label for="category" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Category</label>
@@ -147,23 +147,6 @@
                 required
                 class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
               />
-            </div>
-
-            <!-- Period Selector -->
-            <div>
-              <label for="period" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">Period</label>
-              <select
-                id="period"
-                name="period"
-                [(ngModel)]="budget.period"
-                required
-                class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="weekly">Weekly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="yearly">Yearly</option>
-              </select>
             </div>
           </div>
 
