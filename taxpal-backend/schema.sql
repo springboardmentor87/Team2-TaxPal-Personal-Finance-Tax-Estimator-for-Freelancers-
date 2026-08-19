@@ -94,3 +94,22 @@ CREATE TABLE IF NOT EXISTS `alerts` (
     FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- -------------------------------------------------------
+-- 6. Tax Events Table
+-- -------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tax_events` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `userId` INT NOT NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `description` TEXT,
+  `dueDate` DATE NOT NULL,
+  `completed` TINYINT(1) NOT NULL DEFAULT 0,
+  `isCustom` TINYINT(1) NOT NULL DEFAULT 1,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_tax_events_userId`
+    FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
