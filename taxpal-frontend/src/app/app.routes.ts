@@ -64,6 +64,7 @@ export const routes: Routes = [
       ),
     title: "TaxPal — Settings",
   },
+
   {
     path: "tax-estimator",
     canActivate: [authGuard],
@@ -73,5 +74,16 @@ export const routes: Routes = [
       ),
     title: "TaxPal — Tax Estimator",
   },
+
+  {
+    path: "tax-calendar",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/tax-calendar/tax-calendar.page").then(
+        (m) => m.TaxCalendarPageComponent,
+      ),
+    title: "TaxPal — Tax Calendar",
+  },
+
   { path: "**", redirectTo: "dashboard" },
 ];
