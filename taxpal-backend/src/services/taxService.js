@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Transaction, User } = require('../models');
+const { Transaction, User, TaxEvent } = require('../models');
 const AppError = require('../utils/AppError');
 const { roundToTwo, sum } = require('../utils/finance');
 const { serializeDocument, serializeDocuments } = require('../utils/serialize');
@@ -244,9 +244,156 @@ const getTaxCalendar = async (userId, yearInput) => {
   ];
 };
 
+const getDefaultDeadlinesForCountry = (country, year) => {
+  const c = String(country || 'default').toLowerCase();
+  switch (c) {
+    case 'india':
+      return [
+        { title: '4th Installment of Advance Tax', description: 'Pay 100% of advance tax for the current financial year.', dueDate: `${year}-03-15`, isCustom: false },
+        { title: 'Tax Saving Investments Deadline', description: 'Last date to make tax-saving investments under Section 80C, 80D, etc. to reduce tax liability.', dueDate: `${year}-03-31`, isCustom: false },
+        { title: '1st Installment of Advance Tax', description: 'Pay 15% of advance tax for the current financial year.', dueDate: `${year}-06-15`, isCustom: false },
+        { title: 'Income Tax Return (ITR) Filing', description: 'File your annual income tax return for the previous financial year.', dueDate: `${year}-07-31`, isCustom: false },
+        { title: '2nd Installment of Advance Tax', description: 'Pay 45% of advance tax for the current financial year.', dueDate: `${year}-09-15`, isCustom: false },
+        { title: '3rd Installment of Advance Tax', description: 'Pay 75% of advance tax for the current financial year.', dueDate: `${year}-12-15`, isCustom: false }
+      ];
+    case 'usa':
+    case 'united states':
+      return [
+        { title: 'Q4 Estimated Tax Payment', description: 'Due date for Q4 estimated tax payment for the previous year (Form 1040-ES).', dueDate: `${year}-01-15`, isCustom: false },
+        { title: '1099-NEC Mailing Deadline', description: 'Deadline for businesses to mail Form 1099-NEC to independent contractors.', dueDate: `${year}-01-31`, isCustom: false },
+        { title: 'Annual Tax Return Filing', description: 'File Federal Income Tax Return (Form 1040) and pay any outstanding tax due.', dueDate: `${year}-04-15`, isCustom: false },
+        { title: 'Q1 Estimated Tax Payment', description: 'Due date for Q1 estimated tax payments (Form 1040-ES).', dueDate: `${year}-04-15`, isCustom: false },
+        { title: 'Q2 Estimated Tax Payment', description: 'Due date for Q2 estimated tax payments (Form 1040-ES).', dueDate: `${year}-06-15`, isCustom: false },
+        { title: 'Q3 Estimated Tax Payment', description: 'Due date for Q3 estimated tax payments (Form 1040-ES).', dueDate: `${year}-09-15`, isCustom: false },
+        { title: 'Extension Filing Deadline', description: 'Filing deadline if you requested a 6-month extension (Form 4868).', dueDate: `${year}-10-15`, isCustom: false }
+      ];
+    case 'canada':
+      return [
+        { title: 'Q1 Personal Tax Installment', description: 'First quarterly tax installment due for individuals.', dueDate: `${year}-03-15`, isCustom: false },
+        { title: 'Personal Tax Return Filing', description: 'File personal income tax return and pay outstanding tax balance.', dueDate: `${year}-04-30`, isCustom: false },
+        { title: 'Q2 Personal Tax Installment', description: 'Second quarterly tax installment due for individuals.', dueDate: `${year}-06-15`, isCustom: false },
+        { title: 'Self-Employed Tax Return Filing', description: 'Filing deadline for self-employed individuals (payment is still due April 30).', dueDate: `${year}-06-15`, isCustom: false },
+        { title: 'Q3 Personal Tax Installment', description: 'Third quarterly tax installment due for individuals.', dueDate: `${year}-09-15`, isCustom: false },
+        { title: 'Q4 Personal Tax Installment', description: 'Fourth quarterly tax installment due for individuals.', dueDate: `${year}-12-15`, isCustom: false }
+      ];
+    case 'uk':
+    case 'united kingdom':
+      return [
+        { title: 'Online Self-Assessment Return & Payment', description: 'Deadline to file your online tax return and pay your tax bill for the previous tax year.', dueDate: `${year}-01-31`, isCustom: false },
+        { title: 'First Payment on Account', description: 'First advance payment towards your next tax bill.', dueDate: `${year}-01-31`, isCustom: false },
+        { title: 'End of Tax Year', description: 'End of the current UK tax year.', dueDate: `${year}-04-05`, isCustom: false },
+        { title: 'Second Payment on Account', description: 'Second advance payment towards your next tax bill.', dueDate: `${year}-07-31`, isCustom: false },
+        { title: 'Paper Self-Assessment Return', description: 'Deadline to file paper tax return (if not online).', dueDate: `${year}-10-31`, isCustom: false }
+      ];
+    default:
+      return [
+        { title: 'Annual Tax Return Filing', description: 'File annual income tax return and pay any tax due.', dueDate: `${year}-04-15`, isCustom: false },
+        { title: 'Mid-Year Tax Checkpoint', description: 'Review your earnings and estimate mid-year tax liability.', dueDate: `${year}-06-15`, isCustom: false },
+        { title: 'Year-End Tax Planning', description: 'Optimize tax deductions and compile receipts before the year ends.', dueDate: `${year}-12-31`, isCustom: false }
+      ];
+  }
+};
+
+const getOrCreateTaxEvents = async (userId, queryCountry, yearInput) => {
+  const year = Number.parseInt(yearInput, 10) || new Date().getFullYear();
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+  const country = queryCountry || user.country || 'default';
+
+  const startOfYear = `${year}-01-01`;
+  const endOfYear = `${year}-12-31`;
+
+  let events = await TaxEvent.findAll({
+    where: {
+      userId,
+      dueDate: {
+        [Op.between]: [startOfYear, endOfYear]
+      }
+    },
+    order: [['dueDate', 'ASC'], ['id', 'ASC']]
+  });
+
+  if (events.length === 0) {
+    const defaults = getDefaultDeadlinesForCountry(country, year);
+    const toInsert = defaults.map((d) => ({
+      ...d,
+      userId,
+      completed: false
+    }));
+    await TaxEvent.bulkCreate(toInsert);
+
+    events = await TaxEvent.findAll({
+      where: {
+        userId,
+        dueDate: {
+          [Op.between]: [startOfYear, endOfYear]
+        }
+      },
+      order: [['dueDate', 'ASC'], ['id', 'ASC']]
+    });
+  }
+
+  return serializeDocuments(events);
+};
+
+const createTaxEvent = async (userId, data) => {
+  if (!data.title || !data.dueDate) {
+    throw new AppError('Title and due date are required', 400);
+  }
+
+  const newEvent = await TaxEvent.create({
+    userId,
+    title: data.title,
+    description: data.description || '',
+    dueDate: data.dueDate,
+    completed: !!data.completed,
+    isCustom: true
+  });
+
+  return serializeDocument(newEvent);
+};
+
+const updateTaxEvent = async (userId, id, data) => {
+  const event = await TaxEvent.findOne({
+    where: { id, userId }
+  });
+
+  if (!event) {
+    throw new AppError('Tax event not found', 404);
+  }
+
+  const updatedFields = {};
+  if (data.title !== undefined) updatedFields.title = data.title;
+  if (data.description !== undefined) updatedFields.description = data.description;
+  if (data.dueDate !== undefined) updatedFields.dueDate = data.dueDate;
+  if (data.completed !== undefined) updatedFields.completed = !!data.completed;
+
+  await event.update(updatedFields);
+  return serializeDocument(event);
+};
+
+const deleteTaxEvent = async (userId, id) => {
+  const event = await TaxEvent.findOne({
+    where: { id, userId }
+  });
+
+  if (!event) {
+    throw new AppError('Tax event not found', 404);
+  }
+
+  await event.destroy();
+  return { success: true, message: 'Tax event deleted successfully' };
+};
+
 module.exports = {
   calculateQuarterlyTax,
   computeTax,
+  createTaxEvent,
+  deleteTaxEvent,
+  getOrCreateTaxEvents,
   getTaxCalendar,
-  getTaxEstimate
+  getTaxEstimate,
+  updateTaxEvent
 };

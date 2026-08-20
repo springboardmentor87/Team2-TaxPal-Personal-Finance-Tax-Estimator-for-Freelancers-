@@ -15,6 +15,12 @@ import {
   TrendingUp,
   Wallet,
   X,
+  Calendar,
+  CheckCircle2,
+  Circle,
+  Trash2,
+  Clock,
+  Info,
 } from 'lucide-angular';
 
 /**
@@ -38,4 +44,10 @@ export const APP_ICONS = {
   TrendingUp,
   Wallet,
   X,
+  Calendar,
+  CheckCircle2,
+  Circle,
+  Trash2,
+  Clock,
+  Info,
 };
