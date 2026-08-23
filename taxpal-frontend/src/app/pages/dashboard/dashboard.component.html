@@ -1,4 +1,4 @@
-<div class="flex min-h-screen">
+<div class="flex min-h-screen bg-[#F8F7FC]">
   <app-sidebar
     [open]="sidebarOpen"
     (closeSidebar)="closeSidebar()"
@@ -7,7 +7,7 @@
   <div class="flex min-w-0 flex-1 flex-col">
     <app-topbar (menuClick)="openSidebar()" [userName]="auth.currentUser()?.name"></app-topbar>
 
-    <main class="px-5 pt-6 sm:px-8" *ngIf="summary">
+    <main class="px-5 pt-6 pb-12 sm:px-8" *ngIf="summary">
       <!-- Summary cards -->
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <app-summary-cards
@@ -45,7 +45,11 @@
 
       <!-- Charts -->
       <section class="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <app-income-expense-chart [monthlyTrend]="summary.monthlyTrend"></app-income-expense-chart>
+        <app-income-expense-chart
+          [monthlyTrend]="summary.monthlyTrend"
+          [quarterlyTrend]="summary.quarterlyTrend"
+          [yearlyTrend]="summary.yearlyTrend"
+        ></app-income-expense-chart>
 
         <app-expense-donut-chart [topCategories]="summary.topCategories"></app-expense-donut-chart>
       </section>

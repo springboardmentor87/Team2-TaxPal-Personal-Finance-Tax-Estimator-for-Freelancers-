@@ -1,28 +1,28 @@
-import { Component, computed, signal, Input, OnChanges, inject } from '@angular/core';
+import { Component, computed, signal, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CurrencyService } from '../../services/currency.service';
 
-interface Category {
+export interface Category {
   label: string;
   value: number;
-  color: string;
-}
-
-interface Segment extends Category {
   percent: number;
-  dashArray: string;
-  dashOffset: number;
+  color: string;
+  pathD?: string;
 }
 
-const RADIUS = 42;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const COLOR_PALETTE = [
+  '#3B82F6', // Blue - Rent/Mortgage
+  '#10B981', // Green - Business Expenses
+  '#F59E0B', // Amber/Yellow - Utilities
+  '#EF4444', // Red - Food
+  '#8B5CF6', // Purple - Other
+];
 
-const FALLBACK_CATEGORIES: Category[] = [
-  { label: 'Software & Tools', value: 0, color: '#7C3AED' },
-  { label: 'Office & Rent', value: 0, color: '#9D5CF0' },
-  { label: 'Travel', value: 0, color: '#B588F5' },
-  { label: 'Marketing', value: 0, color: '#CBAAFC' },
-  { label: 'Taxes Set Aside', value: 0, color: '#E4D2FE' }
+const DEFAULT_CATEGORIES: Category[] = [
+  { label: 'Rent/Mortgage', value: 32, percent: 32, color: '#3B82F6' },
+  { label: 'Business Expenses', value: 28, percent: 28, color: '#10B981' },
+  { label: 'Utilities', value: 15, percent: 15, color: '#F59E0B' },
+  { label: 'Food', value: 12, percent: 12, color: '#EF4444' },
+  { label: 'Other', value: 13, percent: 13, color: '#8B5CF6' }
 ];
 
 @Component({
@@ -31,46 +31,65 @@ const FALLBACK_CATEGORIES: Category[] = [
   imports: [CommonModule],
   templateUrl: './expense-donut-chart.component.html'
 })
-export class ExpenseDonutChartComponent {
-  readonly radius = RADIUS;
-  readonly circumference = CIRCUMFERENCE;
-  currency = inject(CurrencyService);
-
+export class ExpenseDonutChartComponent implements OnChanges {
   @Input() topCategories: any[] = [];
 
-  dynamicCategories = signal<Category[]>(FALLBACK_CATEGORIES);
+  dynamicCategories = signal<Category[]>([]);
 
   ngOnChanges(): void {
     if (this.topCategories && this.topCategories.length > 0) {
-      const colors = ['#7C3AED', '#9D5CF0', '#B588F5', '#CBAAFC', '#E4D2FE'];
-      const mapped = this.topCategories.slice(0, 5).map((c, i) => ({
-        label: c.category,
-        value: c.expense,
-        color: colors[i % colors.length]
-      }));
-      this.dynamicCategories.set(mapped);
-    } else if (this.topCategories && this.topCategories.length === 0) {
-      this.dynamicCategories.set([]);
+      const totalExpense = this.topCategories.reduce((sum, c) => sum + (c.expense || 0), 0);
+      if (totalExpense > 0) {
+        const mapped = this.topCategories.slice(0, 5).map((c, i) => {
+          const val = c.expense || 0;
+          const pct = Math.round((val / totalExpense) * 100);
+          return {
+            label: c.category,
+            value: val,
+            percent: pct,
+            color: COLOR_PALETTE[i % COLOR_PALETTE.length]
+          };
+        });
+        this.dynamicCategories.set(mapped);
+        return;
+      }
     }
+    this.dynamicCategories.set([]);
   }
 
   total = computed(() => this.dynamicCategories().reduce((sum, c) => sum + c.value, 0));
 
-  segments = computed<Segment[]>(() => {
-    let offsetAccum = 0;
-    const total = this.total();
+  computedSegments = computed(() => {
+    const cats = this.dynamicCategories();
+    const totalVal = this.total();
+    if (totalVal <= 0) return [];
 
-    return this.dynamicCategories().map((cat) => {
-      const percent = (cat.value / total) * 100;
-      const dashLength = (percent / 100) * CIRCUMFERENCE;
-      const segment: Segment = {
+    const cx = 100;
+    const cy = 100;
+    const r = 85;
+    let startAngle = -Math.PI / 2; // Start from top (12 o'clock)
+
+    return cats.map((cat) => {
+      const sliceAngle = (cat.value / totalVal) * 2 * Math.PI;
+      const endAngle = startAngle + sliceAngle;
+      const actualEndAngle = Math.min(endAngle, startAngle + 2 * Math.PI - 0.0001);
+
+      const x1 = cx + r * Math.cos(startAngle);
+      const y1 = cy + r * Math.sin(startAngle);
+      const x2 = cx + r * Math.cos(actualEndAngle);
+      const y2 = cy + r * Math.sin(actualEndAngle);
+
+      const largeArcFlag = sliceAngle > Math.PI ? 1 : 0;
+
+      const pathD = `M ${cx} ${cy} L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+
+      startAngle = endAngle;
+
+      return {
         ...cat,
-        percent: Math.round(percent),
-        dashArray: `${dashLength} ${CIRCUMFERENCE - dashLength}`,
-        dashOffset: -offsetAccum
+        pathD
       };
-      offsetAccum += dashLength;
-      return segment;
     });
   });
 }
+

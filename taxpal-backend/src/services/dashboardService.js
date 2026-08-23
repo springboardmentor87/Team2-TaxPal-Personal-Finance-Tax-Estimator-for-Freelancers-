@@ -37,14 +37,22 @@ const getDashboardSummary = async (userId) => {
   const yearToDateTransactions = serializeDocuments(rawYtd);
   const user = serializeDocument(userObj);
 
+  const rawAllTransactions = await Transaction.findAll({ where: { userId } });
+  const allTransactions = serializeDocuments(rawAllTransactions);
+
+  const totalIncome = roundToTwo(sum(allTransactions.filter((t) => t.type === 'income').map((t) => t.amount)));
+  const totalExpenses = roundToTwo(sum(allTransactions.filter((t) => t.type === 'expense').map((t) => t.amount)));
+  const currentBalance = roundToTwo(totalIncome - totalExpenses);
+
   const monthlyIncome = roundToTwo(sum(currentMonthTransactions.filter((transaction) => transaction.type === 'income').map((transaction) => transaction.amount)));
   const monthlyExpenses = roundToTwo(sum(currentMonthTransactions.filter((transaction) => transaction.type === 'expense').map((transaction) => transaction.amount)));
   const netCashFlow = roundToTwo(monthlyIncome - monthlyExpenses);
   const savingsRate = percent(netCashFlow > 0 ? netCashFlow : 0, monthlyIncome);
 
+  // 1. Monthly trend (6-month window)
   const monthLabels = buildMonthWindow(6);
   const monthlyTrend = monthLabels.map((window) => {
-    const monthTransactions = yearToDateTransactions.filter((transaction) => monthKey(new Date(transaction.date)) === window.key);
+    const monthTransactions = allTransactions.filter((transaction) => monthKey(new Date(transaction.date)) === window.key);
     const income = roundToTwo(sum(monthTransactions.filter((transaction) => transaction.type === 'income').map((transaction) => transaction.amount)));
     const expense = roundToTwo(sum(monthTransactions.filter((transaction) => transaction.type === 'expense').map((transaction) => transaction.amount)));
 
@@ -56,22 +64,58 @@ const getDashboardSummary = async (userId) => {
     };
   });
 
-  const topCategories = yearToDateTransactions.reduce((accumulator, transaction) => {
-    const entry = accumulator[transaction.category] || {
-      category: transaction.category,
-      income: 0,
-      expense: 0
+  // 2. Quarterly trend (Q1 - Q4 of current year)
+  const currentYear = now.getFullYear();
+  const quarterlyTrend = [1, 2, 3, 4].map((q) => {
+    const startMonth = (q - 1) * 3;
+    const endMonth = startMonth + 2;
+    const qTransactions = allTransactions.filter((t) => {
+      const d = new Date(t.date);
+      return d.getFullYear() === currentYear && d.getMonth() >= startMonth && d.getMonth() <= endMonth;
+    });
+    const income = roundToTwo(sum(qTransactions.filter((t) => t.type === 'income').map((t) => t.amount)));
+    const expense = roundToTwo(sum(qTransactions.filter((t) => t.type === 'expense').map((t) => t.amount)));
+
+    return {
+      quarter: `Q${q}`,
+      income,
+      expense,
+      net: roundToTwo(income - expense)
     };
+  });
 
-    if (transaction.type === 'income') {
-      entry.income += Number(transaction.amount || 0);
-    } else {
-      entry.expense += Number(transaction.amount || 0);
-    }
+  // 3. Yearly trend (4 years)
+  const yearlyTrend = [currentYear - 3, currentYear - 2, currentYear - 1, currentYear].map((yr) => {
+    const yrTransactions = allTransactions.filter((t) => new Date(t.date).getFullYear() === yr);
+    const income = roundToTwo(sum(yrTransactions.filter((t) => t.type === 'income').map((t) => t.amount)));
+    const expense = roundToTwo(sum(yrTransactions.filter((t) => t.type === 'expense').map((t) => t.amount)));
 
-    accumulator[transaction.category] = entry;
+    return {
+      year: String(yr),
+      income,
+      expense,
+      net: roundToTwo(income - expense)
+    };
+  });
+
+  // 4. Top categories (from expense transactions)
+  const categoryMap = allTransactions.reduce((accumulator, transaction) => {
+    if (transaction.type !== 'expense') return accumulator;
+    const cat = transaction.category || 'Other';
+    const entry = accumulator[cat] || { category: cat, income: 0, expense: 0 };
+    entry.expense += Number(transaction.amount || 0);
+    accumulator[cat] = entry;
     return accumulator;
   }, {});
+
+  const topCategories = Object.values(categoryMap)
+    .sort((left, right) => right.expense - left.expense)
+    .slice(0, 5)
+    .map((entry) => ({
+      ...entry,
+      income: 0,
+      expense: roundToTwo(entry.expense)
+    }));
 
   const [budgetOverview, taxEstimate, alertCount, unreadAlerts] = await Promise.all([
     getBudgetOverview(userId),
@@ -79,13 +123,6 @@ const getDashboardSummary = async (userId) => {
     Alert.count({ where: { userId, resolved: false } }),
     Alert.count({ where: { userId, read: false } })
   ]);
-
-  const rawAllTransactions = await Transaction.findAll({ where: { userId } });
-  const allTransactions = serializeDocuments(rawAllTransactions);
-
-  const totalIncome = roundToTwo(sum(allTransactions.filter((t) => t.type === 'income').map((t) => t.amount)));
-  const totalExpenses = roundToTwo(sum(allTransactions.filter((t) => t.type === 'expense').map((t) => t.amount)));
-  const currentBalance = roundToTwo(totalIncome - totalExpenses);
 
   return {
     user,
@@ -108,14 +145,9 @@ const getDashboardSummary = async (userId) => {
       estimatedAnnualTax: taxEstimate.tax.estimatedTax
     },
     monthlyTrend,
-    topCategories: Object.values(topCategories)
-      .sort((left, right) => right.expense - left.expense)
-      .slice(0, 5)
-      .map((entry) => ({
-        ...entry,
-        income: roundToTwo(entry.income),
-        expense: roundToTwo(entry.expense)
-      })),
+    quarterlyTrend,
+    yearlyTrend,
+    topCategories,
     recentTransactions,
     budgetOverview,
     taxEstimate,

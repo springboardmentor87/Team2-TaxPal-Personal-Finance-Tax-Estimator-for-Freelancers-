@@ -1,19 +1,39 @@
-  <div
-    class="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 h-full"
-  >
-    <div class="flex items-start justify-between">
-      <div>
-        <p class="text-sm font-medium text-muted-foreground">{{ title }}</p>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-          {{ amount }}
-        </p>
-      </div>
-      <span [class]="accentClass">
-        <lucide-icon [name]="mappedIcon" class="h-5 w-5"></lucide-icon>
-      </span>
+<div
+  class="group relative overflow-hidden rounded-2xl border border-purple-100/80 bg-white p-5 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md h-full flex flex-col justify-between"
+>
+  <div class="flex items-start justify-between">
+    <div>
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ title }}</p>
+      <p class="mt-2 text-2xl font-bold tracking-tight text-[#1E1533] md:text-3xl">
+        {{ amount }}
+      </p>
     </div>
-    <div class="mt-4 flex items-center gap-1.5" *ngIf="statusText">
-      <span [class]="deltaClass">{{ statusText }}</span>
-    </div>
+
+    <!-- Icon Badge -->
+    <span
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
+      [ngClass]="{
+        'bg-emerald-50 text-emerald-600': icon === 'income' || trend === 'up',
+        'bg-rose-50 text-rose-600': icon === 'expense' || trend === 'down',
+        'bg-purple-50 text-purple-600': icon === 'balance' || icon === 'tax' || trend === 'neutral'
+      }"
+    >
+      <lucide-icon [name]="mappedIcon" class="h-5 w-5"></lucide-icon>
+    </span>
   </div>
+
+  <div class="mt-4 flex items-center gap-1.5" *ngIf="statusText">
+    <span
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+      [ngClass]="{
+        'bg-emerald-50 text-emerald-700': trend === 'up',
+        'bg-rose-50 text-rose-700': trend === 'down',
+        'bg-gray-100 text-gray-700': trend === 'neutral'
+      }"
+    >
+      {{ statusText }}
+    </span>
+  </div>
+</div>
+
 
