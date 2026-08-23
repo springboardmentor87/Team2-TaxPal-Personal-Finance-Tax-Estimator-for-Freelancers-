@@ -1,4 +1,4 @@
-<div class="flex min-h-screen bg-background">
+<div class="flex min-h-screen bg-[#F8F7FC]">
   <app-sidebar [open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
 
   <div class="flex min-w-0 flex-1 flex-col">
@@ -155,7 +155,7 @@
                     (click)="editCategory(item)"
                     class="text-purple-600 hover:text-purple-800 font-semibold cursor-pointer"
                   >
-                    ✏️ Edit
+                    Edit
                   </button>
                   <button
                     (click)="deleteCategory(item)"

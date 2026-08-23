@@ -1,41 +1,51 @@
-<div class="rounded-2xl border border-primary-100/60 bg-white p-5 shadow-card sm:p-6">
-  <div>
-    <h3 class="font-display text-[16px] font-bold text-[#1E1533]">Expense Breakdown</h3>
-    <p class="mt-0.5 text-[12.5px] text-[#8A7FA5]">Where your money went this month</p>
-  </div>
+<div class="rounded-xl border border-gray-100 bg-white p-5 shadow-card">
+  <!-- Title -->
+  <h3 class="font-display text-[16px] font-bold text-gray-800">Expense Breakdown</h3>
 
-  <div class="mt-5 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center">
-    <!-- donut -->
-    <div class="relative h-[190px] w-[190px] shrink-0">
-      <svg viewBox="0 0 100 100" class="h-full w-full -rotate-90">
-        <circle cx="50" cy="50" [attr.r]="radius" fill="none" stroke="#F3E8FF" stroke-width="12" />
-        <circle
-          *ngFor="let seg of segments()"
-          cx="50" cy="50" [attr.r]="radius"
-          fill="none"
-          [attr.stroke]="seg.color"
-          stroke-width="12"
-          stroke-linecap="round"
-          [attr.stroke-dasharray]="seg.dashArray"
-          [attr.stroke-dashoffset]="seg.dashOffset"
-          class="transition-all duration-500 ease-out"
+  <div *ngIf="computedSegments().length > 0; else emptyState" class="mt-4 flex flex-col items-center">
+    <!-- Solid Pie Chart -->
+    <div class="relative h-48 w-48 shrink-0">
+      <svg viewBox="0 0 200 200" class="h-full w-full">
+        <path
+          *ngFor="let seg of computedSegments()"
+          [attr.d]="seg.pathD"
+          [attr.fill]="seg.color"
+          stroke="#ffffff"
+          stroke-width="2"
+          stroke-linejoin="round"
+          class="transition-all duration-300 hover:opacity-90"
         />
       </svg>
-      <div class="absolute inset-0 flex flex-col items-center justify-center">
-        <span class="text-[11.5px] font-medium text-[#8A7FA5]">Total Spent</span>
-        <span class="font-display text-[20px] font-bold text-[#1E1533]">{{ currency.format(total(), 0, 0) }}</span>
+    </div>
+
+    <!-- Inline Badge Legend (Square Swatch + Colored Label Text) -->
+    <div class="mt-4 flex max-w-[260px] flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[13px] font-medium leading-snug">
+      <div *ngFor="let seg of computedSegments()" class="flex items-center gap-1.5">
+        <span class="h-3 w-3 rounded-[2px] shrink-0" [style.background-color]="seg.color"></span>
+        <span [style.color]="seg.color" class="font-semibold">{{ seg.label }}</span>
       </div>
     </div>
 
-    <!-- legend -->
-    <ul class="w-full space-y-2.5 sm:max-w-[190px]">
-      <li *ngFor="let seg of segments()" class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-primary-50/70">
-        <div class="flex min-w-0 items-center gap-2.5">
-          <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.background]="seg.color"></span>
-          <span class="truncate text-[13px] font-medium text-[#4B4363]">{{ seg.label }}</span>
+    <!-- Category Percentage Breakdown List -->
+    <div class="mt-6 w-full space-y-3.5 border-t border-gray-100 pt-4">
+      <div
+        *ngFor="let seg of computedSegments()"
+        class="flex items-center justify-between text-sm"
+      >
+        <div class="flex items-center gap-3">
+          <span class="h-2.5 w-2.5 rounded-full shrink-0" [style.background-color]="seg.color"></span>
+          <span class="font-medium text-gray-700">{{ seg.label }}</span>
         </div>
-        <span class="shrink-0 text-[13px] font-semibold text-[#1E1533]">{{ seg.percent }}%</span>
-      </li>
-    </ul>
+        <span class="font-bold text-gray-900">{{ seg.percent }}%</span>
+      </div>
+    </div>
   </div>
+
+  <ng-template #emptyState>
+    <div class="mt-8 flex flex-col items-center justify-center py-10 text-gray-400">
+      <p class="text-sm font-medium text-gray-500">No expense transactions recorded yet</p>
+    </div>
+  </ng-template>
 </div>
+
+
