@@ -4,24 +4,35 @@ const AppError = require('../utils/AppError');
 const { roundToTwo, sum } = require('../utils/finance');
 const { serializeDocument, serializeDocuments } = require('../utils/serialize');
 
+const normalizeCountryKey = (countryStr) => {
+  const c = String(countryStr || '').toLowerCase().trim();
+  if (c === 'india' || c === 'in') return 'india';
+  if (c === 'usa' || c === 'united states' || c === 'us') return 'usa';
+  if (c === 'canada' || c === 'ca') return 'canada';
+  if (c === 'uk' || c === 'united kingdom' || c === 'gb') return 'uk';
+  return 'default';
+};
+
 const taxRules = {
   india: {
-    standardDeduction: 50000,
+    standardDeduction: 75000,
     deductibleExpenseCap: 0.7,
+    rebate87ALimit: 700000,
     brackets: [
-      { upTo: 300000, rate: 0 },
-      { upTo: 600000, rate: 0.05 },
-      { upTo: 900000, rate: 0.1 },
-      { upTo: 1200000, rate: 0.15 },
-      { upTo: 1500000, rate: 0.2 },
-      { upTo: Infinity, rate: 0.3 }
+      { upTo: 400000, rate: 0 },
+      { upTo: 800000, rate: 0.05 },
+      { upTo: 1200000, rate: 0.10 },
+      { upTo: 1500000, rate: 0.15 },
+      { upTo: 2000000, rate: 0.20 },
+      { upTo: 2400000, rate: 0.25 },
+      { upTo: Infinity, rate: 0.30 }
     ]
   },
   usa: {
     standardDeduction: 14600,
     deductibleExpenseCap: 0.8,
     brackets: [
-      { upTo: 11600, rate: 0.1 },
+      { upTo: 11600, rate: 0.10 },
       { upTo: 47150, rate: 0.12 },
       { upTo: 100525, rate: 0.22 },
       { upTo: 191950, rate: 0.24 },
@@ -31,7 +42,7 @@ const taxRules = {
     ]
   },
   canada: {
-    standardDeduction: 15000,
+    standardDeduction: 15705,
     deductibleExpenseCap: 0.75,
     brackets: [
       { upTo: 55867, rate: 0.15 },
@@ -45,17 +56,19 @@ const taxRules = {
     standardDeduction: 12570,
     deductibleExpenseCap: 0.75,
     brackets: [
-      { upTo: 50270, rate: 0.2 },
-      { upTo: 125140, rate: 0.4 },
+      { upTo: 12570, rate: 0 },
+      { upTo: 50270, rate: 0.20 },
+      { upTo: 125140, rate: 0.40 },
       { upTo: Infinity, rate: 0.45 }
     ]
   },
   default: {
-    standardDeduction: 0,
+    standardDeduction: 10000,
     deductibleExpenseCap: 0.7,
     brackets: [
-      { upTo: 50000, rate: 0.15 },
-      { upTo: 100000, rate: 0.2 },
+      { upTo: 30000, rate: 0.05 },
+      { upTo: 70000, rate: 0.12 },
+      { upTo: 150000, rate: 0.20 },
       { upTo: Infinity, rate: 0.25 }
     ]
   }
@@ -90,7 +103,8 @@ const getTaxEstimate = async (userId, query = {}, options = {}) => {
   }
 
   const user = serializeDocument(userObj);
-  const rules = taxRules[String(query.country || user.country || 'default').toLowerCase()] || taxRules.default;
+  const countryKey = normalizeCountryKey(query.country || user.country || 'india');
+  const rules = taxRules[countryKey] || taxRules.default;
   const now = new Date();
   const startOfYear = new Date(year, 0, 1);
   const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
@@ -114,12 +128,17 @@ const getTaxEstimate = async (userId, query = {}, options = {}) => {
   const annualizedExpenses = roundToTwo(ytdExpenses * (12 / monthsElapsed));
   const deductibleExpenses = roundToTwo(Math.min(annualizedExpenses, annualizedIncome * rules.deductibleExpenseCap));
   const taxableIncome = Math.max(0, annualizedIncome - deductibleExpenses - rules.standardDeduction);
-  const estimatedTax = computeTax(taxableIncome, rules.brackets);
-  const effectiveTaxRate = taxableIncome > 0 ? roundToTwo((estimatedTax / taxableIncome) * 100) : 0;
+
+  let estimatedTax = computeTax(taxableIncome, rules.brackets);
+  if (countryKey === 'india' && taxableIncome <= (rules.rebate87ALimit || 700000)) {
+    estimatedTax = 0;
+  }
+
+  const effectiveTaxRate = annualizedIncome > 0 ? roundToTwo((estimatedTax / annualizedIncome) * 100) : 0;
 
   const result = {
     year,
-    jurisdiction: String(query.country || user.country || 'default').toLowerCase(),
+    jurisdiction: countryKey,
     user: {
       id: userId,
       name: user.name,
@@ -157,7 +176,7 @@ const getTaxEstimate = async (userId, query = {}, options = {}) => {
 
 const calculateQuarterlyTax = async (userId, payload) => {
   const userObj = await User.findByPk(userId);
-  const countryKey = String(payload.country || userObj?.country || 'usa').toLowerCase();
+  const countryKey = normalizeCountryKey(payload.country || userObj?.country || 'india');
   const rules = taxRules[countryKey] || taxRules.default;
 
   const grossIncome = Number(payload.grossIncome || 0);
@@ -167,23 +186,26 @@ const calculateQuarterlyTax = async (userId, payload) => {
   const homeOfficeDeduction = Number(payload.homeOfficeDeduction || 0);
 
   const totalDeductions = roundToTwo(businessExpenses + retirementContributions + healthInsurance + homeOfficeDeduction);
-  const quarterlyStandardDeduction = roundToTwo(rules.standardDeduction / 4);
-  const taxableIncome = Math.max(0, grossIncome - totalDeductions - quarterlyStandardDeduction);
 
-  const quarterlyBrackets = rules.brackets.map((b) => ({
-    upTo: b.upTo === Infinity ? Infinity : b.upTo / 4,
-    rate: b.rate
-  }));
+  const annualGrossIncome = grossIncome * 4;
+  const annualDeductions = totalDeductions * 4;
+  const annualTaxableIncome = Math.max(0, annualGrossIncome - annualDeductions - rules.standardDeduction);
 
-  const estimatedQuarterlyTax = computeTax(taxableIncome, quarterlyBrackets);
-  const effectiveTaxRate = taxableIncome > 0 ? roundToTwo((estimatedQuarterlyTax / taxableIncome) * 100) : 0;
+  let annualTax = computeTax(annualTaxableIncome, rules.brackets);
+  if (countryKey === 'india' && annualTaxableIncome <= (rules.rebate87ALimit || 700000)) {
+    annualTax = 0;
+  }
+
+  const estimatedQuarterlyTax = roundToTwo(annualTax / 4);
+  const quarterlyTaxableIncome = roundToTwo(annualTaxableIncome / 4);
+  const effectiveTaxRate = grossIncome > 0 ? roundToTwo((estimatedQuarterlyTax / grossIncome) * 100) : 0;
   const monthlySetAside = roundToTwo(estimatedQuarterlyTax / 3);
 
   return {
-    country: payload.country || userObj?.country || 'USA',
-    state: payload.state || 'California',
+    country: payload.country || userObj?.country || 'India',
+    state: payload.state || 'Maharashtra',
     filingStatus: payload.filingStatus || 'Single',
-    quarter: payload.quarter || 'Q3 (Jul-Sep)',
+    quarter: payload.quarter || 'Q1 (Jan-Mar)',
     grossIncome: roundToTwo(grossIncome),
     deductions: {
       businessExpenses: roundToTwo(businessExpenses),
@@ -193,9 +215,9 @@ const calculateQuarterlyTax = async (userId, payload) => {
       totalDeductions
     },
     taxSummary: {
-      standardDeduction: quarterlyStandardDeduction,
-      taxableIncome: roundToTwo(taxableIncome),
-      estimatedQuarterlyTax: roundToTwo(estimatedQuarterlyTax),
+      standardDeduction: roundToTwo(rules.standardDeduction / 4),
+      taxableIncome: quarterlyTaxableIncome,
+      estimatedQuarterlyTax,
       effectiveTaxRate,
       monthlySetAside
     }
@@ -245,7 +267,7 @@ const getTaxCalendar = async (userId, yearInput) => {
 };
 
 const getDefaultDeadlinesForCountry = (country, year) => {
-  const c = String(country || 'default').toLowerCase();
+  const c = normalizeCountryKey(country);
   switch (c) {
     case 'india':
       return [
@@ -257,7 +279,6 @@ const getDefaultDeadlinesForCountry = (country, year) => {
         { title: '3rd Installment of Advance Tax', description: 'Pay 75% of advance tax for the current financial year.', dueDate: `${year}-12-15`, isCustom: false }
       ];
     case 'usa':
-    case 'united states':
       return [
         { title: 'Q4 Estimated Tax Payment', description: 'Due date for Q4 estimated tax payment for the previous year (Form 1040-ES).', dueDate: `${year}-01-15`, isCustom: false },
         { title: '1099-NEC Mailing Deadline', description: 'Deadline for businesses to mail Form 1099-NEC to independent contractors.', dueDate: `${year}-01-31`, isCustom: false },
@@ -277,7 +298,6 @@ const getDefaultDeadlinesForCountry = (country, year) => {
         { title: 'Q4 Personal Tax Installment', description: 'Fourth quarterly tax installment due for individuals.', dueDate: `${year}-12-15`, isCustom: false }
       ];
     case 'uk':
-    case 'united kingdom':
       return [
         { title: 'Online Self-Assessment Return & Payment', description: 'Deadline to file your online tax return and pay your tax bill for the previous tax year.', dueDate: `${year}-01-31`, isCustom: false },
         { title: 'First Payment on Account', description: 'First advance payment towards your next tax bill.', dueDate: `${year}-01-31`, isCustom: false },
