@@ -114,3 +114,28 @@ CREATE TABLE IF NOT EXISTS `tax_events` (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- -------------------------------------------------------
+-- 7. Tax Estimates Table
+-- -------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tax_estimates` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `country` VARCHAR(100),
+  `state` VARCHAR(100),
+  `filing_status` VARCHAR(100),
+  `quarter` VARCHAR(50),
+  `gross_income_for_quarter` DECIMAL(12, 2) DEFAULT 0.00,
+  `business_expenses` DECIMAL(12, 2) DEFAULT 0.00,
+  `retirement_contribution` DECIMAL(12, 2) DEFAULT 0.00,
+  `health_insurance_premiums` DECIMAL(12, 2) DEFAULT 0.00,
+  `home_office_deduction` DECIMAL(12, 2) DEFAULT 0.00,
+  `estimated_tax` DECIMAL(12, 2) DEFAULT 0.00,
+  `due_date` DATE,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_tax_estimates_userId`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
