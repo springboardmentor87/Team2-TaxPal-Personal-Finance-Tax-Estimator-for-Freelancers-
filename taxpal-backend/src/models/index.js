@@ -4,6 +4,7 @@ const Budget = require('./Budget');
 const Category = require('./Category');
 const Alert = require('./Alert');
 const TaxEvent = require('./TaxEvent');
+const TaxEstimate = require('./TaxEstimate');
 
 // Associations
 User.hasMany(Transaction, { foreignKey: 'userId', onDelete: 'CASCADE' });
@@ -21,11 +22,15 @@ Alert.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(TaxEvent, { foreignKey: 'userId', onDelete: 'CASCADE' });
 TaxEvent.belongsTo(User, { foreignKey: 'userId' });
 
+User.hasMany(TaxEstimate, { foreignKey: 'userId', onDelete: 'CASCADE' });
+TaxEstimate.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   User,
   Transaction,
   Budget,
   Category,
   Alert,
-  TaxEvent
+  TaxEvent,
+  TaxEstimate
 };

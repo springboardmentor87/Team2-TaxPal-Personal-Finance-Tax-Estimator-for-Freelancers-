@@ -201,6 +201,27 @@ const calculateQuarterlyTax = async (userId, payload) => {
   const effectiveTaxRate = grossIncome > 0 ? roundToTwo((estimatedQuarterlyTax / grossIncome) * 100) : 0;
   const monthlySetAside = roundToTwo(estimatedQuarterlyTax / 3);
 
+  // Persist calculation into TaxEstimate MySQL table
+  try {
+    const { TaxEstimate } = require('../models');
+    await TaxEstimate.create({
+      userId,
+      country: payload.country || userObj?.country || 'India',
+      state: payload.state || 'Maharashtra',
+      filingStatus: payload.filingStatus || 'Single',
+      quarter: payload.quarter || 'Q1',
+      grossIncomeForQuarter: grossIncome,
+      businessExpenses,
+      retirementContribution: retirementContributions,
+      healthInsurancePremiums: healthInsurance,
+      homeOfficeDeduction,
+      estimatedTax: estimatedQuarterlyTax,
+      dueDate: new Date().toISOString().slice(0, 10)
+    });
+  } catch (e) {
+    console.warn('Notice: Tax estimate record persistence:', e.message);
+  }
+
   return {
     country: payload.country || userObj?.country || 'India',
     state: payload.state || 'Maharashtra',
