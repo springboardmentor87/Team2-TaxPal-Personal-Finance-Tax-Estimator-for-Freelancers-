@@ -138,4 +138,22 @@ CREATE TABLE IF NOT EXISTS `tax_estimates` (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- -------------------------------------------------------
+-- 8. Reports Table
+-- -------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `reports` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `period` VARCHAR(100) NOT NULL DEFAULT 'Current Month',
+  `report_type` VARCHAR(100) NOT NULL DEFAULT 'Income Statement',
+  `file_path` VARCHAR(255),
+  `format` VARCHAR(20) NOT NULL DEFAULT 'PDF',
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_reports_userId`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
