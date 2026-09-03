@@ -84,6 +84,15 @@ export const routes: Routes = [
       ),
     title: "TaxPal — Tax Calendar",
   },
+  {
+    path: "reports",
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import("./pages/reports/reports.component").then(
+        (m) => m.ReportsComponent,
+      ),
+    title: "TaxPal — Reports",
+  },
 
   { path: "**", redirectTo: "dashboard" },
 ];

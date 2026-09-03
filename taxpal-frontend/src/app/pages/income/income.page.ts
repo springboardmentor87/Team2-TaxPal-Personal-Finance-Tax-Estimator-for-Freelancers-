@@ -1,18 +1,25 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AddIncomeCardComponent } from '../../components/add-income-card/add-income-card.component';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
-import { SummaryCardsComponent } from '../../components/summary-cards/summary-cards.component';
-import { TopbarComponent } from '../../components/topbar/topbar.component';
-import { TransactionsTableComponent } from '../../components/transactions-table/transactions-table.component';
-import { NewTransaction, Transaction } from '../../models/transaction.model';
-import { TransactionService } from '../../services/transaction.service';
-import { AuthService } from '../../services/auth.service';
-import { CurrencyService } from '../../services/currency.service';
+import { Component, OnInit, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+
+import { AddIncomeCardComponent } from "../../components/add-income-card/add-income-card.component";
+import { SidebarComponent } from "../../components/sidebar/sidebar.component";
+import { SummaryCardsComponent } from "../../components/summary-cards/summary-cards.component";
+import { TopbarComponent } from "../../components/topbar/topbar.component";
+import { TransactionsTableComponent } from "../../components/transactions-table/transactions-table.component";
+
+import { NewTransaction, Transaction } from "../../models/transaction.model";
+
+import { TransactionService } from "../../services/transaction.service";
+import { AuthService } from "../../services/auth.service";
+import { CurrencyService } from "../../services/currency.service";
+import { UiStateService } from "../../services/ui-state.service";
+
+import { ReportsComponent } from "../reports/reports.component";
 
 @Component({
-  selector: 'app-income-page',
+  selector: "app-income-page",
   standalone: true,
+
   imports: [
     CommonModule,
     SidebarComponent,
@@ -20,19 +27,25 @@ import { CurrencyService } from '../../services/currency.service';
     SummaryCardsComponent,
     AddIncomeCardComponent,
     TransactionsTableComponent,
+
+    // IMPORTANT: Reports must be here
+    ReportsComponent,
   ],
-  templateUrl: './income.page.html',
+
+  templateUrl: "./income.page.html",
 })
 export class IncomePageComponent implements OnInit {
   sidebarOpen = false;
+
   transactions: Transaction[] = [];
+
+  ui = inject(UiStateService);
+  auth = inject(AuthService);
+  currency = inject(CurrencyService);
 
   income = 0;
   expenses = 0;
   balance = 0;
-
-  auth = inject(AuthService);
-  currency = inject(CurrencyService);
 
   constructor(private readonly transactionService: TransactionService) {}
 
@@ -41,21 +54,22 @@ export class IncomePageComponent implements OnInit {
   }
 
   loadTransactions(): void {
-    this.transactionService.getTransactions('income').subscribe({
+    this.transactionService.getTransactions("income").subscribe({
       next: (res) => {
         this.transactions = res.data?.transactions || [];
       },
-      error: (err) => console.error('Error loading transactions', err)
+      error: (err) => console.error("Error loading transactions", err),
     });
-    
+
     this.transactionService.getDashboardSummary().subscribe({
       next: (res) => {
         const summary = res.data.summary;
+
         this.income = summary.totalIncome || 0;
         this.expenses = summary.totalExpenses || 0;
         this.balance = summary.currentBalance || 0;
       },
-      error: (err) => console.error('Error loading summary', err)
+      error: (err) => console.error("Error loading summary", err),
     });
   }
 
@@ -68,19 +82,21 @@ export class IncomePageComponent implements OnInit {
   }
 
   handleAdd(t: NewTransaction): void {
-    const data = { ...t, type: 'income' as const };
+    const data = {
+      ...t,
+      type: "income" as const,
+    };
+
     this.transactionService.addTransaction(data).subscribe({
       next: () => this.loadTransactions(),
-      error: (err) => console.error('Error adding transaction', err)
+      error: (err) => console.error("Error adding transaction", err),
     });
   }
 
   handleDelete(id: number): void {
     this.transactionService.deleteTransaction(id).subscribe({
       next: () => this.loadTransactions(),
-      error: (err) => console.error('Error deleting transaction', err)
+      error: (err) => console.error("Error deleting transaction", err),
     });
   }
-
 }
-

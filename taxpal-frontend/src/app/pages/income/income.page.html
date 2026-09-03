@@ -1,21 +1,43 @@
+```html
 <div class="flex min-h-screen bg-[#F8F7FC]">
-  <app-sidebar [open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
+  <!-- ================= SIDEBAR ================= -->
+  <app-sidebar
+    [open]="sidebarOpen"
+    (closeSidebar)="closeSidebar()"
+  ></app-sidebar>
 
+  <!-- ================= MAIN AREA ================= -->
   <div class="flex min-w-0 flex-1 flex-col">
-    <app-topbar (menuClick)="openSidebar()" [userName]="auth.currentUser()?.name"></app-topbar>
+    <!-- ================= TOPBAR ================= -->
+    <app-topbar
+      (menuClick)="openSidebar()"
+      [userName]="auth.currentUser()?.name"
+    ></app-topbar>
 
-    <main class="flex-1 space-y-5 p-4 md:space-y-6 md:p-8">
+    <!-- ================================================= -->
+    <!-- INCOME CONTENT -->
+    <!-- ================================================= -->
+    <main
+      *ngIf="!ui.showReports()"
+      class="flex-1 space-y-5 p-4 md:space-y-6 md:p-8"
+    >
+      <!-- ================= SUMMARY CARDS ================= -->
       <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <!-- Total Income -->
         <app-summary-cards
           title="Total Income"
           [amount]="currency.format(income, 0, 0)"
           icon="income"
         ></app-summary-cards>
+
+        <!-- Total Expenses -->
         <app-summary-cards
           title="Total Expenses"
           [amount]="currency.format(expenses, 0, 0)"
           icon="expense"
         ></app-summary-cards>
+
+        <!-- Remaining Balance -->
         <app-summary-cards
           title="Remaining Balance"
           [amount]="currency.format(balance, 0, 0)"
@@ -25,9 +47,12 @@
         ></app-summary-cards>
       </section>
 
+      <!-- ================= INCOME + TRANSACTIONS ================= -->
       <div class="grid grid-cols-1 gap-5 md:gap-6 xl:grid-cols-[380px_1fr]">
+        <!-- Add Income -->
         <app-add-income-card (add)="handleAdd($event)"></app-add-income-card>
 
+        <!-- Transactions -->
         <div class="min-w-0">
           <app-transactions-table
             [transactions]="transactions"
@@ -36,5 +61,13 @@
         </div>
       </div>
     </main>
+
+    <!-- ================================================= -->
+    <!-- REPORTS CONTENT -->
+    <!-- ================================================= -->
+    <main *ngIf="ui.showReports()" class="flex-1 p-4 md:p-8">
+      <app-reports></app-reports>
+    </main>
   </div>
 </div>
+```

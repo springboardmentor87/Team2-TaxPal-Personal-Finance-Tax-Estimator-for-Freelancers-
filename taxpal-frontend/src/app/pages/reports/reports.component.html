@@ -1,0 +1,275 @@
+<!-- ================= MAIN REPORT CONTENT ================= -->
+
+<main class="report-main">
+  <!-- ================= PAGE HEADER ================= -->
+
+  <header class="page-header">
+    <div class="flex items-center gap-3">
+      <!-- BACK BUTTON -->
+      <button
+        type="button"
+        (click)="onBack()"
+        class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition"
+      >
+        ← Back
+      </button>
+
+      <h1 class="page-title">Report Preview</h1>
+    </div>
+
+    <div class="header-actions">
+      <!-- Report Selection -->
+      <div class="report-select-wrap">
+        <label for="reportType" class="visually-hidden">
+          Select report type
+        </label>
+
+        <select
+          id="reportType"
+          class="report-select"
+          [ngModel]="selectedType()"
+          (ngModelChange)="onReportTypeChange($event)"
+        >
+          <option value="">Select report</option>
+
+          <option *ngFor="let option of reportOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Print -->
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onPrint()"
+        aria-label="Print report"
+      >
+        <span class="btn-icon">🖨</span>
+        <span>Print</span>
+      </button>
+
+      <!-- Download -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!report()"
+        (click)="onDownload()"
+        aria-label="Download report"
+      >
+        <span class="btn-icon">↓</span>
+        <span>Download</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= REPORT PREVIEW ================= -->
+
+  <section class="preview-card" aria-label="Report preview">
+    <!-- ================= EMPTY STATE ================= -->
+
+    <div class="empty-state" *ngIf="!report()">
+      <!-- Document Icon -->
+
+      <div class="empty-icon" aria-hidden="true">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 3H14L18 7V21H6V3Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+
+          <path
+            d="M14 3V7H18"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+
+          <path
+            d="M9 11H15"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+
+          <path
+            d="M9 15H15"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+
+      <h2 class="empty-title">Select a report to preview</h2>
+
+      <p class="empty-subtitle">
+        Generated reports will appear here before downloading
+      </p>
+    </div>
+
+    <!-- ================= GENERATED REPORT ================= -->
+
+    <div class="report-content" *ngIf="report() as currentReport">
+      <!-- Report Header -->
+
+      <div class="report-doc-header">
+        <span class="report-doc-brand"> TaxPal </span>
+
+        <h2 class="report-doc-title">
+          {{ currentReport.title }}
+        </h2>
+
+        <p class="report-doc-period">
+          {{ currentReport.periodLabel }}
+        </p>
+      </div>
+
+      <!-- ================= SUMMARY CARDS ================= -->
+
+      <div class="summary-grid">
+        <!-- Total Income -->
+
+        <div class="summary-card">
+          <span class="summary-label"> Total Income </span>
+
+          <span class="summary-value positive">
+            {{ formatCurrency(currentReport.summary.totalIncome) }}
+          </span>
+        </div>
+
+        <!-- Total Expenses -->
+
+        <div class="summary-card">
+          <span class="summary-label"> Total Expenses </span>
+
+          <span class="summary-value negative">
+            {{ formatCurrency(currentReport.summary.totalExpenses) }}
+          </span>
+        </div>
+
+        <!-- Net Profit -->
+
+        <div class="summary-card accent">
+          <span class="summary-label"> Net Profit </span>
+
+          <span
+            class="summary-value"
+            [class.positive]="currentReport.summary.netProfit >= 0"
+            [class.negative]="currentReport.summary.netProfit < 0"
+          >
+            {{ formatCurrency(currentReport.summary.netProfit) }}
+          </span>
+        </div>
+
+        <!-- Estimated Tax -->
+
+        <div class="summary-card">
+          <span class="summary-label"> Estimated Tax </span>
+
+          <span class="summary-value">
+            {{ formatCurrency(currentReport.summary.estimatedTax) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ================= TRANSACTION TABLE ================= -->
+
+      <div class="table-wrap" *ngIf="currentReport.items.length > 0">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+
+              <th scope="col">Description</th>
+
+              <th scope="col">Category</th>
+
+              <th scope="col" class="num">Income</th>
+
+              <th scope="col" class="num">Expense</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of currentReport.items">
+              <td>
+                {{ item.date | date: "dd MMM yyyy" }}
+              </td>
+
+              <td>
+                {{ item.description }}
+              </td>
+
+              <td>
+                <span class="category-pill">
+                  {{ item.category }}
+                </span>
+              </td>
+
+              <td class="num positive">
+                <ng-container *ngIf="item.income !== null">
+                  {{ formatCurrency(item.income) }}
+                </ng-container>
+
+                <ng-container *ngIf="item.income === null"> — </ng-container>
+              </td>
+
+              <td class="num negative">
+                <ng-container *ngIf="item.expense !== null">
+                  {{ formatCurrency(item.expense) }}
+                </ng-container>
+
+                <ng-container *ngIf="item.expense === null"> — </ng-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================= NO TRANSACTIONS ================= -->
+
+      <div class="empty-state" *ngIf="currentReport.items.length === 0">
+        <div class="empty-icon" aria-hidden="true">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 3H14L18 7V21H6V3Z"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+
+            <path
+              d="M14 3V7H18"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+
+        <h2 class="empty-title">No transactions available</h2>
+
+        <p class="empty-subtitle">
+          There is currently no transaction data for this report.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>

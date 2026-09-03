@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
+
 import { SidebarComponent } from "../../components/sidebar/sidebar.component";
 import { UiStateService } from "../../services/ui-state.service";
 import { SummaryCardsComponent } from "../../components/summary-cards/summary-cards.component";
@@ -10,6 +11,7 @@ import { TransactionsTableComponent } from "../../components/transactions-table/
 import { TransactionService } from "../../services/transaction.service";
 import { AuthService } from "../../services/auth.service";
 import { CurrencyService } from "../../services/currency.service";
+import { ReportsComponent } from "../reports/reports.component";
 
 @Component({
   selector: "app-dashboard",
@@ -22,33 +24,41 @@ import { CurrencyService } from "../../services/currency.service";
     IncomeExpenseChartComponent,
     ExpenseDonutChartComponent,
     TransactionsTableComponent,
+    ReportsComponent,
   ],
   templateUrl: "./dashboard.component.html",
 })
 export class DashboardComponent implements OnInit {
+  // Dashboard is shown initially
+
   sidebarOpen = false;
+
   ui = inject(UiStateService);
   auth = inject(AuthService);
   currency = inject(CurrencyService);
+
   private readonly transactionService = inject(TransactionService);
 
   summary: any = null;
 
   ngOnInit(): void {
+    this.ui.closeReports();
     this.transactionService.getDashboardSummary().subscribe({
       next: (res) => {
         this.summary = res.data;
       },
-      error: (err) => console.error("Error fetching dashboard summary", err)
+      error: (err) => console.error("Error fetching dashboard summary", err),
     });
   }
 
-  openSidebar() {
+  openSidebar(): void {
     this.sidebarOpen = true;
   }
 
-  closeSidebar() {
+  closeSidebar(): void {
     this.sidebarOpen = false;
   }
+  openReports(): void {
+    this.ui.openReports();
+  }
 }
-

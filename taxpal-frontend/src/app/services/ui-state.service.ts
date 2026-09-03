@@ -1,9 +1,11 @@
 import { Injectable, signal } from "@angular/core";
 
-@Injectable({ providedIn: "root" })
+@Injectable({
+  providedIn: "root",
+})
 export class UiStateService {
-  /** Controls the slide-in sidebar on tablet / mobile breakpoints */
   readonly mobileSidebarOpen = signal(false);
+  readonly showReports = signal(false);
 
   openSidebar(): void {
     this.mobileSidebarOpen.set(true);
@@ -15,5 +17,13 @@ export class UiStateService {
 
   toggleSidebar(): void {
     this.mobileSidebarOpen.update((v) => !v);
+  }
+
+  openReports(): void {
+    this.showReports.set(true);
+  }
+
+  closeReports(): void {
+    this.showReports.set(false);
   }
 }
