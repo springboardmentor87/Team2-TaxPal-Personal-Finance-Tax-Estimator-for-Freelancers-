@@ -28,6 +28,11 @@ const toCsv = (rows = [], columns = []) => {
   return [header, ...lines].join('\n');
 };
 
+const cleanPdfText = (val) => {
+  if (val === null || val === undefined) return '';
+  return String(val).replace(/₹/g, 'Rs. ');
+};
+
 // Executive Styled PDF Builder using PDFKit
 const createStyledPdfBuffer = ({ title, period, summaryCards = [], columns = [], rows = [] }) => {
   return new Promise((resolve, reject) => {
@@ -46,8 +51,8 @@ const createStyledPdfBuffer = ({ title, period, summaryCards = [], columns = [],
 
     // 1. Header Banner
     doc.fillColor('#6D28D9').fontSize(22).font('Helvetica-Bold').text('TaxPal', 40, 40);
-    doc.fillColor('#1E1533').fontSize(16).font('Helvetica-Bold').text(title, 40, 68);
-    doc.fillColor('#6B7280').fontSize(9).font('Helvetica').text(`Period: ${period || 'Current Month'}   |   Generated: ${generatedDate}`, 40, 90);
+    doc.fillColor('#1E1533').fontSize(16).font('Helvetica-Bold').text(cleanPdfText(title), 40, 68);
+    doc.fillColor('#6B7280').fontSize(9).font('Helvetica').text(`Period: ${cleanPdfText(period || 'Current Month')}   |   Generated: ${generatedDate}`, 40, 90);
 
     doc.moveTo(40, 105).lineTo(555, 105).strokeColor('#E5E7EB').lineWidth(1).stroke();
 
@@ -63,8 +68,8 @@ const createStyledPdfBuffer = ({ title, period, summaryCards = [], columns = [],
       summaryCards.forEach((card, idx) => {
         const xPos = 40 + idx * (boxWidth + gap);
         doc.roundedRect(xPos, currentY, boxWidth, 48, 6).fillAndStroke('#FBF9FE', '#EDE9FE');
-        doc.fillColor('#6B7280').fontSize(8).font('Helvetica-Bold').text(String(card.label).toUpperCase(), xPos + 10, currentY + 10);
-        doc.fillColor('#1E1533').fontSize(13).font('Helvetica-Bold').text(String(card.value), xPos + 10, currentY + 25);
+        doc.fillColor('#6B7280').fontSize(8).font('Helvetica-Bold').text(cleanPdfText(card.label).toUpperCase(), xPos + 10, currentY + 10);
+        doc.fillColor('#1E1533').fontSize(13).font('Helvetica-Bold').text(cleanPdfText(card.value), xPos + 10, currentY + 25);
       });
       currentY += 65;
     }
@@ -74,7 +79,7 @@ const createStyledPdfBuffer = ({ title, period, summaryCards = [], columns = [],
       doc.rect(40, currentY, 515, 24).fill('#6D28D9');
       let xOffset = 45;
       columns.forEach((col) => {
-        doc.fillColor('#FFFFFF').fontSize(9).font('Helvetica-Bold').text(col.label.toUpperCase(), xOffset, currentY + 7, {
+        doc.fillColor('#FFFFFF').fontSize(9).font('Helvetica-Bold').text(cleanPdfText(col.label).toUpperCase(), xOffset, currentY + 7, {
           width: col.width - 10,
           align: col.align || 'left'
         });
@@ -99,7 +104,7 @@ const createStyledPdfBuffer = ({ title, period, summaryCards = [], columns = [],
           let cellX = 45;
           columns.forEach((col) => {
             const val = col.value(row);
-            doc.fillColor('#374151').fontSize(8.5).font('Helvetica').text(String(val), cellX, currentY + 6, {
+            doc.fillColor('#374151').fontSize(8.5).font('Helvetica').text(cleanPdfText(val), cellX, currentY + 6, {
               width: col.width - 10,
               align: col.align || 'left'
             });
