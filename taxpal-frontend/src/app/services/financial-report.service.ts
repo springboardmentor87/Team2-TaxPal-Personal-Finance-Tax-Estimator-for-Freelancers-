@@ -28,7 +28,7 @@ export interface ApiResponse<T> {
 export interface ReportPreviewData {
   report: Report;
   preview: {
-    type: 'tax' | 'dashboard' | 'transactions' | 'expense';
+    type: 'tax' | 'dashboard' | 'transactions' | 'expense' | 'income';
     summary?: any;
     estimate?: any;
     lines?: Array<{ label: string; value: any }>;
