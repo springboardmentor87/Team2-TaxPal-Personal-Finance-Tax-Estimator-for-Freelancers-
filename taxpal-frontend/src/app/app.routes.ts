@@ -86,24 +86,13 @@ export const routes: Routes = [
   },
 
   {
-  path: "reports",
-  canActivate: [authGuard],
-
-  loadComponent: () =>
-    import("./pages/financial-report/report.component").then(
-      (m) => m.ReportComponent,
-    ),
-
-  title: "TaxPal — Financial Reports",
-  },
-  {
     path: "reports",
     canActivate: [authGuard],
     loadComponent: () =>
-      import("./pages/reports/reports.component").then(
-        (m) => m.ReportsComponent,
+      import("./pages/financial-report/report.component").then(
+        (m) => m.ReportComponent,
       ),
-    title: "TaxPal — Reports",
+    title: "TaxPal — Financial Reports",
   },
 
   { path: "**", redirectTo: "dashboard" },

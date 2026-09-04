@@ -147,16 +147,15 @@
       </li>
 
       <!-- Reports -->
-      <!-- IMPORTANT: No routerLink here -->
       <li>
-        <button
-          type="button"
-          (click)="onReportsClick()"
-          class="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition text-left"
+        <a
+          routerLink="/reports"
+          routerLinkActive="bg-purple-50 text-purple-700"
+          class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[#4B4363] hover:bg-purple-50 hover:text-purple-700 transition"
         >
           <span class="text-purple-500">📊</span>
           Reports
-        </button>
+        </a>
       </li>
     </ul>
   </nav>

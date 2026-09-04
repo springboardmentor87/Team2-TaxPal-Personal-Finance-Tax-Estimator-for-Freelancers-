@@ -16,7 +16,7 @@ export interface Report {
 export interface GenerateReportRequest {
   reportType: string;
   period: string;
-  format: 'pdf' | 'csv';
+  format: 'PDF' | 'CSV' | 'pdf' | 'csv';
 }
 
 export interface ApiResponse<T> {
@@ -25,46 +25,43 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface ReportPreviewData {
+  report: Report;
+  preview: {
+    type: 'tax' | 'dashboard' | 'transactions' | 'expense' | 'income';
+    summary?: any;
+    estimate?: any;
+    lines?: Array<{ label: string; value: any }>;
+    transactions?: Array<any>;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
-
   private readonly http = inject(HttpClient);
-
   private readonly apiUrl = 'http://localhost:5000/api/reports';
-
-  // =========================
-  // Get Recent Reports
-  // =========================
 
   getReports(): Observable<ApiResponse<Report[]>> {
     return this.http.get<ApiResponse<Report[]>>(this.apiUrl);
   }
 
-  // =========================
-  // Generate Report
-  // =========================
-
-  generateReport(
-    data: GenerateReportRequest
-  ): Observable<ApiResponse<Report>> {
-    return this.http.post<ApiResponse<Report>>(
-      this.apiUrl,
-      data
-    );
+  generateReport(data: GenerateReportRequest): Observable<ApiResponse<Report>> {
+    return this.http.post<ApiResponse<Report>>(this.apiUrl, data);
   }
 
-  // =========================
-  // Delete Report
-  // =========================
+  deleteReport(id: number): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${id}`);
+  }
 
-  deleteReport(
-    id: number
-  ): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(
-      `${this.apiUrl}/${id}`
-    );
+  downloadReport(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/download`, {
+      responseType: 'blob'
+    });
+  }
+
+  getReportPreview(id: number): Observable<ApiResponse<ReportPreviewData>> {
+    return this.http.get<ApiResponse<ReportPreviewData>>(`${this.apiUrl}/${id}/preview`);
   }
 }
-
