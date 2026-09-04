@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import {
   FormBuilder,
@@ -16,6 +16,7 @@ import {
 import { SidebarComponent } from "../../components/sidebar/sidebar.component";
 import { TopbarComponent } from "../../components/topbar/topbar.component";
 import { AuthService } from "../../services/auth.service";
+import { NotificationService } from "../../services/notification.service";
 
 @Component({
   selector: "app-tax-estimator",
@@ -32,6 +33,7 @@ import { AuthService } from "../../services/auth.service";
   styleUrls: ["./tax-estimator.component.css"],
 })
 export class TaxEstimatorComponent {
+  public notificationService = inject(NotificationService);
   // ============================================================
   // SIDEBAR
   // ============================================================
@@ -382,6 +384,21 @@ export class TaxEstimatorComponent {
     };
 
     console.log("Tax calculation request:", formData);
+
+    const totalDeductions =
+      formData.businessExpenses +
+      formData.retirementContributions +
+      formData.healthInsurancePremiums +
+      formData.homeOfficeDeduction;
+
+    if (totalDeductions > formData.grossIncome) {
+      const deficit = totalDeductions - formData.grossIncome;
+      this.notificationService.notifyOutOfBalance(
+        deficit,
+        "Quarterly Tax Calculator",
+        this.currencySymbol
+      );
+    }
 
     this.taxService.calculateTax(formData).subscribe({
       next: (result: TaxEstimateResult) => {
