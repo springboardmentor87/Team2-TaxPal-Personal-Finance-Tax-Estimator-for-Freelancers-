@@ -19,12 +19,11 @@ const taxRules = {
     deductibleExpenseCap: 0.7,
     rebate87ALimit: 700000,
     brackets: [
-      { upTo: 400000, rate: 0 },
-      { upTo: 800000, rate: 0.05 },
-      { upTo: 1200000, rate: 0.10 },
-      { upTo: 1500000, rate: 0.15 },
-      { upTo: 2000000, rate: 0.20 },
-      { upTo: 2400000, rate: 0.25 },
+      { upTo: 300000, rate: 0 },
+      { upTo: 700000, rate: 0.05 },
+      { upTo: 1000000, rate: 0.10 },
+      { upTo: 1200000, rate: 0.15 },
+      { upTo: 1500000, rate: 0.20 },
       { upTo: Infinity, rate: 0.30 }
     ]
   },
@@ -127,10 +126,10 @@ const getTaxEstimate = async (userId, query = {}, options = {}) => {
   const annualizedIncome = roundToTwo(ytdIncome * (12 / monthsElapsed));
   const annualizedExpenses = roundToTwo(ytdExpenses * (12 / monthsElapsed));
   const deductibleExpenses = roundToTwo(Math.min(annualizedExpenses, annualizedIncome * rules.deductibleExpenseCap));
-  const taxableIncome = Math.max(0, annualizedIncome - deductibleExpenses - rules.standardDeduction);
+  const taxableIncome = Math.max(0, annualizedIncome - deductibleExpenses);
 
   let estimatedTax = computeTax(taxableIncome, rules.brackets);
-  if (countryKey === 'india' && taxableIncome <= (rules.rebate87ALimit || 700000)) {
+  if (countryKey === 'india' && taxableIncome <= 300000) {
     estimatedTax = 0;
   }
 
@@ -187,17 +186,16 @@ const calculateQuarterlyTax = async (userId, payload) => {
 
   const totalDeductions = roundToTwo(businessExpenses + retirementContributions + healthInsurance + homeOfficeDeduction);
 
-  const annualGrossIncome = grossIncome * 4;
-  const annualDeductions = totalDeductions * 4;
-  const annualTaxableIncome = Math.max(0, annualGrossIncome - annualDeductions - rules.standardDeduction);
+  const quarterlyNetIncome = Math.max(0, grossIncome - totalDeductions);
+  const annualTaxableIncome = quarterlyNetIncome * 4;
 
   let annualTax = computeTax(annualTaxableIncome, rules.brackets);
-  if (countryKey === 'india' && annualTaxableIncome <= (rules.rebate87ALimit || 700000)) {
+  if (countryKey === 'india' && annualTaxableIncome <= 300000) {
     annualTax = 0;
   }
 
   const estimatedQuarterlyTax = roundToTwo(annualTax / 4);
-  const quarterlyTaxableIncome = roundToTwo(annualTaxableIncome / 4);
+  const quarterlyTaxableIncome = roundToTwo(quarterlyNetIncome);
   const effectiveTaxRate = grossIncome > 0 ? roundToTwo((estimatedQuarterlyTax / grossIncome) * 100) : 0;
   const monthlySetAside = roundToTwo(estimatedQuarterlyTax / 3);
 

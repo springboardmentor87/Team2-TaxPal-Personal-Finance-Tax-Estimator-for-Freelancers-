@@ -90,21 +90,19 @@ const getBudgetWithUsage = async (userId, budgetObj) => {
   }
 
   const budget = serializeDocument(budgetObj);
-  let range;
 
-  if ((!budget.period || budget.period === 'monthly') && budget.month && /^\d{4}-\d{2}$/.test(budget.month)) {
-    const [year, monthNum] = budget.month.split('-').map(Number);
-    const start = new Date(year, monthNum - 1, 1, 0, 0, 0, 0);
-    const end = new Date(year, monthNum, 0, 23, 59, 59, 999);
-    range = { start, end };
-  } else {
-    range = getPeriodRange(budget.period || 'monthly', new Date());
-  }
+  // Always compute spending against the CURRENT period, not the stored month.
+  // The stored month is used only for display/labelling purposes.
+  const range = getPeriodRange(budget.period || 'monthly', new Date());
 
   const allExpenseTransactions = await Transaction.findAll({
     where: {
       userId,
-      type: 'expense'
+      type: 'expense',
+      date: {
+        [Op.gte]: range.start,
+        [Op.lte]: range.end
+      }
     }
   });
 
@@ -113,20 +111,10 @@ const getBudgetWithUsage = async (userId, budgetObj) => {
 
   const matchingTransactions = transactions.filter((t) => {
     const tCategory = String(t.category || '').trim().toLowerCase();
-    if (tCategory !== targetCategory) {
-      return false;
-    }
-
-    if (t.date && range) {
-      const tDate = new Date(t.date);
-      if (!Number.isNaN(tDate.getTime())) {
-        return tDate >= range.start && tDate <= range.end;
-      }
-    }
-    return true;
+    return tCategory === targetCategory;
   });
 
-  const spent = roundToTwo(sum(matchingTransactions.map((transaction) => transaction.amount)));
+  const spent = roundToTwo(sum(matchingTransactions.map((transaction) => Math.abs(transaction.amount))));
   const remaining = roundToTwo(Number(budget.amount || 0) - spent);
   const utilization = budget.amount ? roundToTwo((spent / Number(budget.amount)) * 100) : 0;
   const thresholdPercent = (budget.alertThreshold || 0.8) * 100;
@@ -145,6 +133,7 @@ const getBudgetWithUsage = async (userId, budgetObj) => {
     }
   };
 };
+
 
 const createBudget = async (userId, payload) => {
   const budgetData = normalizeBudgetInput(payload);

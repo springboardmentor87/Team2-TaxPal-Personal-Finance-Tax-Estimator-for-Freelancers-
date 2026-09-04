@@ -16,25 +16,131 @@
   </div>
 
   <!-- Search + Notifications + Profile -->
-  <div class="ml-auto flex items-center gap-3.5">
+  <div class="relative ml-auto flex items-center gap-3.5">
     <!-- Search Bar -->
-    <div class="relative hidden w-64 items-center md:flex sm:w-80">
+    <!-- <div class="relative hidden w-64 items-center md:flex sm:w-80">
       <lucide-icon name="Search" class="pointer-events-none absolute left-4 h-4 w-4 text-gray-400"></lucide-icon>
       <input
         type="search"
-        placeholder="Search transactions..."
+        placeholder="  Search transactions..."
         class="h-10 w-full rounded-full border border-gray-300 bg-white pl-11 pr-4 text-sm text-gray-800 outline-none transition-all placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
       />
-    </div>
+    </div> -->
 
     <!-- Notification Bell Button -->
-    <button
-      class="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition-colors hover:bg-gray-50"
-      aria-label="Notifications"
-    >
-      <lucide-icon name="Bell" class="h-4 w-4 text-gray-600"></lucide-icon>
-      <span class="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[#10B981] ring-2 ring-white"></span>
-    </button>
+    <div class="relative">
+      <button
+        (click)="toggleNotifications()"
+        class="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition-all hover:bg-purple-50 hover:border-purple-200"
+        aria-label="Notifications"
+      >
+        <lucide-icon name="Bell" class="h-4 w-4 text-gray-600"></lucide-icon>
+        <span
+          *ngIf="notificationService.unreadCount() > 0"
+          class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white shadow-md ring-2 ring-white animate-pulse"
+        >
+          {{ notificationService.unreadCount() }}
+        </span>
+      </button>
+
+      <!-- Top-Right Dynamic Notification History Dropdown Panel -->
+      <div
+        *ngIf="showNotificationsDropdown"
+        class="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-purple-100 bg-white p-4 shadow-2xl transition-all animate-slide-in-right"
+      >
+        <!-- Dropdown Header -->
+        <div class="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold text-[#1E1533]">Notification History</h3>
+            <span class="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700">
+              {{ notificationService.notifications().length }}
+            </span>
+          </div>
+
+          <button
+            (click)="notificationService.clearAll()"
+            class="text-xs font-medium text-purple-600 hover:text-purple-800 transition"
+          >
+            Clear all
+          </button>
+        </div>
+
+        <!-- Notification History List -->
+        <div class="max-h-80 overflow-y-auto space-y-2.5 pr-1">
+          <div
+            *ngFor="let item of notificationService.notifications()"
+            class="relative rounded-xl border p-3 transition-all hover:shadow-sm"
+            [ngClass]="{
+              'border-red-200 bg-red-50/60': item.type === 'error' || item.category === 'balance',
+              'border-amber-200 bg-amber-50/60': item.type === 'warning' && item.category !== 'balance',
+              'border-purple-100 bg-purple-50/40': item.type === 'info' || item.type === 'success'
+            }"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <span *ngIf="item.type === 'error' || item.category === 'balance'" class="text-sm">🚨</span>
+                <span *ngIf="item.type === 'warning' && item.category !== 'balance'" class="text-sm">⚠️</span>
+                <span *ngIf="item.type === 'info'" class="text-sm">💡</span>
+                <span *ngIf="item.type === 'success'" class="text-sm">✅</span>
+
+                <span class="text-xs font-bold text-[#1E1533]">
+                  {{ item.title }}
+                </span>
+              </div>
+
+              <span class="text-[10px] font-medium text-gray-400 whitespace-nowrap">
+                {{ formatTimeAgo(item.timestamp) }}
+              </span>
+            </div>
+
+            <p class="mt-1 text-xs text-gray-600 leading-relaxed">
+              {{ item.message }}
+            </p>
+
+            <!-- Category Pill -->
+            <div class="mt-2 flex items-center justify-between">
+              <span
+                class="rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                [ngClass]="{
+                  'bg-red-100 text-red-700': item.category === 'balance',
+                  'bg-amber-100 text-amber-700': item.category === 'budget',
+                  'bg-purple-100 text-purple-700': item.category === 'tax',
+                  'bg-gray-100 text-gray-600': item.category === 'system'
+                }"
+              >
+                {{ item.category }}
+              </span>
+
+              <button
+                (click)="notificationService.clearNotification(item.id)"
+                class="text-[10px] text-gray-400 hover:text-gray-600"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div
+            *ngIf="notificationService.notifications().length === 0"
+            class="py-8 text-center"
+          >
+            <span class="text-2xl">🔔</span>
+            <p class="mt-2 text-xs text-gray-500 font-medium">No notifications in history</p>
+          </div>
+        </div>
+
+        <!-- Dropdown Footer -->
+        <div class="mt-3 border-t border-gray-100 pt-2 text-center">
+          <button
+            (click)="closeNotifications()"
+            class="text-xs text-gray-500 hover:text-gray-700 font-medium"
+          >
+            Close Panel
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- User Profile Avatar -->
     <div class="flex items-center gap-2.5 pl-1">
@@ -49,3 +155,66 @@
   </div>
 </header>
 
+<!-- =========================================================================
+     BOTTOM-RIGHT FLOATING TOAST POPUPS (DARK GLASSMORPHISM HIGH-CONTRAST)
+     ========================================================================= -->
+<div
+  class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm sm:max-w-md w-full px-4 sm:px-0 pointer-events-none"
+>
+  <div
+    *ngFor="let toast of notificationService.toasts()"
+    class="pointer-events-auto flex items-start gap-3.5 rounded-2xl p-4.5 bg-slate-900/95 text-white shadow-2xl border backdrop-blur-xl transition-all animate-slide-in-right shadow-slate-950/60"
+    [ngClass]="{
+      'border-l-4 border-l-red-500 border-y border-r border-slate-800/90 shadow-red-950/30': toast.type === 'error',
+      'border-l-4 border-l-amber-500 border-y border-r border-slate-800/90 shadow-amber-950/30': toast.type === 'warning',
+      'border-l-4 border-l-purple-500 border-y border-r border-slate-800/90 shadow-purple-950/30': toast.type === 'info',
+      'border-l-4 border-l-emerald-500 border-y border-r border-slate-800/90 shadow-emerald-950/30': toast.type === 'success'
+    }"
+  >
+    <!-- Icon Container -->
+    <div class="mt-0.5 shrink-0">
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-xl transition-transform"
+        [ngClass]="{
+          'bg-red-500/15 text-red-400 ring-1 ring-red-500/30': toast.type === 'error',
+          'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30': toast.type === 'warning',
+          'bg-purple-500/15 text-purple-400 ring-1 ring-purple-500/30': toast.type === 'info',
+          'bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30': toast.type === 'success'
+        }"
+      >
+        <span *ngIf="toast.type === 'error'" class="text-xl">🚨</span>
+        <span *ngIf="toast.type === 'warning'" class="text-xl">⚠️</span>
+        <span *ngIf="toast.type === 'info'" class="text-xl">💡</span>
+        <span *ngIf="toast.type === 'success'" class="text-xl">✅</span>
+      </div>
+    </div>
+
+    <!-- Text Content -->
+    <div class="flex-1 min-w-0 pr-1">
+      <div class="flex items-center gap-2">
+        <h4 class="text-xs font-bold tracking-wider uppercase text-slate-100">
+          {{ toast.title }}
+        </h4>
+        <span
+          *ngIf="toast.type === 'error'"
+          class="rounded-full bg-red-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-400 border border-red-500/20"
+        >
+          DEFICIT
+        </span>
+      </div>
+
+      <p class="mt-1.5 text-xs font-medium leading-relaxed text-slate-300">
+        {{ toast.message }}
+      </p>
+    </div>
+
+    <!-- Dismiss Button -->
+    <button
+      (click)="dismissToast(toast.id)"
+      class="shrink-0 text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-slate-800"
+      aria-label="Dismiss toast"
+    >
+      <lucide-icon name="X" class="h-4 w-4"></lucide-icon>
+    </button>
+  </div>
+</div>

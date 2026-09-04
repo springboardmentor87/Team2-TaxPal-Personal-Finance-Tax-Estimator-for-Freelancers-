@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { BudgetService } from '../../services/budget.service';
 import { CategoryService, CategoryItem } from '../../services/category.service';
 import { CurrencyService } from '../../services/currency.service';
+import { NotificationService } from '../../services/notification.service';
 import {
   Budget,
   NewBudget,
@@ -68,6 +69,7 @@ export class BudgetComponent implements OnInit {
 
   categoryService = inject(CategoryService);
   currency = inject(CurrencyService);
+  notificationService = inject(NotificationService);
 
   constructor(
     private budgetService: BudgetService,
@@ -210,11 +212,21 @@ export class BudgetComponent implements OnInit {
       return;
     }
 
-    const statuses = this.budgets.map((b) => b.usage?.status).filter(Boolean);
+    const overBudgets = this.budgets.filter((b) => b.usage?.status === 'over' || (b.usage?.spent || 0) > b.amount);
+    const warningBudgets = this.budgets.filter((b) => b.usage?.status === 'warning');
 
-    if (statuses.includes('over')) {
+    if (overBudgets.length > 0) {
       this.budgetHealth = 'Over Budget';
-    } else if (statuses.includes('warning')) {
+      overBudgets.forEach((item) => {
+        const spent = item.usage?.spent || 0;
+        this.notificationService.notifyBudgetWarning(
+          item.category || item.name || 'Budget Category',
+          spent,
+          item.amount,
+          this.currency.currencySymbol()
+        );
+      });
+    } else if (warningBudgets.length > 0) {
       this.budgetHealth = 'Warning';
     } else {
       this.budgetHealth = 'Good';

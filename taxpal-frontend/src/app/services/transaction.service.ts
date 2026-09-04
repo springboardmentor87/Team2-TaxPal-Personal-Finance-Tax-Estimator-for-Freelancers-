@@ -1,13 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Transaction, NewTransaction } from '../models/transaction.model';
+import { NotificationService } from './notification.service';
+import { CurrencyService } from './currency.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TransactionService {
   private apiUrl = 'http://localhost:5000/api';
+  private notificationService = inject(NotificationService);
+  private currency = inject(CurrencyService);
 
   constructor(private http: HttpClient) {}
 
@@ -28,6 +32,26 @@ export class TransactionService {
   }
 
   getDashboardSummary(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/dashboard/summary`);
+    return this.http.get<any>(`${this.apiUrl}/dashboard/summary`).pipe(
+      tap((res) => {
+        const summary = res?.data?.summary || res?.data || res?.summary;
+        if (!summary || typeof summary.currentBalance !== 'number') return;
+
+        const balance = summary.currentBalance;
+        const symbol = this.currency.currencySymbol();
+
+        if (balance < 0) {
+          // Only fires the toast ONCE per session until balance goes positive again
+          this.notificationService.notifyOutOfBalance(
+            Math.abs(balance),
+            'Account Balance',
+            symbol
+          );
+        } else {
+          // Balance is healthy — re-arm the toast so it fires again if balance goes negative
+          this.notificationService.resolveOutOfBalance('Account Balance');
+        }
+      })
+    );
   }
 }

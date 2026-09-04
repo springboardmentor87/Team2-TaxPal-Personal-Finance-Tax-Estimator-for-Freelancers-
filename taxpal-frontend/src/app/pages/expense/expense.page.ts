@@ -50,10 +50,12 @@ export class ExpensePageComponent implements OnInit {
 
     this.transactionService.getDashboardSummary().subscribe({
       next: (res) => {
-        const summary = res.data.summary;
-        this.income = summary.totalIncome || 0;
-        this.expenses = summary.totalExpenses || 0;
-        this.balance = summary.currentBalance || 0;
+        const summary = res.data?.summary || res.data || res.summary;
+        if (summary) {
+          this.income = summary.totalIncome || 0;
+          this.expenses = summary.totalExpenses || 0;
+          this.balance = summary.currentBalance || 0;
+        }
       },
       error: (err) => console.error('Error loading summary', err)
     });
@@ -70,7 +72,9 @@ export class ExpensePageComponent implements OnInit {
   handleAdd(t: NewTransaction): void {
     const data = { ...t, type: 'expense' as const };
     this.transactionService.addTransaction(data).subscribe({
-      next: () => this.loadTransactions(),
+      next: () => {
+        this.loadTransactions();
+      },
       error: (err) => console.error('Error adding transaction', err)
     });
   }
@@ -81,6 +85,4 @@ export class ExpensePageComponent implements OnInit {
       error: (err) => console.error('Error deleting transaction', err)
     });
   }
-
 }
-
