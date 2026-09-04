@@ -7,6 +7,7 @@ const {
   deleteReportById,
   generateReportRecord,
   getReportById,
+  getReportPreviewData,
   getReportsList
 } = require('../services/reportService');
 

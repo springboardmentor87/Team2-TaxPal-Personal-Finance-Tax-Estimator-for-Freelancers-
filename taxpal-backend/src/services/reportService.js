@@ -302,6 +302,10 @@ const deleteReportById = async (userId, reportId) => {
     }
   }
 
+  await reportObj.destroy();
+  return { success: true, message: 'Report deleted successfully' };
+};
+
 const getReportPreviewData = async (userId, reportId) => {
   const reportObj = await Report.findOne({
     where: { id: reportId, userId }
@@ -322,11 +326,11 @@ const getReportPreviewData = async (userId, reportId) => {
       estimate: taxData.estimate,
       lines: [
         { label: 'Jurisdiction', value: String(taxData.estimate.jurisdiction || 'INDIA').toUpperCase() },
-        { label: 'Annualized Income', value: taxData.estimate.income?.annualized },
-        { label: 'Deductible Expenses', value: taxData.estimate.expenses?.deductible },
-        { label: 'Taxable Income', value: taxData.estimate.tax?.taxableIncome },
-        { label: 'Estimated Tax', value: taxData.estimate.tax?.estimatedTax },
-        { label: 'Effective Tax Rate', value: `${taxData.estimate.tax?.effectiveTaxRate}%` }
+        { label: 'Annualized Income', value: `₹${taxData.estimate.income?.annualized || 0}` },
+        { label: 'Deductible Expenses', value: `₹${taxData.estimate.expenses?.deductible || 0}` },
+        { label: 'Taxable Income', value: `₹${taxData.estimate.tax?.taxableIncome || 0}` },
+        { label: 'Estimated Tax', value: `₹${taxData.estimate.tax?.estimatedTax || 0}` },
+        { label: 'Effective Tax Rate', value: `${taxData.estimate.tax?.effectiveTaxRate || 0}%` }
       ]
     };
   } else if (report.reportType.toLowerCase().includes('dashboard') || report.reportType.toLowerCase().includes('executive')) {
@@ -335,14 +339,37 @@ const getReportPreviewData = async (userId, reportId) => {
       type: 'dashboard',
       summary: dashData.summary?.summary,
       lines: [
-        { label: 'Monthly Income', value: dashData.summary?.summary?.monthlyIncome },
-        { label: 'Monthly Expenses', value: dashData.summary?.summary?.monthlyExpenses },
-        { label: 'Net Cash Flow', value: dashData.summary?.summary?.netCashFlow },
-        { label: 'Savings Rate', value: `${dashData.summary?.summary?.savingsRate}%` }
+        { label: 'Monthly Income', value: `₹${dashData.summary?.summary?.monthlyIncome || 0}` },
+        { label: 'Monthly Expenses', value: `₹${dashData.summary?.summary?.monthlyExpenses || 0}` },
+        { label: 'Net Cash Flow', value: `₹${dashData.summary?.summary?.netCashFlow || 0}` },
+        { label: 'Savings Rate', value: `${dashData.summary?.summary?.savingsRate || 0}%` }
       ]
     };
+  } else if (report.reportType.toLowerCase().includes('expense')) {
+    let transData = await buildTransactionsReport(userId, { from: start, to: end });
+    if (transData.transactions.length === 0) {
+      transData = await buildTransactionsReport(userId, {});
+    }
+    const expenses = transData.transactions.filter(t => t.type === 'expense');
+    const categoryTotals = {};
+    expenses.forEach(t => {
+      categoryTotals[t.category] = (categoryTotals[t.category] || 0) + Number(t.amount || 0);
+    });
+    const categoryLines = Object.keys(categoryTotals).map(cat => ({
+      label: cat,
+      value: `₹${categoryTotals[cat]}`
+    }));
+    previewDetails = {
+      type: 'expense',
+      summary: transData.summary,
+      lines: categoryLines.length > 0 ? categoryLines : [{ label: 'Total Expenses', value: `₹${transData.summary.expenses || 0}` }],
+      transactions: expenses.slice(0, 15)
+    };
   } else {
-    const transData = await buildTransactionsReport(userId, { from: start, to: end });
+    let transData = await buildTransactionsReport(userId, { from: start, to: end });
+    if (transData.transactions.length === 0) {
+      transData = await buildTransactionsReport(userId, {});
+    }
     previewDetails = {
       type: 'transactions',
       summary: transData.summary,

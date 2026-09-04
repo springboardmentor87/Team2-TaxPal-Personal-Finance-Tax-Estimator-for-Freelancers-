@@ -273,6 +273,14 @@
             </div>
           </div>
 
+          <!-- Expense Breakdown Report Preview Metrics -->
+          <div *ngIf="previewData?.type === 'expense' && previewData?.lines" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div *ngFor="let item of previewData?.lines" class="rounded-xl border border-red-100 p-4 bg-red-50/30">
+              <p class="text-xs font-medium text-red-700 uppercase tracking-wider">{{ item.label }}</p>
+              <p class="text-lg font-bold text-[#1E1533] mt-1">{{ item.value }}</p>
+            </div>
+          </div>
+
           <!-- Transactions Report Preview Summary -->
           <div *ngIf="previewData?.type === 'transactions'" class="space-y-4">
             <div *ngIf="previewData?.summary" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
