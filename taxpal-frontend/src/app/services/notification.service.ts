@@ -26,24 +26,24 @@ export class NotificationService {
 
   // All notifications stored for top-right Notification History bell dropdown
   readonly notifications = signal<AppNotification[]>([
-    {
-      id: 'init-1',
-      type: 'warning',
-      title: 'Budget Deficit Alert',
-      message: 'Monthly business expenses are approaching 85% of allocated budget.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15),
-      read: false,
-      category: 'budget',
-    },
-    {
-      id: 'init-2',
-      type: 'info',
-      title: 'Q2 Estimated Tax Due',
-      message: 'Upcoming Q2 advance tax deadline reminder.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 120),
-      read: false,
-      category: 'tax',
-    },
+    // {
+    //   id: 'init-1',
+    //   type: 'warning',
+    //   title: 'Budget Deficit Alert',
+    //   message: 'Monthly business expenses are approaching 85% of allocated budget.',
+    //   timestamp: new Date(Date.now() - 1000 * 60 * 15),
+    //   read: false,
+    //   category: 'budget',
+    // },
+    // {
+    //   id: 'init-2',
+    //   type: 'info',
+    //   title: 'Q2 Estimated Tax Due',
+    //   message: 'Upcoming Q2 advance tax deadline reminder.',
+    //   timestamp: new Date(Date.now() - 1000 * 60 * 120),
+    //   read: false,
+    //   category: 'tax',
+    // },
   ]);
 
   // Active toasts floating in bottom-right corner
