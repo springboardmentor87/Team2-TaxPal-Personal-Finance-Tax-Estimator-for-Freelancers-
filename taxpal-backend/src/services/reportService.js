@@ -302,8 +302,58 @@ const deleteReportById = async (userId, reportId) => {
     }
   }
 
-  await reportObj.destroy();
-  return { success: true, message: 'Report deleted successfully' };
+const getReportPreviewData = async (userId, reportId) => {
+  const reportObj = await Report.findOne({
+    where: { id: reportId, userId }
+  });
+
+  if (!reportObj) {
+    throw new AppError('Report not found', 404);
+  }
+
+  const report = serializeDocument(reportObj);
+  const { start, end } = getPeriodDates(report.period);
+
+  let previewDetails = null;
+  if (report.reportType.toLowerCase().includes('tax')) {
+    const taxData = await buildTaxReport(userId, { from: start, to: end });
+    previewDetails = {
+      type: 'tax',
+      estimate: taxData.estimate,
+      lines: [
+        { label: 'Jurisdiction', value: String(taxData.estimate.jurisdiction || 'INDIA').toUpperCase() },
+        { label: 'Annualized Income', value: taxData.estimate.income?.annualized },
+        { label: 'Deductible Expenses', value: taxData.estimate.expenses?.deductible },
+        { label: 'Taxable Income', value: taxData.estimate.tax?.taxableIncome },
+        { label: 'Estimated Tax', value: taxData.estimate.tax?.estimatedTax },
+        { label: 'Effective Tax Rate', value: `${taxData.estimate.tax?.effectiveTaxRate}%` }
+      ]
+    };
+  } else if (report.reportType.toLowerCase().includes('dashboard') || report.reportType.toLowerCase().includes('executive')) {
+    const dashData = await buildDashboardReport(userId);
+    previewDetails = {
+      type: 'dashboard',
+      summary: dashData.summary?.summary,
+      lines: [
+        { label: 'Monthly Income', value: dashData.summary?.summary?.monthlyIncome },
+        { label: 'Monthly Expenses', value: dashData.summary?.summary?.monthlyExpenses },
+        { label: 'Net Cash Flow', value: dashData.summary?.summary?.netCashFlow },
+        { label: 'Savings Rate', value: `${dashData.summary?.summary?.savingsRate}%` }
+      ]
+    };
+  } else {
+    const transData = await buildTransactionsReport(userId, { from: start, to: end });
+    previewDetails = {
+      type: 'transactions',
+      summary: transData.summary,
+      transactions: transData.transactions.slice(0, 15)
+    };
+  }
+
+  return {
+    report,
+    preview: previewDetails
+  };
 };
 
 module.exports = {
@@ -314,6 +364,7 @@ module.exports = {
   deleteReportById,
   generateReportRecord,
   getReportById,
+  getReportPreviewData,
   getReportsList,
   toCsv
 };

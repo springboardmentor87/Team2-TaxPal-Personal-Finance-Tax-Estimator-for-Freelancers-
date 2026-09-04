@@ -1,207 +1,327 @@
-<div class="reports-page">
+<div class="flex min-h-screen bg-background">
+  <!-- Sidebar -->
+  <app-sidebar [open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
 
-<!-- Page Header -->
-    <div class="page-header">
-    <div>
-        <h1>Financial Reports</h1>
-        <p>Generate your financial reports.</p>
-    </div>
-</div>
+  <!-- Main Content Wrapper -->
+  <div class="flex min-w-0 flex-1 flex-col">
+    <!-- Topbar -->
+    <app-topbar
+      (menuClick)="openSidebar()"
+      title="Financial Reports"
+      subtitle="Generate and download your financial reports"
+    ></app-topbar>
 
-
-    <!-- Generate Report Card -->
-    <div class="report-card">
-
-    <h2>Generate Report</h2>
-
-    <form (ngSubmit)="generateReport()">
-
-        <div class="form-row">
-
-        <!-- Report Type -->
-        <div class="form-group">
-        <label for="reportType">Report Type</label>
-
-            <select
-            id="reportType"
-            name="reportType"
-            [(ngModel)]="reportType"
-            required
-            >
-            <option value="Transactions Report">
-              Transactions Report
-            </option>
-
-            <option value="Dashboard Report">
-              Dashboard Report
-            </option>
-
-            <option value="Tax Report">
-              Tax Report
-            </option>
-          </select>
+    <main class="flex-1 space-y-6 p-4 md:space-y-8 md:p-8">
+      <!-- Success Banner -->
+      <div *ngIf="successMessage" class="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+        <div class="flex items-center gap-2">
+          <span>✅</span>
+          <span>{{ successMessage }}</span>
         </div>
-
-
-        <!-- Period -->
-        <div class="form-group">
-          <label for="period">Period</label>
-
-          <select
-            id="period"
-            name="period"
-            [(ngModel)]="period"
-            required
-          >
-            <option value="Current Month">
-              Current Month
-            </option>
-
-            <option value="Current Quarter">
-              Current Quarter
-            </option>
-
-            <option value="Current Year">
-              Current Year
-            </option>
-
-            
-          </select>
-        </div>
-
-
-        <!-- Format -->
-        <div class="form-group">
-          <label for="format">Format</label>
-
-          <select
-            id="format"
-            name="format"
-            [(ngModel)]="format"
-            required
-          >
-            <option value="PDF">PDF</option>
-            <option value="CSV">CSV</option>
-          </select>
-        </div>
-
+        <button (click)="successMessage = ''" class="text-green-600 hover:text-green-900 font-bold">&times;</button>
       </div>
 
-
-      <!-- Generate Button -->
-      <div class="button-section">
-
-        <button
-          type="submit"
-          class="generate-btn"
-          [disabled]="isGenerating"
-        >
-        Generate Report
-        </button>
-
+      <!-- Error Banner -->
+      <div *ngIf="errorMessage" class="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div class="flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+        <button (click)="errorMessage = ''" class="text-red-600 hover:text-red-900 font-bold">&times;</button>
       </div>
 
+      <!-- 1. Generate Report Card -->
+      <div class="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
+        <div class="mb-5">
+          <h2 class="text-base font-bold text-[#1E1533]">Generate Report</h2>
+        </div>
 
-      <!-- Error Message -->
-      <div
-      class="error-message"
-      *ngIf="errorMessage"
-      >
-        {{ errorMessage }}
-      </div>
-      
-
-    </form>
-  </div>
-
-
-  <!-- Recent Reports -->
-  <div class="report-card recent-card">
-
-    <h2>Recent Reports</h2>
-
-    <div class="table-wrapper">
-
-      <table>
-
-        <thead>
-          <tr>
-            <th>Report Name</th>
-            <th>Generated</th>
-            <th>Period</th>
-            <th>Format</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-
-        <tbody>
-
-          <!-- Reports from Backend -->
-          <tr *ngFor="let report of recentReports">
-
-            <td class="report-name">
-            {{ report.reportType }}
-            </td>
-
-            <td>
-              {{ getGeneratedDate(report) }}
-            </td>
-
-            <td>
-              {{ report.period }}
-            </td>
-
-            <td>
-              <span class="format-badge">
-                {{ report.format | uppercase }}
-              </span>
-            </td>
-
-            <td>
-
-              <button
-                type="button"
-                class="edit-btn"
-                (click)="editReport(report)"
-                
+        <form (ngSubmit)="generateReport()" class="space-y-5">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <!-- Report Type -->
+            <div>
+              <label for="reportType" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">
+                Report Type
+              </label>
+              <select
+                id="reportType"
+                name="reportType"
+                [(ngModel)]="reportType"
+                required
+                class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
               >
-                edit
-              </button>
-              
-              <button
-                type="button"
-                class="delete-btn"
-                (click)="deleteReport(report)"
-                
+                <option *ngFor="let opt of reportTypeOptions" [value]="opt">{{ opt }}</option>
+              </select>
+            </div>
+
+            <!-- Period -->
+            <div>
+              <label for="period" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">
+                Period
+              </label>
+              <select
+                id="period"
+                name="period"
+                [(ngModel)]="period"
+                required
+                class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
               >
-                Delete
-              </button>
+                <option *ngFor="let p of periodOptions" [value]="p">{{ p }}</option>
+              </select>
+            </div>
 
-            </td>
+            <!-- Format -->
+            <div>
+              <label for="format" class="block text-xs font-semibold uppercase tracking-wider text-[#4B4363] mb-1.5">
+                Format
+              </label>
+              <select
+                id="format"
+                name="format"
+                [(ngModel)]="format"
+                required
+                class="w-full rounded-xl border border-purple-200 bg-[#FBF9FE] px-4 py-3 text-sm text-[#1E1533] focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer"
+              >
+                <option *ngFor="let f of formatOptions" [value]="f">{{ f }}</option>
+              </select>
+            </div>
+          </div>
 
-          </tr>
-
-
-          <!-- no Reports -->
-          <tr *ngIf="recentReports.length === 0">
-
-            <td
-              colspan="5"
-              class="no-results"
+          <!-- Buttons Row -->
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              (click)="resetForm()"
+              class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition shadow-sm cursor-pointer"
             >
-              No reports generated yet.
-            </td>
+              Reset
+            </button>
+            <button
+              type="submit"
+              [disabled]="isGenerating"
+              class="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500/30 transition disabled:opacity-50 cursor-pointer"
+            >
+              <span *ngIf="isGenerating" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+              <span>{{ isGenerating ? 'Generating...' : 'Generate Report' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
 
-          </tr>
+      <!-- 2. Recent Reports Table Card -->
+      <div class="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
+        <div class="mb-4">
+          <h2 class="text-base font-bold text-[#1E1533]">Recent Reports</h2>
+        </div>
 
-        </tbody>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b border-purple-100 text-xs font-semibold text-[#7A6F9B] uppercase tracking-wider">
+                <th class="py-3 px-4">Report Name</th>
+                <th class="py-3 px-4">Generated</th>
+                <th class="py-3 px-4">Period</th>
+                <th class="py-3 px-4">Format</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-purple-50">
+              <tr
+                *ngFor="let report of recentReports"
+                (click)="selectReportForPreview(report)"
+                [class.bg-purple-50]="selectedReport?.id === report.id"
+                class="hover:bg-purple-50/60 transition cursor-pointer"
+              >
+                <td class="py-3.5 px-4 font-semibold text-[#1E1533]">
+                  <div class="flex items-center gap-2">
+                    <span class="text-purple-600">📄</span>
+                    <span>{{ report.reportType }}</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-gray-600">
+                  {{ getGeneratedDate(report) }}
+                </td>
+                <td class="py-3.5 px-4 text-gray-700">
+                  {{ report.period }}
+                </td>
+                <td class="py-3.5 px-4">
+                  <span
+                    [ngClass]="{
+                      'bg-red-50 text-red-700 border-red-200': report.format.toUpperCase() === 'PDF',
+                      'bg-green-50 text-green-700 border-green-200': report.format.toUpperCase() === 'CSV'
+                    }"
+                    class="inline-block rounded-lg border px-2.5 py-1 text-xs font-bold uppercase tracking-wider"
+                  >
+                    {{ report.format | uppercase }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="inline-flex items-center gap-2">
+                    <button
+                      type="button"
+                      (click)="selectReportForPreview(report); $event.stopPropagation()"
+                      class="rounded-lg px-2.5 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 transition cursor-pointer"
+                    >
+                      Preview
+                    </button>
+                    <button
+                      type="button"
+                      (click)="downloadReport(report); $event.stopPropagation()"
+                      class="rounded-lg px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition cursor-pointer"
+                    >
+                      Download
+                    </button>
+                    <button
+                      type="button"
+                      (click)="deleteReport(report, $event)"
+                      class="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
 
-      </table>
+              <!-- Empty State -->
+              <tr *ngIf="recentReports.length === 0">
+                <td colspan="5" class="py-8 text-center text-gray-400">
+                  No results.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-    </div>
+      <!-- 3. Report Preview Card (Screenshot 2 Match) -->
+      <div class="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between pb-4 border-b border-purple-100">
+          <div>
+            <h2 class="text-base font-bold text-[#1E1533]">Report Preview</h2>
+          </div>
+          <div *ngIf="selectedReport" class="flex items-center gap-2.5">
+            <button
+              type="button"
+              (click)="printPreview()"
+              class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition shadow-sm cursor-pointer"
+            >
+              <span>🖨️</span>
+              <span>Print</span>
+            </button>
+            <button
+              type="button"
+              (click)="downloadReport()"
+              [disabled]="isDownloading"
+              class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-700 transition shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              <span>📥</span>
+              <span>{{ isDownloading ? 'Downloading...' : 'Download' }}</span>
+            </button>
+          </div>
+        </div>
 
+        <!-- Placeholder when no report is selected -->
+        <div *ngIf="!selectedReport" class="flex flex-col items-center justify-center py-16 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-50 text-3xl text-purple-400 mb-4">
+            📄
+          </div>
+          <h3 class="text-sm font-bold text-[#1E1533]">Select a report to preview</h3>
+          <p class="text-xs text-gray-500 max-w-sm mt-1">
+            Generated reports will appear here for review before downloading
+          </p>
+        </div>
+
+        <!-- Active Preview Content -->
+        <div *ngIf="selectedReport" class="mt-6 space-y-6 printable-area">
+          <!-- Report Header Banner -->
+          <div class="rounded-xl border border-purple-100 bg-[#FBF9FE] p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-purple-600">TaxPal Financial Statement</span>
+                <h3 class="text-lg font-bold text-[#1E1533] mt-0.5">{{ selectedReport.reportType }}</h3>
+                <p class="text-xs text-gray-500 mt-1">
+                  Period: <strong class="text-gray-700">{{ selectedReport.period }}</strong> &bull; Generated: {{ getGeneratedDate(selectedReport) }}
+                </p>
+              </div>
+              <div>
+                <span
+                  [ngClass]="{
+                    'bg-red-50 text-red-700 border-red-200': selectedReport.format.toUpperCase() === 'PDF',
+                    'bg-green-50 text-green-700 border-green-200': selectedReport.format.toUpperCase() === 'CSV'
+                  }"
+                  class="inline-block rounded-lg border px-3 py-1 text-xs font-bold uppercase tracking-wider"
+                >
+                  {{ selectedReport.format | uppercase }} Report
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tax Report Preview Metrics -->
+          <div *ngIf="previewData?.type === 'tax' && previewData?.lines" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div *ngFor="let item of previewData?.lines" class="rounded-xl border border-purple-100 p-4 bg-white">
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ item.label }}</p>
+              <p class="text-lg font-bold text-[#1E1533] mt-1">{{ item.value }}</p>
+            </div>
+          </div>
+
+          <!-- Dashboard Report Preview Metrics -->
+          <div *ngIf="previewData?.type === 'dashboard' && previewData?.lines" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div *ngFor="let item of previewData?.lines" class="rounded-xl border border-purple-100 p-4 bg-white">
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ item.label }}</p>
+              <p class="text-lg font-bold text-[#1E1533] mt-1">{{ item.value }}</p>
+            </div>
+          </div>
+
+          <!-- Transactions Report Preview Summary -->
+          <div *ngIf="previewData?.type === 'transactions'" class="space-y-4">
+            <div *ngIf="previewData?.summary" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="rounded-xl border border-green-100 bg-green-50/50 p-4">
+                <p class="text-xs font-semibold text-green-700 uppercase">Total Income</p>
+                <p class="text-lg font-bold text-green-800 mt-1">{{ currency.currencySymbol() }}{{ previewData?.summary?.income || 0 }}</p>
+              </div>
+              <div class="rounded-xl border border-red-100 bg-red-50/50 p-4">
+                <p class="text-xs font-semibold text-red-700 uppercase">Total Expenses</p>
+                <p class="text-lg font-bold text-red-800 mt-1">{{ currency.currencySymbol() }}{{ previewData?.summary?.expenses || 0 }}</p>
+              </div>
+              <div class="rounded-xl border border-purple-100 bg-purple-50/50 p-4">
+                <p class="text-xs font-semibold text-purple-700 uppercase">Net Cash Flow</p>
+                <p class="text-lg font-bold text-purple-800 mt-1">{{ currency.currencySymbol() }}{{ previewData?.summary?.net || 0 }}</p>
+              </div>
+            </div>
+
+            <!-- Transactions Preview Table -->
+            <div *ngIf="previewData?.transactions && previewData!.transactions!.length > 0" class="overflow-x-auto rounded-xl border border-purple-100">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[#FBF9FE] text-[#7A6F9B] uppercase font-semibold">
+                  <tr>
+                    <th class="py-2.5 px-3">Date</th>
+                    <th class="py-2.5 px-3">Type</th>
+                    <th class="py-2.5 px-3">Category</th>
+                    <th class="py-2.5 px-3">Description</th>
+                    <th class="py-2.5 px-3 text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-purple-50">
+                  <tr *ngFor="let t of previewData?.transactions">
+                    <td class="py-2.5 px-3">{{ t.date | date:'mediumDate' }}</td>
+                    <td class="py-2.5 px-3">
+                      <span [ngClass]="t.type === 'income' ? 'text-green-700 font-bold' : 'text-red-700 font-bold'">
+                        {{ t.type | uppercase }}
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3">{{ t.category }}</td>
+                    <td class="py-2.5 px-3 text-gray-500">{{ t.description || '-' }}</td>
+                    <td class="py-2.5 px-3 text-right font-bold" [ngClass]="t.type === 'income' ? 'text-green-700' : 'text-red-700'">
+                      {{ t.type === 'income' ? '+' : '-' }}{{ currency.currencySymbol() }}{{ t.amount }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
-
 </div>
-

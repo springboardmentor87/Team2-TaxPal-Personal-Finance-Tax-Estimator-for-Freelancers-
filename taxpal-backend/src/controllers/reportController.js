@@ -38,17 +38,8 @@ const downloadReportByIdController = asyncHandler(async (req, res) => {
 
 const previewReportByIdController = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { report, content } = await getReportById(req.userId, id);
-
-  if (String(report.format).toLowerCase() === 'pdf') {
-    res.setHeader('Content-Type', 'application/pdf');
-    return res.status(200).send(content);
-  }
-
-  return sendSuccess(res, 200, 'Report preview fetched', {
-    report,
-    content: content.toString('utf-8')
-  });
+  const result = await getReportPreviewData(req.userId, id);
+  return sendSuccess(res, 200, 'Report preview fetched successfully', result);
 });
 
 const deleteReportController = asyncHandler(async (req, res) => {
