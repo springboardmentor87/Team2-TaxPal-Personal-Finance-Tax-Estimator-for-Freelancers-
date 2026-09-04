@@ -15,7 +15,8 @@ if (!fs.existsSync(REPORTS_DIR)) {
 }
 
 const escapeCsv = (value) => {
-  const text = String(value ?? '');
+  let text = String(value ?? '');
+  text = text.replace(/₹/g, 'Rs. ').replace(/â,¹/g, 'Rs. ').replace(/¹/g, '');
   if (/[",\n]/.test(text)) {
     return `"${text.replace(/"/g, '""')}"`;
   }
@@ -25,12 +26,18 @@ const escapeCsv = (value) => {
 const toCsv = (rows = [], columns = []) => {
   const header = columns.map((column) => escapeCsv(column.label)).join(',');
   const lines = rows.map((row) => columns.map((column) => escapeCsv(column.value(row))).join(','));
-  return [header, ...lines].join('\n');
+  // \uFEFF is UTF-8 Byte Order Mark (BOM) ensuring Excel opens CSV with proper UTF-8 decoding
+  return '\uFEFF' + [header, ...lines].join('\n');
 };
 
 const cleanPdfText = (val) => {
   if (val === null || val === undefined) return '';
-  return String(val).replace(/₹/g, 'Rs. ');
+  let str = String(val);
+  str = str.replace(/₹/g, 'Rs. ');
+  str = str.replace(/â,¹/g, 'Rs. ');
+  str = str.replace(/¹/g, '');
+  str = str.replace(/\u20B9/g, 'Rs. ');
+  return str;
 };
 
 // Executive Styled PDF Builder using PDFKit
