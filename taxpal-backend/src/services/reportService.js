@@ -181,7 +181,7 @@ const buildIncomeStatementReport = async (userId, query = {}, periodName = 'Curr
   const rows = transactions.map((t) => ({
     date: new Date(t.date).toISOString().slice(0, 10),
     category: t.category,
-    amount: `+₹${t.amount}`,
+    amount: `+Rs. ${t.amount}`,
     description: t.description || '-'
   }));
 
@@ -196,7 +196,7 @@ const buildIncomeStatementReport = async (userId, query = {}, periodName = 'Curr
     title: 'Income Statement Report',
     period: periodName,
     summaryCards: [
-      { label: 'Total Income', value: `₹${totalIncome}` },
+      { label: 'Total Income', value: `Rs. ${totalIncome}` },
       { label: 'Total Receipts', value: `${transactions.length}` }
     ],
     columns: [
@@ -229,14 +229,14 @@ const buildExpenseBreakdownReport = async (userId, query = {}, periodName = 'Cur
   const categoryRows = Object.keys(categoryTotals).map((cat) => ({
     category: cat,
     total: categoryTotals[cat],
-    formattedTotal: `₹${categoryTotals[cat]}`,
+    formattedTotal: `Rs. ${categoryTotals[cat]}`,
     percentage: totalExpenses > 0 ? `${roundToTwo((categoryTotals[cat] / totalExpenses) * 100)}%` : '0%'
   }));
 
   const transactionRows = transactions.map((t) => ({
     date: new Date(t.date).toISOString().slice(0, 10),
     category: t.category,
-    amount: `-₹${t.amount}`,
+    amount: `-Rs. ${t.amount}`,
     description: t.description || '-'
   }));
 
@@ -250,7 +250,7 @@ const buildExpenseBreakdownReport = async (userId, query = {}, periodName = 'Cur
     title: 'Expense Breakdown Report',
     period: periodName,
     summaryCards: [
-      { label: 'Total Expenses', value: `₹${totalExpenses}` },
+      { label: 'Total Expenses', value: `Rs. ${totalExpenses}` },
       { label: 'Categories', value: `${categoryRows.length}` },
       { label: 'Transactions', value: `${transactions.length}` }
     ],
@@ -281,7 +281,7 @@ const buildTransactionsReport = async (userId, query = {}, periodName = 'Current
     date: new Date(t.date).toISOString().slice(0, 10),
     type: t.type.toUpperCase(),
     category: t.category,
-    amount: t.type === 'income' ? `+₹${t.amount}` : `-₹${t.amount}`,
+    amount: t.type === 'income' ? `+Rs. ${t.amount}` : `-Rs. ${t.amount}`,
     description: t.description || '-'
   }));
 
@@ -297,9 +297,9 @@ const buildTransactionsReport = async (userId, query = {}, periodName = 'Current
     title: 'Transaction History Report',
     period: periodName,
     summaryCards: [
-      { label: 'Total Income', value: `₹${totalIncome}` },
-      { label: 'Total Expenses', value: `₹${totalExpenses}` },
-      { label: 'Net Cash Flow', value: `₹${roundToTwo(totalIncome - totalExpenses)}` }
+      { label: 'Total Income', value: `Rs. ${totalIncome}` },
+      { label: 'Total Expenses', value: `Rs. ${totalExpenses}` },
+      { label: 'Net Cash Flow', value: `Rs. ${roundToTwo(totalIncome - totalExpenses)}` }
     ],
     columns: [
       { label: 'Date', width: 85, value: (r) => r.date },
@@ -340,16 +340,16 @@ const buildDashboardReport = async (userId) => {
     title: 'Executive Dashboard Report',
     period: 'Current Year',
     summaryCards: [
-      { label: 'Monthly Income', value: `₹${summary.summary.monthlyIncome || 0}` },
-      { label: 'Monthly Expenses', value: `₹${summary.summary.monthlyExpenses || 0}` },
-      { label: 'Net Cash Flow', value: `₹${summary.summary.netCashFlow || 0}` },
+      { label: 'Monthly Income', value: `Rs. ${summary.summary.monthlyIncome || 0}` },
+      { label: 'Monthly Expenses', value: `Rs. ${summary.summary.monthlyExpenses || 0}` },
+      { label: 'Net Cash Flow', value: `Rs. ${summary.summary.netCashFlow || 0}` },
       { label: 'Savings Rate', value: `${summary.summary.savingsRate || 0}%` }
     ],
     columns: [
       { label: 'Month', width: 100, value: (r) => r.month },
-      { label: 'Income', width: 100, align: 'right', value: (r) => `₹${r.income}` },
-      { label: 'Expenses', width: 100, align: 'right', value: (r) => `₹${r.expenses}` },
-      { label: 'Net', width: 100, align: 'right', value: (r) => `₹${r.net}` },
+      { label: 'Income', width: 100, align: 'right', value: (r) => `Rs. ${r.income}` },
+      { label: 'Expenses', width: 100, align: 'right', value: (r) => `Rs. ${r.expenses}` },
+      { label: 'Net', width: 100, align: 'right', value: (r) => `Rs. ${r.net}` },
       { label: 'Savings Rate', width: 115, align: 'right', value: (r) => `${r.savingsRate}%` }
     ],
     rows: analytics.monthlyAnalytics || []
@@ -362,10 +362,10 @@ const buildTaxReport = async (userId, query = {}, periodName = 'Current Year') =
   const estimate = await getTaxEstimate(userId, query);
   const rows = [
     { item: 'Jurisdiction', value: String(estimate.jurisdiction || 'India').toUpperCase() },
-    { item: 'Annualized Income', value: `₹${estimate.income?.annualized || 0}` },
-    { item: 'Deductible Expenses', value: `₹${estimate.expenses?.deductible || 0}` },
-    { item: 'Taxable Income', value: `₹${estimate.tax?.taxableIncome || 0}` },
-    { item: 'Estimated Tax', value: `₹${estimate.tax?.estimatedTax || 0}` },
+    { item: 'Annualized Income', value: `Rs. ${estimate.income?.annualized || 0}` },
+    { item: 'Deductible Expenses', value: `Rs. ${estimate.expenses?.deductible || 0}` },
+    { item: 'Taxable Income', value: `Rs. ${estimate.tax?.taxableIncome || 0}` },
+    { item: 'Estimated Tax', value: `Rs. ${estimate.tax?.estimatedTax || 0}` },
     { item: 'Effective Tax Rate', value: `${estimate.tax?.effectiveTaxRate || 0}%` }
   ];
 
@@ -378,9 +378,9 @@ const buildTaxReport = async (userId, query = {}, periodName = 'Current Year') =
     title: 'Tax Summary & Estimate Report',
     period: periodName,
     summaryCards: [
-      { label: 'Annualized Income', value: `₹${estimate.income?.annualized || 0}` },
-      { label: 'Taxable Income', value: `₹${estimate.tax?.taxableIncome || 0}` },
-      { label: 'Estimated Tax', value: `₹${estimate.tax?.estimatedTax || 0}` }
+      { label: 'Annualized Income', value: `Rs. ${estimate.income?.annualized || 0}` },
+      { label: 'Taxable Income', value: `Rs. ${estimate.tax?.taxableIncome || 0}` },
+      { label: 'Estimated Tax', value: `Rs. ${estimate.tax?.estimatedTax || 0}` }
     ],
     columns: [
       { label: 'Tax Metric / Breakdown Line Item', width: 315, value: (r) => r.item },
