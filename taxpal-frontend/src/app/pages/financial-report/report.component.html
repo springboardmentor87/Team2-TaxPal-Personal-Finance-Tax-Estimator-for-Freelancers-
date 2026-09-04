@@ -1,0 +1,207 @@
+<div class="reports-page">
+
+<!-- Page Header -->
+    <div class="page-header">
+    <div>
+        <h1>Financial Reports</h1>
+        <p>Generate your financial reports.</p>
+    </div>
+</div>
+
+
+    <!-- Generate Report Card -->
+    <div class="report-card">
+
+    <h2>Generate Report</h2>
+
+    <form (ngSubmit)="generateReport()">
+
+        <div class="form-row">
+
+        <!-- Report Type -->
+        <div class="form-group">
+        <label for="reportType">Report Type</label>
+
+            <select
+            id="reportType"
+            name="reportType"
+            [(ngModel)]="reportType"
+            required
+            >
+            <option value="Transactions Report">
+              Transactions Report
+            </option>
+
+            <option value="Dashboard Report">
+              Dashboard Report
+            </option>
+
+            <option value="Tax Report">
+              Tax Report
+            </option>
+          </select>
+        </div>
+
+
+        <!-- Period -->
+        <div class="form-group">
+          <label for="period">Period</label>
+
+          <select
+            id="period"
+            name="period"
+            [(ngModel)]="period"
+            required
+          >
+            <option value="Current Month">
+              Current Month
+            </option>
+
+            <option value="Current Quarter">
+              Current Quarter
+            </option>
+
+            <option value="Current Year">
+              Current Year
+            </option>
+
+            
+          </select>
+        </div>
+
+
+        <!-- Format -->
+        <div class="form-group">
+          <label for="format">Format</label>
+
+          <select
+            id="format"
+            name="format"
+            [(ngModel)]="format"
+            required
+          >
+            <option value="PDF">PDF</option>
+            <option value="CSV">CSV</option>
+          </select>
+        </div>
+
+      </div>
+
+
+      <!-- Generate Button -->
+      <div class="button-section">
+
+        <button
+          type="submit"
+          class="generate-btn"
+          [disabled]="isGenerating"
+        >
+        Generate Report
+        </button>
+
+      </div>
+
+
+      <!-- Error Message -->
+      <div
+      class="error-message"
+      *ngIf="errorMessage"
+      >
+        {{ errorMessage }}
+      </div>
+      
+
+    </form>
+  </div>
+
+
+  <!-- Recent Reports -->
+  <div class="report-card recent-card">
+
+    <h2>Recent Reports</h2>
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Report Name</th>
+            <th>Generated</th>
+            <th>Period</th>
+            <th>Format</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+
+        <tbody>
+
+          <!-- Reports from Backend -->
+          <tr *ngFor="let report of recentReports">
+
+            <td class="report-name">
+            {{ report.reportType }}
+            </td>
+
+            <td>
+              {{ getGeneratedDate(report) }}
+            </td>
+
+            <td>
+              {{ report.period }}
+            </td>
+
+            <td>
+              <span class="format-badge">
+                {{ report.format | uppercase }}
+              </span>
+            </td>
+
+            <td>
+
+              <button
+                type="button"
+                class="edit-btn"
+                (click)="editReport(report)"
+                
+              >
+                edit
+              </button>
+              
+              <button
+                type="button"
+                class="delete-btn"
+                (click)="deleteReport(report)"
+                
+              >
+                Delete
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          <!-- no Reports -->
+          <tr *ngIf="recentReports.length === 0">
+
+            <td
+              colspan="5"
+              class="no-results"
+            >
+              No reports generated yet.
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+

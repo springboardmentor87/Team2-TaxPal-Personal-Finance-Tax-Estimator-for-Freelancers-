@@ -1,0 +1,294 @@
+:host {
+  display: block;
+  font-family: "Inter", sans-serif;
+  color: #1e1533;
+}
+
+.reports-page {
+  padding: 32px;
+  background: #faf9fc;
+  min-height: 100%;
+}
+
+
+/* =========================
+  PAGE HEADER
+========================= */
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e1533;
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #756d86;
+}
+
+
+/* =========================
+  CARD
+========================= */
+
+.report-card {
+  background: #ffffff;
+  border: 1px solid #eeeaf5;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(30, 21, 51, 0.04);
+}
+
+.report-card h2 {
+  margin: 0 0 22px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #302844;
+}
+
+
+/* =========================
+  FORM
+========================= */
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #433b58;
+}
+
+.form-group select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #ddd7e8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #332c45;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.form-group select:focus {
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+}
+
+
+/* =========================
+  BUTTONS
+========================= */
+
+.button-section {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+
+.generate-btn,
+.edit-btn,
+.delete-btn {
+  font-family: "Inter", sans-serif;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+
+.generate-btn {
+  padding: 10px 20px;
+  background: #6d28d9;
+  color: #ffffff;
+  border: 1px solid #6d28d9;
+}
+
+.generate-btn:hover {
+  background: #5b21b6;
+}
+
+.generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================
+  ERROR
+========================= */
+
+.error-message {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  font-size: 13px;
+}
+
+
+/* =========================
+  RECENT REPORTS
+========================= */
+
+.recent-card {
+  overflow: hidden;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #faf9fc;
+}
+
+th {
+  padding: 13px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #625a73;
+  border-bottom: 1px solid #eeeaf5;
+}
+
+td {
+  padding: 15px 12px;
+  font-size: 13px;
+  color: #4b4363;
+  border-bottom: 1px solid #f0edf5;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.report-name {
+  font-weight: 600;
+  color: #302844;
+}
+
+.format-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #f3e8ff;
+  color: #6d28d9;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 7px 12px;
+  background: #ffffff;
+  border-radius:8px;
+  font-family: "Inter",sans-serif;
+  font-size:13px;
+  font-weight:600 ;
+  cursor:pointer;
+
+}
+
+
+
+.edit-btn {
+  border: 1px solid #ddd7e8;
+  color: #4b4363;
+}
+
+.edit-btn:hover {
+  background: #f7f5fa;
+}
+
+.delete-btn {
+  border: 1px solid #fecdd3;
+  color: #be123c;
+}
+
+.delete-btn:hover {
+  background: #fff1f2;
+}
+
+
+
+.no-results {
+  padding: 40px 12px;
+  text-align: center;
+  color: #8b8498;
+}
+
+
+
+/* =========================
+  RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .reports-page {
+    padding: 20px;
+  }
+
+  .report-card {
+    padding: 18px;
+  }
+
+  .button-section {
+    flex-direction: column;
+  }
+
+  
+  .generate-btn {
+    width: 100%;
+  }
+
+}
