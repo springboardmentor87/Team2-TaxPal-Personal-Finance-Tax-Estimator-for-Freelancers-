@@ -134,7 +134,7 @@ export class NotificationService {
     contextLabel: string = 'Account Balance',
     currencySymbol: string = '₹'
   ): void {
-    const title = '⚠️ Out of Balance Deficit Warning';
+    const title = '⚠️ Out of Balance Deficient Warning';
     const message = `Your ${contextLabel} is out of balance! Deductions/expenses exceed income by ${currencySymbol}${deficitAmount.toFixed(
       2
     )}. Total net balance is negative.`;
