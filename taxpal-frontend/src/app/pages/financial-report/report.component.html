@@ -1,4 +1,4 @@
-<div class="flex min-h-screen bg-background">
+<div class="flex min-h-screen bg-[#F8F7FC]">
   <!-- Sidebar -->
   <app-sidebar [open]="sidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
 
@@ -138,7 +138,7 @@
                     <span>{{ report.reportType }}</span>
                   </div>
                 </td>
-                <td class="py-3.5 px-4 text-gray-600">
+                <td class="py-3.5 px-4 text-black">
                   {{ getGeneratedDate(report) }}
                 </td>
                 <td class="py-3.5 px-4 text-gray-700">
@@ -157,13 +157,13 @@
                 </td>
                 <td class="py-3.5 px-4 text-right">
                   <div class="inline-flex items-center gap-2">
-                    <button
+                    <!-- <button
                       type="button"
                       (click)="selectReportForPreview(report); $event.stopPropagation()"
                       class="rounded-lg px-2.5 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 transition cursor-pointer"
                     >
                       Preview
-                    </button>
+                    </button> -->
                     <button
                       type="button"
                       (click)="downloadReport(report); $event.stopPropagation()"
@@ -283,7 +283,7 @@
                 </thead>
                 <tbody class="divide-y divide-purple-50">
                   <tr *ngFor="let t of previewData?.transactions">
-                    <td class="py-2.5 px-3">{{ t.date | date:'mediumDate' }}</td>
+                    <td class="py-2.5 px-3 text-black">{{ t.date | date:'mediumDate' }}</td>
                     <td class="py-2.5 px-3 font-semibold text-[#1E1533]">{{ t.category }}</td>
                     <td class="py-2.5 px-3 text-gray-500">{{ t.description || '-' }}</td>
                     <td class="py-2.5 px-3 text-right font-bold text-green-700">
@@ -322,7 +322,7 @@
                 </thead>
                 <tbody class="divide-y divide-purple-50">
                   <tr *ngFor="let t of previewData?.transactions">
-                    <td class="py-2.5 px-3">{{ t.date | date:'mediumDate' }}</td>
+                    <td class="py-2.5 px-3 text-black">{{ t.date | date:'mediumDate' }}</td>
                     <td class="py-2.5 px-3 font-semibold text-[#1E1533]">{{ t.category }}</td>
                     <td class="py-2.5 px-3 text-gray-500">{{ t.description || '-' }}</td>
                     <td class="py-2.5 px-3 text-right font-bold text-red-700">
@@ -386,7 +386,7 @@
                 </thead>
                 <tbody class="divide-y divide-purple-50">
                   <tr *ngFor="let t of previewData?.transactions">
-                    <td class="py-2.5 px-3">{{ t.date | date:'mediumDate' }}</td>
+                    <td class="py-2.5 px-3 text-black">{{ t.date | date:'mediumDate' }}</td>
                     <td class="py-2.5 px-3">
                       <span [ngClass]="t.type === 'income' ? 'text-green-700 font-bold' : 'text-red-700 font-bold'">
                         {{ t.type | uppercase }}
