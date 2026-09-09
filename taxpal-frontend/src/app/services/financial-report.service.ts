@@ -41,7 +41,7 @@ export interface ReportPreviewData {
 })
 export class ReportService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5000/api/reports';
+  private readonly apiUrl = 'https://taxpal-backend-3hwc.onrender.com/api/reports';
 
   getReports(): Observable<ApiResponse<Report[]>> {
     return this.http.get<ApiResponse<Report[]>>(this.apiUrl);

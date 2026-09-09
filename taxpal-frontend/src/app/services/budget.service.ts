@@ -9,7 +9,7 @@ import { Budget, NewBudget } from '../models/budget.model';
 })
 export class BudgetService {
 
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'https://taxpal-backend-3hwc.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 

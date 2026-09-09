@@ -19,7 +19,7 @@ export interface TaxEvent {
 })
 export class TaxCalendarService {
   private http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5000/api/tax/calendar';
+  private readonly apiUrl = 'https://taxpal-backend-3hwc.onrender.com/api/tax/calendar';
 
   getEvents(year?: number, country?: string): Observable<{ success: boolean; message: string; data: TaxEvent[] }> {
     let url = this.apiUrl;

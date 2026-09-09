@@ -29,7 +29,7 @@ export interface TaxEstimateResult {
   providedIn: "root",
 })
 export class TaxService {
-  private readonly apiUrl = "http://localhost:5000/api/tax";
+  private readonly apiUrl = "https://taxpal-backend-3hwc.onrender.com/api/tax";
 
   constructor(private http: HttpClient) {}
 

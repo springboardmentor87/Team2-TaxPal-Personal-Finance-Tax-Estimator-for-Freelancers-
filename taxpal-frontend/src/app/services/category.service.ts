@@ -43,7 +43,7 @@ const STORAGE_KEY = 'taxpal_custom_categories_v2';
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = 'http://localhost:5000/api/categories';
+  private apiUrl = 'https://taxpal-backend-3hwc.onrender.com/api/categories';
   private categoriesSubject = new BehaviorSubject<CategoryItem[]>(this.getInitialCategories());
 
   public categories$ = this.categoriesSubject.asObservable();
