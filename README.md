@@ -10,7 +10,7 @@ TaxPal is fully containerized and deployed across 100% free cloud infrastructure
 
 | Component | Platform / Host | Live Endpoint & Details | Status |
 | :--- | :--- | :--- | :--- |
-| **Frontend UI** | **Vercel** | Angular 17 SPA (with `vercel.json` rewrite routing) | ✅ **Deployed** |
+| **Frontend UI** | **Vercel** | `https://taxxpal.vercel.app` | ✅ **Live & Verified** |
 | **Backend REST API** | **Render** | `https://taxpal-backend-3hwc.onrender.com` | ✅ **Live & Verified** |
 | **Database Layer** | **Aiven MySQL** | `taxpal-omkarsbiradar165-e6c9.h.aivencloud.com:11488` | ✅ **Connected & Synced** |
 
