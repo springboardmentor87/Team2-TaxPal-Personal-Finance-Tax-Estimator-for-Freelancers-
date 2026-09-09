@@ -23,7 +23,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  private readonly API_URL = 'http://localhost:5000/api/auth';
+  private readonly API_URL = 'https://taxpal-backend-3hwc.onrender.com/api/auth';
   private readonly TOKEN_KEY = 'taxpal_jwt_token';
   private readonly USER_KEY = 'taxpal_user_data';
 

@@ -9,7 +9,7 @@ import { CurrencyService } from './currency.service';
   providedIn: 'root'
 })
 export class TransactionService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'https://taxpal-backend-3hwc.onrender.com/api';
   private notificationService = inject(NotificationService);
   private currency = inject(CurrencyService);
 
