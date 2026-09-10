@@ -21,6 +21,7 @@ import {
   Trash2,
   Clock,
   Info,
+  Landmark,
 } from 'lucide-angular';
 
 /**
@@ -50,4 +51,5 @@ export const APP_ICONS = {
   Trash2,
   Clock,
   Info,
+  Landmark,
 };
